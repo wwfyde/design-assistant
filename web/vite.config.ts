@@ -30,6 +30,7 @@ export default defineConfig(({mode}) => {
     server: {
       port: 8014,
       proxy: {},
+      allowedHosts: ['183.134.100.252', 'localhost', 'agent.aimark.net.cn', '127.0.0.1'],
     },
   }
 
