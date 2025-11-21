@@ -1,0 +1,148 @@
+import asyncio
+import json
+from typing import Any, Generator, Optional
+
+from agents.rednote_agent import (
+    build_rednote_agent,
+)
+from agents.supervisor_agent import langgraph_supervisor_agent
+from api.core.memory import memory_checkpointer, memory_store
+from api.domain.model import ModelInfo
+from api.domain.tool import ToolInfo
+from api.schemas.chat import ChatRequest, SessionCreate
+from api.services.canvas import CanvasService, InMemoryCanvasRepo
+from api.services.chat import ChatService, InMemoryChatRepo
+from api.services.stream import add_stream_task, remove_stream_task
+from api.services.websocket import send_to_websocket
+from fastapi import Depends
+from langgraph.checkpoint.postgres import PostgresSaver
+
+from lib import settings
+
+# canvas_service = CanvasService(store=memory_store)
+
+
+def get_canvas_service() -> CanvasService:
+    if settings.repo_type == "in-memory":
+        return CanvasService(InMemoryCanvasRepo(memory_store))
+    else:
+        return CanvasService(InMemoryCanvasRepo(memory_store))
+
+
+# 使用类实例的不要使用Annotated
+# CanvasServiceDep = Annotated[CanvasService, Depends(get_canvas_service)]
+
+
+def get_chat_service() -> ChatService:
+    if settings.repo_type == "in-memory":
+        return ChatService(InMemoryChatRepo(memory_store))
+    else:
+        return ChatService(InMemoryChatRepo(memory_store))
+
+
+def get_checkpointer() -> Generator[PostgresSaver, None, None]:
+    DB_URI = "postgresql://postgres:postgres@127.0.0.1:5432/postgres"
+
+    with PostgresSaver.from_conn_string(DB_URI) as checkpointer:
+        yield checkpointer
+
+
+# ChatServiceDep = Annotated[ChatService, Depends(get_chat_service)]
+
+
+def get_in_memory_checkpointer():
+    return memory_checkpointer
+
+
+def get_rednote_agent(checkpointer: PostgresSaver = Depends(get_checkpointer)):
+    if settings.repo_type == "in-memory":
+        checkpointer = memory_checkpointer
+
+    rednote_agent = build_rednote_agent(checkpointer)
+
+    return rednote_agent
+
+
+#
+# def get_creative_agent(checkpointer: PostgresSaver = Depends(get_checkpointer)):
+#     if settings.repo_type == "in-memory":
+#         checkpointer = memory_checkpointer
+#
+#     agent = build_creative_assistant(checkpointer)
+#
+#     return agent
+
+
+async def handle_chat(data: ChatRequest, chat_service: ChatService) -> None:
+    """
+    Handle an incoming chat request.
+
+    Workflow:
+    - Parse incoming chat data.
+    - Optionally inject system prompt.
+    - Save chat session and messages to the database.
+    - Launch langgraph_agent task to process chat.
+    - Manage stream task lifecycle (add, remove).
+    - Notify frontend via WebSocket when stream is done.
+
+    Args:
+        data (dict): Chat request data containing:
+            - messages: list of message dicts
+            - session_id: unique session identifier
+            - canvas_id: canvas identifier (contextual use)
+            - text_model: text model configuration
+            - tool_list: list of tool model configurations (images/videos)
+        chat_service: ChatService instance for chat operations
+    """
+    # Extract fields from incoming data
+    messages: list[dict[str, Any]] = data.messages
+    session_id: str = data.session_id
+    canvas_id: str = data.canvas_id
+    text_model: ModelInfo = data.text_model
+    tool_list: list[ToolInfo] = data.tool_list
+
+    print("👇 chat_service got tool_list", tool_list)
+
+    # TODO: save and fetch system prompt from db or settings config
+    system_prompt: Optional[str] = data.system_prompt
+
+    # If there is only one message, create a new chat session
+    if len(messages) == 1:
+        # create new session
+        prompt = messages[0].get("content", "")
+        # TODO: Better way to determin when to create new chat session.
+        await chat_service.create_chat_session(
+            SessionCreate(
+                id=session_id,
+                model=text_model.model,
+                provider=text_model.provider,
+                canvas_id=canvas_id,
+                title=prompt[:200] if isinstance(prompt, str) else "",
+            )
+        )
+
+    # TODO
+    await chat_service.create_message(
+        session_id, messages[-1].get("role", "user"), json.dumps(messages[-1])
+    ) if len(messages) > 0 else None
+
+    # Create and start langgraph_agent task for chat processing
+    # rednote_agent = get_rednote_agent(checkpointer=memory_checkpointer)
+    task = asyncio.create_task(
+        langgraph_supervisor_agent(
+            messages, canvas_id, session_id, tool_list, chat_service=chat_service
+        )
+    )
+    #
+    # # Register the task in stream_tasks (for possible cancellation)
+    add_stream_task(session_id, task)
+    try:
+        # Await completion of the langgraph_agent task
+        await task
+    except asyncio.exceptions.CancelledError:
+        print(f"🛑Session {session_id} cancelled during stream")
+    finally:
+        # Always remove the task from stream_tasks after completion/cancellation
+        remove_stream_task(session_id)
+        # Notify frontend WebSocket that chat processing is done
+        await send_to_websocket(session_id, {"type": "done"})

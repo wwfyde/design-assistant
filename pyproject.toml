@@ -1,0 +1,60 @@
+[project]
+name = "design-assistant"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "api",
+    "lib",
+    "tools",
+    "agents",
+    "langgraph-tools",
+    "pydantic>=2.12.3",
+    "httpx[http2,socks]>=0.28.1",
+    "pydantic-settings>=2.12.0",
+    "langchain[openai]>=1.0.3",
+    "langgraph>=1.0.3",
+    "pillow>=12.0.0",
+    "oss2>=2.19.1",
+    "fastapi[standard]>=0.121.0",
+    "uvicorn>=0.38.0",
+    "python-socketio>=5.14.3",
+    "psycopg[binary,pool]>=3.2.12",
+    "langgraph-checkpoint-postgres>=3.0.1",
+    "langgraph-checkpoint>=3.0.1",
+    "google-genai>=1.51.0",
+    "sqlalchemy[asyncio]>=2.0.44",
+    "alembic>=1.17.2",
+    "langchain-google-genai>=3.1.0",
+]
+
+[tool.uv.workspace]
+members = [
+    "api",
+    "lib",
+    "tools",
+    "agents",
+    "langgraph-tools",
+]
+
+[tool.uv]
+package = false
+
+[build-system]
+requires = ["uv_build"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pip>=25.3",
+    "uv-build>=0.9.7",
+]
+
+[tool.uv.sources]
+api = { workspace = true }
+lib = { workspace = true }
+tools = { workspace = true }
+agents = { workspace = true }
+langgraph-tools = { workspace = true }
+

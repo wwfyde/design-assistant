@@ -1,0 +1,2 @@
+class WebSocketManager:
+    pass

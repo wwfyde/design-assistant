@@ -1,0 +1,69 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+
+
+# MacOS
+.DS_Store
+
+
+### Projects
+temp/
+data/
+.idea/
+.vscode/
+.fleet/
+*.drawio.bkp
+.obsidian/
+
+
+### JavaScripts
+node_modules/
+package-lock.json
+yarn.lock
+
+### Rust
+target/
+
+### Configuration
+# env file and config
+.env
+.env.dev
+.env.staging
+.env.development
+.env.prod
+.env.production
+*.local
+
+*.local.yml
+config.yml
+config.dev.yml
+config.prod.yml
+config.staging.yml
+config.test.yml
+
+config.toml
+*.local.toml
+config.dev.toml
+config.prod.toml
+config.staging.toml
+config.test.toml
+
+
+/config/*.toml
+/config/*.yaml
+
+
+# Logs
+logs/
+*.log
+*.log-*
+*.log_*

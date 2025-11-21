@@ -1,0 +1,24 @@
+from fastapi import APIRouter
+
+from . import (  # noqa F401
+    agent,
+    canvas,
+    chat,
+    config,
+    file,
+    root,
+    tool,
+    websocket,
+    workspace,
+)
+
+router = APIRouter()
+
+router.include_router(canvas.router, prefix="/canvas", tags=["canvas"])
+router.include_router(chat.router, tags=["chat"])
+router.include_router(workspace.router, tags=["workspace"])
+router.include_router(config.router, prefix="/config", tags=["settings"])
+router.include_router(root.router, tags=["default"])
+router.include_router(tool.router, prefix="/tools", tags=["tool"])
+router.include_router(agent.router, prefix="/agents", tags=["agents"])
+router.include_router(file.router, prefix="", tags=["file"])
