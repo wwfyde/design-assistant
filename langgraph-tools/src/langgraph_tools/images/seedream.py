@@ -10,7 +10,7 @@ from tools.images.seedream import (
 class SeedreamArgs(BaseModel):
     image_urls: list[str] | str | None = Field(
         None,
-        description="image_urls, optional, when multiple image urls passed,  split them with commas. 网络图片传入图片url, 本地文件传入文件. 如果只有文件名默认当做本地文件.",
+        description="image_urls or image file name, optional, when multiple image urls passed,  split them with commas. 网络图片传入图片url, 本地文件传入文件. 如果只有文件名默认当做本地文件.",
     )
     prompt: str = Field(
         description="Required. The prompt for image generation. If you want to edit an image, please describe what you want to edit in the prompt."
@@ -23,7 +23,7 @@ class SeedreamArgs(BaseModel):
 
 @tool(
     "image_create_with_seedream",
-    description="Image Creation, Generate or Edit Image with ByteDance Seedream model using  prompt , image_urls, aspect_ratio. Response multiple images. Use this model for: 1. adding or removing elements, 2. Inpainting (Semantic masking), 3. Style transfer, 4. Generate images. Supports output multiple images.",
+    description="Image Creation, Generate or Edit Image with ByteDance Seedream model using  prompt , image_urls, aspect_ratio. image_urls may be local file, input it with filename(img_xx.png). Response multiple images. Use this model for: 1. adding or removing elements, 2. Inpainting (Semantic masking), 3. Style transfer, 4. Generate images. Supports output multiple images.",
     args_schema=SeedreamArgs,
 )
 def image_create_with_seedream(
