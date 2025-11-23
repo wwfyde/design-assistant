@@ -194,7 +194,6 @@ class PostgresChatRepo(ChatRepo):
                 .values(**session_create.model_dump(exclude_unset=True))
             )
             await self.asession.execute(update_stmt)
-            await self.asession.commit()
         else:
             session_create.session_id = session_create.id
             session_db = ChatSessionModel(
@@ -338,7 +337,7 @@ async def magic_generation(magic: MagicCreate, chat_service: ChatService):
             magic_prompt = """
             理解视觉意图. 基于我绘制的草图, 然后基于理解到的意图, 并逐步创作 
             """
-            magic_prompt="""
+            magic_prompt = """
             理解视觉意图或视觉指令. 理解图像中的草图,涂鸦或视觉指令并生成图像
             """
             if prompt:
