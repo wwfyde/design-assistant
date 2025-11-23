@@ -20,7 +20,6 @@ from lib import settings
 root_path = os.getenv("ROOT_PATH", "") or settings.api_prefix
 
 
-
 async def initialize():
     print("Initializing config_service")
     print("Initializing broadcast_init_done")
@@ -157,7 +156,9 @@ def main():
     os.environ["no_proxy"] = os.environ["NO_PROXY"] = ",".join(
         sorted(_bypass | current - {""})
     )
-    run(app="main:socket_app", reload=True, port=8013, loop='asyncio')
+    os.environ["HTTP_PROXY"] = "http://127.0.0.1:7890"
+    os.environ["HTTPS_PROXY"] = "http://127.0.0.1:7890"
+    run(app="main:socket_app", reload=True, port=8013, loop="asyncio")
     # run(socket_app, host="127.0.0.1", port=8013)
 
 
