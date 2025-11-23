@@ -1,29 +1,24 @@
-import { saveCanvas } from '@/api/canvas'
-import { useCanvas } from '@/contexts/canvas'
+import {saveCanvas} from '@/api/canvas'
+import {useCanvas} from '@/contexts/canvas'
 import useDebounce from '@/hooks/use-debounce'
-import { useTheme } from '@/hooks/use-theme'
-import { eventBus } from '@/lib/event'
+import {useTheme} from '@/hooks/use-theme'
+import {eventBus} from '@/lib/event'
 import * as ISocket from '@/types/socket'
-import { CanvasData } from '@/types/types'
-import { Excalidraw, convertToExcalidrawElements } from '@excalidraw/excalidraw'
+import {CanvasData} from '@/types/types'
+import {convertToExcalidrawElements, Excalidraw} from '@excalidraw/excalidraw'
 import {
-  ExcalidrawImageElement,
   ExcalidrawEmbeddableElement,
+  ExcalidrawImageElement,
+  NonDeleted,
   OrderedExcalidrawElement,
   Theme,
-  NonDeleted,
 } from '@excalidraw/excalidraw/element/types'
 import '@excalidraw/excalidraw/index.css'
-import {
-  AppState,
-  BinaryFileData,
-  BinaryFiles,
-  ExcalidrawInitialDataState,
-} from '@excalidraw/excalidraw/types'
-import { nanoid } from 'nanoid'
-import { useCallback, useEffect, useRef } from 'react'
-import { useTranslation } from 'react-i18next'
-import { VideoElement } from './VideoElement'
+import {AppState, BinaryFileData, BinaryFiles, ExcalidrawInitialDataState,} from '@excalidraw/excalidraw/types'
+import {nanoid} from 'nanoid'
+import {useCallback, useEffect, useRef} from 'react'
+import {useTranslation} from 'react-i18next'
+import {VideoElement} from './VideoElement'
 
 import '@/assets/style/canvas.css'
 
@@ -41,12 +36,12 @@ type CanvasExcaliProps = {
 }
 
 const CanvasExcali: React.FC<CanvasExcaliProps> = ({
-  canvasId,
-  initialData,
-}) => {
-  const { excalidrawAPI, setExcalidrawAPI } = useCanvas()
+                                                     canvasId,
+                                                     initialData,
+                                                   }) => {
+  const {excalidrawAPI, setExcalidrawAPI} = useCanvas()
 
-  const { i18n } = useTranslation()
+  const {i18n} = useTranslation()
 
   // Immediate handler for UI updates (no debounce)
   const handleSelectionChange = (
@@ -56,7 +51,7 @@ const CanvasExcali: React.FC<CanvasExcaliProps> = ({
     if (!appState) return
 
     // Check if any selected element is embeddable type
-    const selectedElements = elements.filter((element) => 
+    const selectedElements = elements.filter((element) =>
       appState.selectedElementIds[element.id]
     )
     const hasEmbeddableSelected = selectedElements.some(
@@ -105,7 +100,7 @@ const CanvasExcali: React.FC<CanvasExcaliProps> = ({
         }
       }
 
-      saveCanvas(canvasId, { data, thumbnail })
+      saveCanvas(canvasId, {data, thumbnail})
     },
     1000
   )
@@ -127,15 +122,15 @@ const CanvasExcali: React.FC<CanvasExcaliProps> = ({
       ? JSON.parse(localStorage.getItem('excalidraw-last-image-position')!)
       : null
   )
-  const { theme } = useTheme()
+  const {theme} = useTheme()
 
   // 添加自定义类名以便应用我们的CSS修复
   const excalidrawClassName = `excalidraw-custom ${theme === 'dark' ? 'excalidraw-dark-fix-wm76394yjopk' : 'excalidraw-wm76394yjopk'}`
-  
+
   // 在深色模式下使用自定义主题设置，避免使用默认的滤镜
   // 这样可以确保颜色在深色模式下正确显示
   const customTheme = theme === 'dark' ? 'light' : theme
-  
+
   // 在组件挂载和主题变化时设置深色模式下的背景色
   useEffect(() => {
     if (excalidrawAPI && theme === 'dark') {
@@ -175,7 +170,7 @@ const CanvasExcali: React.FC<CanvasExcaliProps> = ({
           // Create file object
           // Use existing fileId from element if available, otherwise generate new one
           const fileId = (imageElement.fileId as string) || (nanoid() as string)
-          
+
           const file: BinaryFileData = {
             id: fileId as any, // Cast to any to avoid FileId type error
             dataURL: base64data as any,
@@ -187,7 +182,7 @@ const CanvasExcali: React.FC<CanvasExcaliProps> = ({
           // Get image dimensions if not provided or 0
           let width = imageElement.width
           let height = imageElement.height
-          
+
           if (!width || !height) {
             const img = new Image()
             img.src = base64data
@@ -196,12 +191,32 @@ const CanvasExcali: React.FC<CanvasExcaliProps> = ({
             })
             width = img.width
             height = img.height
+
+            // Scale down if too large (max 1000px)
+            const MAX_DIMENSION = 1000
+            if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
+              const ratio = Math.min(MAX_DIMENSION / width, MAX_DIMENSION / height)
+              width *= ratio
+              height *= ratio
+            }
+          }
+
+          // Calculate position based on last image
+          let x = imageElement.x
+          let y = imageElement.y
+
+          if (lastImagePosition.current) {
+            const GAP = 20
+            x = lastImagePosition.current.x + lastImagePosition.current.width + GAP
+            y = lastImagePosition.current.y
           }
 
           // Ensure image is not locked and can be manipulated
           const unlockedImageElement = {
             ...imageElement,
             fileId: fileId as any,
+            x,
+            y,
             width,
             height,
             locked: false,
@@ -217,9 +232,19 @@ const CanvasExcali: React.FC<CanvasExcaliProps> = ({
 
           console.log('👇 Adding new image element to canvas:', unlockedImageElement.id)
 
+          // Place new image at the beginning (bottom) of the stack to avoid obscuring existing elements
           excalidrawAPI.updateScene({
             elements: [...(currentElements || []), unlockedImageElement],
           })
+
+          // Update last image position
+          lastImagePosition.current = {
+            x,
+            y,
+            width,
+            height,
+            col: 0, // Not strictly used here but required by type
+          }
 
           localStorage.setItem(
             'excalidraw-last-image-position',
@@ -356,7 +381,7 @@ const CanvasExcali: React.FC<CanvasExcaliProps> = ({
 
   const renderEmbeddable = useCallback(
     (element: NonDeleted<ExcalidrawEmbeddableElement>, appState: AppState) => {
-      const { link } = element
+      const {link} = element
 
       // Check if this is a video URL
       if (
@@ -403,7 +428,7 @@ const CanvasExcali: React.FC<CanvasExcaliProps> = ({
       }
 
       let imageElement = imageData.element
-      
+
       // If element is missing or invalid (e.g. empty string from backend), create a default one
       if (!imageElement || typeof imageElement !== 'object') {
         console.log('👇 Image element missing or invalid, creating default')
@@ -520,58 +545,58 @@ const CanvasExcali: React.FC<CanvasExcaliProps> = ({
   }, [handleImageGenerated, handleVideoGenerated, handleAddImageToCanvas])
 
   return (
-    <div className={excalidrawClassName} style={{ width: '100%', height: '100%' }}>
+    <div className={excalidrawClassName} style={{width: '100%', height: '100%'}}>
       <Excalidraw
         theme={customTheme as Theme}
         langCode={i18n.language}
-      excalidrawAPI={(api) => {
-        setExcalidrawAPI(api)
-      }}
-      onChange={handleChange}
-      initialData={() => {
-        const data = initialData
-        console.log('👇initialData', data)
-        if (data?.appState) {
-          data.appState = {
-            ...data.appState,
-            collaborators: undefined!,
-            // Reset critical state properties to ensure canvas is usable
-            activeTool: {
-              type: 'selection',
-              customType: null,
-              locked: false,
-              lastActiveTool: null,
-            },
-            viewModeEnabled: false,
-            zenModeEnabled: false,
-            isLoading: false,
-            errorMessage: null,
-            selectedElementIds: {}, // Clear selection to avoid UI side effects
+        excalidrawAPI={(api) => {
+          setExcalidrawAPI(api)
+        }}
+        onChange={handleChange}
+        initialData={() => {
+          const data = initialData
+          console.log('👇initialData', data)
+          if (data?.appState) {
+            data.appState = {
+              ...data.appState,
+              collaborators: undefined!,
+              // Reset critical state properties to ensure canvas is usable
+              activeTool: {
+                type: 'selection',
+                customType: null,
+                locked: false,
+                lastActiveTool: null,
+              },
+              viewModeEnabled: false,
+              zenModeEnabled: false,
+              isLoading: false,
+              errorMessage: null,
+              selectedElementIds: {}, // Clear selection to avoid UI side effects
+            }
           }
-        }
-        return data || null
-      }}
-      renderEmbeddable={renderEmbeddable}
-      // Allow all URLs for embeddable content
-      validateEmbeddable={(url: string) => {
-        console.log('👇 Validating embeddable URL:', url)
-        // Allow all URLs - return true for everything
-        return true
-      }}
-      // Ensure interactive mode is enabled
-      viewModeEnabled={false}
-      zenModeEnabled={false}
-      // Allow element manipulation
-      onPointerUpdate={(payload) => {
-        // Minimal logging - only log significant pointer events
-        if (payload.button === 'down' && Math.random() < 0.05) {
-          // console.log('👇 Pointer down on:', payload.pointer.x, payload.pointer.y)
-        }
-      }}
-    />
+          return data || null
+        }}
+        renderEmbeddable={renderEmbeddable}
+        // Allow all URLs for embeddable content
+        validateEmbeddable={(url: string) => {
+          console.log('👇 Validating embeddable URL:', url)
+          // Allow all URLs - return true for everything
+          return true
+        }}
+        // Ensure interactive mode is enabled
+        viewModeEnabled={false}
+        zenModeEnabled={false}
+        // Allow element manipulation
+        onPointerUpdate={(payload) => {
+          // Minimal logging - only log significant pointer events
+          if (payload.button === 'down' && Math.random() < 0.05) {
+            // console.log('👇 Pointer down on:', payload.pointer.x, payload.pointer.y)
+          }
+        }}
+      />
     </div>
   )
 }
 
-export { CanvasExcali }
+export {CanvasExcali}
 export default CanvasExcali

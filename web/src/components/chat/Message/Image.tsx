@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button'
 import { useCanvas } from '@/contexts/canvas'
 import { eventBus } from '@/lib/event'
-import { Plus } from 'lucide-react'
+import { MessageSquarePlus, Plus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { PhotoView } from 'react-photo-view'
 
@@ -59,7 +59,7 @@ const MessageImage = ({ content }: MessageImageProps) => {
             <Button
               variant='secondary'
               size='sm'
-              className='group-hover:opacity-100 opacity-0 absolute top-2 right-2 z-10 text-xs'
+              className='group-hover:opacity-100 opacity-0 absolute bottom-2 right-2 z-10 text-xs'
               onClick={(e) => {
                 e.stopPropagation()
                 eventBus.emit('Chat::AddImageToCanvas', {
@@ -67,7 +67,7 @@ const MessageImage = ({ content }: MessageImageProps) => {
                 })
               }}
             >
-              <Plus className='w-4 h-4 mr-1' />
+              <MessageSquarePlus className='w-4 h-4 mr-1' />
               {t('chat:messages:addToCanvas')}
             </Button>
           )}

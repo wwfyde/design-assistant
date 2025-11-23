@@ -36,6 +36,10 @@ export const PROVIDER_NAME_MAPPING: {
     name: 'Volces',
     icon: 'https://portal.volccdn.com/obj/volcfe/misc/favicon.png',
   },
+  ark: {
+    name: 'Seed',
+    icon: 'https://portal.volccdn.com/obj/volcfe/misc/favicon.png',
+  },
   seedream: {
     name: 'Seedream',
     icon: 'https://portal.volccdn.com/obj/volcfe/misc/favicon.png',
@@ -43,6 +47,18 @@ export const PROVIDER_NAME_MAPPING: {
   comfyui: {
     name: 'ComfyUI',
     icon: 'https://framerusercontent.com/images/3cNQMWKzIhIrQ5KErBm7dSmbd2w.png',
+  },
+  gemini: {
+    name: 'Gemini',
+    icon: 'https://upload.wikimedia.org/wikipedia/commons/8/8f/Google-gemini-icon.svg',
+  },
+  qwen: {
+    name: 'Qwen Image',
+    icon: 'https://img.alicdn.com/imgextra/i2/O1CN01B9mlGG1msAz3fxxWL_!!6000000005009-2-tps-84-84.png',
+  },
+  flux: {
+    name: 'Flux Kontext',
+    icon: 'https://bfl.ai/favicon.ico',
   },
 }
 

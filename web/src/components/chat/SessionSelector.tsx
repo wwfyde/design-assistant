@@ -1,14 +1,8 @@
-import { Session } from '@/types/types'
-import { PlusIcon } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
-import { Button } from '../ui/button'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../ui/select'
+import {Session} from '@/types/types'
+import {PlusIcon} from 'lucide-react'
+import {useTranslation} from 'react-i18next'
+import {Button} from '../ui/button'
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from '../ui/select'
 
 type SessionSelectorProps = {
   session: Session | null
@@ -18,12 +12,12 @@ type SessionSelectorProps = {
 }
 
 const SessionSelector: React.FC<SessionSelectorProps> = ({
-  session,
-  sessionList,
-  onSelectSession,
-  onClickNewChat,
-}) => {
-  const { t } = useTranslation()
+                                                           session,
+                                                           sessionList,
+                                                           onSelectSession,
+                                                           onClickNewChat,
+                                                         }) => {
+  const {t} = useTranslation()
 
   return (
     <div className="flex items-center gap-2 w-full">
@@ -34,14 +28,14 @@ const SessionSelector: React.FC<SessionSelectorProps> = ({
         }}
       >
         <SelectTrigger className="flex-1 min-w-0 bg-background">
-          <SelectValue placeholder="Theme" />
+          <SelectValue placeholder="Theme"/>
         </SelectTrigger>
         <SelectContent>
           {sessionList
             ?.filter((session) => session.id && session.id.trim() !== '') // Fix error of A ‹Select.Item /> must have a value prop that is not an empty string.
             ?.map((session) => (
               <SelectItem key={session.id} value={session.id}>
-                {session.title}
+                {session.id}
               </SelectItem>
             ))}
         </SelectContent>
@@ -52,7 +46,7 @@ const SessionSelector: React.FC<SessionSelectorProps> = ({
         onClick={onClickNewChat}
         className="shrink-0 gap-1"
       >
-        <PlusIcon />
+        <PlusIcon/>
         <span className="text-sm">{t('chat:newChat')}</span>
       </Button>
     </div>

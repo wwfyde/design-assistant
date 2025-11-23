@@ -1,22 +1,20 @@
-import React, { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { ChevronDown, Component } from 'lucide-react'
+import React, {useState} from 'react'
+import {Button} from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuCheckboxItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-  DropdownMenuLabel,
   DropdownMenuGroup,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Switch } from '@/components/ui/switch'
-import { Checkbox } from '@/components/ui/checkbox'
-import { useTranslation } from 'react-i18next'
-import { useConfigs } from '@/contexts/configs'
-import { ModelInfo, ToolInfo } from '@/api/model'
-import { PROVIDER_NAME_MAPPING } from '@/constants'
-import { ScrollArea } from '@/components/ui/scroll-area'
+import {Switch} from '@/components/ui/switch'
+import {Checkbox} from '@/components/ui/checkbox'
+import {useTranslation} from 'react-i18next'
+import {useConfigs} from '@/contexts/configs'
+import {ModelInfo, ToolInfo} from '@/api/model'
+import {PROVIDER_NAME_MAPPING} from '@/constants'
+import {ScrollArea} from '@/components/ui/scroll-area'
 
 interface ModelSelectorV3Props {
   onModelToggle?: (modelId: string, checked: boolean) => void
@@ -24,9 +22,9 @@ interface ModelSelectorV3Props {
 }
 
 const ModelSelectorV3: React.FC<ModelSelectorV3Props> = ({
-  onModelToggle,
-  onAutoToggle
-}) => {
+                                                           onModelToggle,
+                                                           onAutoToggle
+                                                         }) => {
   const {
     textModel,
     setTextModel,
@@ -38,7 +36,7 @@ const ModelSelectorV3: React.FC<ModelSelectorV3Props> = ({
 
   const [activeTab, setActiveTab] = useState<'image' | 'video' | 'text'>('image')
   const [dropdownOpen, setDropdownOpen] = useState(false)
-  const { t } = useTranslation()
+  const {t} = useTranslation()
 
   // 初始化时判断auto模式：如果所有工具都被选中，则为auto模式
   const initialAutoMode = allTools.length > 0 && selectedTools.length === allTools.length
@@ -68,7 +66,7 @@ const ModelSelectorV3: React.FC<ModelSelectorV3Props> = ({
   }
 
   // Sort providers to put Jaaz first
-  const sortProviders = <T,>(grouped: { [provider: string]: T[] }) => {
+  const sortProviders = <T, >(grouped: { [provider: string]: T[] }) => {
     const sortedEntries = Object.entries(grouped).sort(([a], [b]) => {
       if (a === 'jaaz') return -1
       if (b === 'jaaz') return 1
@@ -230,9 +228,9 @@ const ModelSelectorV3: React.FC<ModelSelectorV3Props> = ({
   }
 
   const tabs = [
-    { id: 'image', label: t('chat:modelSelector.tabs.image') },
-    { id: 'video', label: t('chat:modelSelector.tabs.video') },
-    { id: 'text', label: t('chat:modelSelector.tabs.text') }
+    {id: 'image', label: t('chat:modelSelector.tabs.image')},
+    // { id: 'video', label: t('chat:modelSelector.tabs.video') },
+    {id: 'text', label: t('chat:modelSelector.tabs.text')}
   ] as const
 
   return (
@@ -244,12 +242,28 @@ const ModelSelectorV3: React.FC<ModelSelectorV3Props> = ({
           className={`w-fit max-w-[40%] justify-between overflow-hidden ${autoMode
             ? 'bg-background border-border text-muted-foreground'
             : 'text-primary border-green-200 bg-green-50'
-            }`}
+          }`}
         >
           {autoMode ? (
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M4 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" /><path d="M4 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" /><path d="M14 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z" /><path d="M14 7l6 0" /><path d="M17 4l0 6" /></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+              <path d="M4 4m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/>
+              <path d="M4 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/>
+              <path d="M14 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"/>
+              <path d="M14 7l6 0"/>
+              <path d="M17 4l0 6"/>
+            </svg>
           ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="icon icon-tabler icons-tabler-filled icon-tabler-apps"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M9 3h-4a2 2 0 0 0 -2 2v4a2 2 0 0 0 2 2h4a2 2 0 0 0 2 -2v-4a2 2 0 0 0 -2 -2z" /><path d="M9 13h-4a2 2 0 0 0 -2 2v4a2 2 0 0 0 2 2h4a2 2 0 0 0 2 -2v-4a2 2 0 0 0 -2 -2z" /><path d="M19 13h-4a2 2 0 0 0 -2 2v4a2 2 0 0 0 2 2h4a2 2 0 0 0 2 -2v-4a2 2 0 0 0 -2 -2z" /><path d="M17 3a1 1 0 0 1 .993 .883l.007 .117v2h2a1 1 0 0 1 .117 1.993l-.117 .007h-2v2a1 1 0 0 1 -1.993 .117l-.007 -.117v-2h-2a1 1 0 0 1 -.117 -1.993l.117 -.007h2v-2a1 1 0 0 1 1 -1z" /></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"
+                 className="icon icon-tabler icons-tabler-filled icon-tabler-apps">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+              <path d="M9 3h-4a2 2 0 0 0 -2 2v4a2 2 0 0 0 2 2h4a2 2 0 0 0 2 -2v-4a2 2 0 0 0 -2 -2z"/>
+              <path d="M9 13h-4a2 2 0 0 0 -2 2v4a2 2 0 0 0 2 2h4a2 2 0 0 0 2 -2v-4a2 2 0 0 0 -2 -2z"/>
+              <path d="M19 13h-4a2 2 0 0 0 -2 2v4a2 2 0 0 0 2 2h4a2 2 0 0 0 2 -2v-4a2 2 0 0 0 -2 -2z"/>
+              <path
+                d="M17 3a1 1 0 0 1 .993 .883l.007 .117v2h2a1 1 0 0 1 .117 1.993l-.117 .007h-2v2a1 1 0 0 1 -1.993 .117l-.007 -.117v-2h-2a1 1 0 0 1 -.117 -1.993l.117 -.007h2v-2a1 1 0 0 1 1 -1z"/>
+            </svg>
           )}
         </Button>
       </DropdownMenuTrigger>
@@ -262,7 +276,7 @@ const ModelSelectorV3: React.FC<ModelSelectorV3Props> = ({
             <Switch
               checked={autoMode}
               onCheckedChange={handleAutoToggle}
-            // disabled={activeTab === 'text'}
+              // disabled={activeTab === 'text'}
             />
           </div>
         </div>
@@ -276,7 +290,7 @@ const ModelSelectorV3: React.FC<ModelSelectorV3Props> = ({
               className={`flex-1 px-3 py-1 rounded-md text-sm font-medium transition-colors cursor-pointer ${activeTab === tab.id
                 ? 'bg-background text-foreground shadow-sm'
                 : 'text-muted-foreground hover:text-foreground'
-                }`}
+              }`}
             >
               {tab.label}
             </button>
@@ -326,7 +340,7 @@ const ModelSelectorV3: React.FC<ModelSelectorV3Props> = ({
                       </div>
                     )
                   })}
-                  {!isLastGroup && <DropdownMenuSeparator className="my-2" />}
+                  {!isLastGroup && <DropdownMenuSeparator className="my-2"/>}
                 </DropdownMenuGroup>
               )
             })}
