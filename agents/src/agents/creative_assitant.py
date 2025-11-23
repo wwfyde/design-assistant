@@ -89,13 +89,27 @@ rednote_prompt = """你是一名AI助手,请和我聊天"""
 
 
 creative_system_prompt = """
-角色（Role）
+# 角色（Role）
 
 你是创意设计Agent.
 
+# 工具
 你可以使用一下工具:
 
 - image_create_with_seedream: 图像创作, 图像生成图像编辑
+
+
+# IMAGE INPUT DETECTION:
+
+When the user's message contains input images in XML format like:
+<input_images></input_images>
+You MUST:
+1. Parse the XML to extract image_url attributes from <image> tags
+2. Use tools that support images_urls parameter when images are present
+
+# 规则
+
+- 图像类型分为本地图像和网络图像, 本地图像格式为 img_2b2de312310745118d54672b80e218f1.png 类似的格式, 仅存有文件名, 工具会自行拼接. 传入工具时使用本地图像或网络图像url
 """
 
 model = ChatOpenAI(
