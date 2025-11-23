@@ -186,29 +186,25 @@ class PostgresChatRepo(ChatRepo):
         return sessions
 
     async def create_chat_session(self, session_create: SessionCreate) -> ChatSession:
-        async with self.asession.begin():
-            session_db = await self.asession.get(ChatSessionModel, session_create.id)
-            if session_db:
-                update_stmt = (
-                    update(ChatSessionModel)
-                    .where(ChatSessionModel.id == session_create.id)
-                    .values(**session_create.model_dump(exclude_unset=True))
-                )
-                await self.asession.execute(update_stmt)
-                await self.asession.flush()
-                await self.asession.refresh(session_db)
-                session = ChatSession.model_validate(session_db)
-                return session
-            else:
-                session_create.session_id = session_create.id
-                session_db = ChatSessionModel(
-                    **session_create.model_dump(exclude_unset=True)
-                )
-                self.asession.add(session_db)
-                await self.asession.flush()
-                await self.asession.refresh(session_db)
-                session = ChatSession.model_validate(session_db)
-                return session
+        session_db = await self.asession.get(ChatSessionModel, session_create.id)
+        if session_db:
+            update_stmt = (
+                update(ChatSessionModel)
+                .where(ChatSessionModel.id == session_create.id)
+                .values(**session_create.model_dump(exclude_unset=True))
+            )
+            await self.asession.execute(update_stmt)
+            await self.asession.commit()
+        else:
+            session_create.session_id = session_create.id
+            session_db = ChatSessionModel(
+                **session_create.model_dump(exclude_unset=True)
+            )
+            self.asession.add(session_db)
+        await self.asession.commit()
+        await self.asession.refresh(session_db)
+        session = ChatSession.model_validate(session_db)
+        return session
 
         pass
 
