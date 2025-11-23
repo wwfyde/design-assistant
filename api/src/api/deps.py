@@ -59,8 +59,8 @@ def get_chat_service(
 ) -> ChatService:
     if settings.repo_type == "in-memory":
         return ChatService(InMemoryChatRepo(memory_store))
+    elif settings.repo_type == "postgres":
         return ChatService(PostgresChatRepo(session=session, asession=asession))
-        return ChatService(PostgresChatRepo(session=session, asession=async_session))
     else:
         return ChatService(InMemoryChatRepo(memory_store))
 
