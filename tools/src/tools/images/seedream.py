@@ -1,5 +1,4 @@
 import math
-import os
 from io import BytesIO
 from uuid import uuid4
 
@@ -93,7 +92,7 @@ def image_create_with_seedream(
     image_list = new_urls
 
     base_url = "https://ark.cn-beijing.volces.com/api/v3/images/generations"
-    api_key = os.getenv("ARK_API_KEY")
+    api_key = settings.providers.ark.api_key
     use_stream = False
     headers = {
         "Content-Type": "application/json",

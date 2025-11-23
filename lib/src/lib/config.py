@@ -196,4 +196,5 @@ settings = Settings()
 if __name__ == "__main__":
     print(settings.redis_dsn)
     print(settings.providers.ark.image_model)
+    print(settings.providers.ark.api_key)
     print(project_dir := settings.project_dir)

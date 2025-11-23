@@ -17,4 +17,4 @@ build-backend = "uv_build"
 package = true
 
 [project.scripts]
-demo = "lib.main:main"
+lib = "lib:hello"
