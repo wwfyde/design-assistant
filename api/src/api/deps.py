@@ -1,30 +1,50 @@
 import asyncio
 import json
-from typing import Any, Generator, Optional
+from typing import Annotated, Any, AsyncGenerator, Generator, Optional
 
 from agents.rednote_agent import (
     build_rednote_agent,
 )
 from agents.supervisor_agent import langgraph_supervisor_agent
+from api.core.db import async_session, engine
 from api.core.memory import memory_checkpointer, memory_store
 from api.domain.model import ModelInfo
 from api.domain.tool import ToolInfo
 from api.schemas.chat import ChatRequest, SessionCreate
-from api.services.canvas import CanvasService, InMemoryCanvasRepo
-from api.services.chat import ChatService, InMemoryChatRepo
+from api.services.canvas import CanvasService, InMemoryCanvasRepo, PostgresCanvasRepo
+from api.services.chat import ChatService, InMemoryChatRepo, PostgresChatRepo
 from api.services.stream import add_stream_task, remove_stream_task
 from api.services.websocket import send_to_websocket
 from fastapi import Depends
 from langgraph.checkpoint.postgres import PostgresSaver
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session
 
 from lib import settings
 
 # canvas_service = CanvasService(store=memory_store)
 
 
-def get_canvas_service() -> CanvasService:
+def get_db() -> Generator[Session, None, None]:
+    with Session(engine) as session:
+        yield session
+
+
+async def get_db_async() -> AsyncGenerator[AsyncSession, None]:
+    async with async_session() as session:
+        yield session
+        # session 关闭 归还给连接池, 而不是真的关闭连接
+
+
+def get_canvas_service(
+    session: Annotated[Session, Depends(get_db)],
+    asession: Annotated[AsyncSession, Depends(get_db_async)],
+) -> CanvasService:
     if settings.repo_type == "in-memory":
         return CanvasService(InMemoryCanvasRepo(memory_store))
+    elif settings.repo_type == "postgres":
+        # pass the async_sessionmaker so the repo creates fresh AsyncSession per operation
+        return CanvasService(PostgresCanvasRepo(session=session, asession=asession))
     else:
         return CanvasService(InMemoryCanvasRepo(memory_store))
 
@@ -33,17 +53,24 @@ def get_canvas_service() -> CanvasService:
 # CanvasServiceDep = Annotated[CanvasService, Depends(get_canvas_service)]
 
 
-def get_chat_service() -> ChatService:
+def get_chat_service(
+    session: Annotated[Session, Depends(get_db)],
+    asession: Annotated[AsyncSession, Depends(get_db_async)],
+) -> ChatService:
     if settings.repo_type == "in-memory":
         return ChatService(InMemoryChatRepo(memory_store))
+        return ChatService(PostgresChatRepo(session=session, asession=asession))
+        return ChatService(PostgresChatRepo(session=session, asession=async_session))
     else:
         return ChatService(InMemoryChatRepo(memory_store))
 
 
 def get_checkpointer() -> Generator[PostgresSaver, None, None]:
-    DB_URI = "postgresql://postgres:postgres@127.0.0.1:5432/postgres"
+    # DB_URI = "postgresql://postgres:postgres@127.0.0.1:5432/postgres"
+    DB_URI = f"postgresql://{settings.postgres.username}:{settings.postgres.password.get_secret_value()}@{settings.postgres.host}:{settings.postgres.port}/{settings.postgres.database}"
 
     with PostgresSaver.from_conn_string(DB_URI) as checkpointer:
+        checkpointer.setup()
         yield checkpointer
 
 

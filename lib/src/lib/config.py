@@ -34,6 +34,15 @@ class RedisConfig(BaseModel):
     password: SecretStr | None = ""
 
 
+class PostgresConfig(BaseModel):
+    host: str
+    port: int
+    username: str
+    password: SecretStr
+    database: str
+    pool_size: int = 30
+
+
 class AliyunOssConfig(BaseModel):
     endpoint: str
     access_key_id: str
@@ -98,6 +107,9 @@ class Settings(BaseSettings):
     apps: Any | None = Field(None, title="多应用配置")
     tools: Any | None = Field(None, title="私有化部署工具")
     infras: Any | None = Field(None, title="基础设施配置")
+
+    postgres: PostgresConfig = None
+
     # ark: ArkConfig = None
 
     @computed_field
@@ -164,6 +176,19 @@ class Settings(BaseSettings):
     @property
     def http_client_async(self) -> httpx.AsyncClient:
         return httpx.AsyncClient(proxy=self.proxy_url or "http://127.0.0.1:7890")
+
+    @computed_field
+    @property
+    def postgres_dsn(self) -> str:
+        # return f"postgresql+psycopg://{self.postgres.username}:{self.postgres.password.get_secret_value()}@{self.postgres.host}:{self.postgres.port}/{self.postgres.database}"
+        return f"postgresql+psycopg://{self.postgres.username}:{self.postgres.password.get_secret_value()}@{self.postgres.host}:{self.postgres.port}/{self.postgres.database}"
+
+    @computed_field
+    @property
+    def postgres_dsn_sync(self) -> str:
+        # return f"postgresql+psycopg://{self.postgres.username}:{self.postgres.password.get_secret_value()}@{self.postgres.host}:{self.postgres.port}/{self.postgres.database}"
+        # return f"postgresql+psycopg_async://{self.postgres.username}:{self.postgres.password.get_secret_value()}@{self.postgres.host}:{self.postgres.port}/{self.postgres.database}"
+        return f"postgresql+psycopg://{self.postgres.username}:{self.postgres.password.get_secret_value()}@{self.postgres.host}:{self.postgres.port}/{self.postgres.database}"
 
 
 settings = Settings()

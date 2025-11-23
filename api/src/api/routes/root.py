@@ -29,6 +29,18 @@ async def get_models() -> list[ModelInfo]:
             url="https://api.openai.com/v1/",
             type="text",
         ),
+        ModelInfo(
+            provider="deepseek",
+            model="deepseek-r1",
+            url="https://api.openai.com/v1/",
+            type="text",
+        ),
+        ModelInfo(
+            provider="qwen",
+            model="qwen-3vl",
+            url="https://api.openai.com/v1/",
+            type="text",
+        ),
     ]
 
 
@@ -54,6 +66,18 @@ async def list_tools() -> list[ToolInfo]:
             type="image",
             display_name="GPT-1",
         ),
+        ToolInfo(
+            provider="qwen",
+            id="create_image_with_gemini",
+            type="image",
+            display_name="Qwen Image",
+        ),
+        ToolInfo(
+            provider="flux",
+            id="create_image_with_gemini",
+            type="image",
+            display_name="Flux  Kontext",
+        ),
     ]
 
 
@@ -69,4 +93,8 @@ async def list_chat_sessions(
 async def get_chat_session(
     session_id: str, chat_service: ChatService = Depends(get_chat_service)
 ):
+    """
+    获取指定会话的聊天历史记录
+
+    """
     return await chat_service.get_chat_history(session_id=session_id)

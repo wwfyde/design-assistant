@@ -1,9 +1,16 @@
+import json
 from abc import ABC, abstractmethod
 from uuid import UUID
 
 from api.core.memory import AppStore
 from api.domain.canvas import Canvas
+from api.domain.chat import ChatSession
+from api.models import ChatSession as ChatSessionModel
+from api.models.canvas import Canvas as CanvasModel
 from api.schemas.canvas import CanvasCreate
+from sqlalchemy import delete, select, update
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session
 
 from lib import get_current_date
 
@@ -73,7 +80,7 @@ class InMemoryCanvasRepo(CanvasRepo):
             return data
         return None
 
-    async def get_canvases(self):
+    async def get_canvases(self) -> list[Canvas] | None:
         if len(self.store.canvas.items()) == 0:
             return None
         canvases = sorted(
@@ -108,6 +115,109 @@ class InMemoryCanvasRepo(CanvasRepo):
         if canvas:
             canvas.name = name
         return canvas
+
+
+class PostgresCanvasRepo(CanvasRepo):
+    def __init__(self, session: Session, asession: AsyncSession):
+        self.asession = asession
+        self.session = session
+
+    async def create_canvas(self, canvas: CanvasCreate) -> Canvas:
+        messages = json.dumps(
+            canvas.messages, sort_keys=True, ensure_ascii=False, separators=(",", ":")
+        )
+        canvas_db = CanvasModel(
+            id=canvas.canvas_id,
+            name=canvas.name,
+            canvas_id=canvas.canvas_id,
+            session_id=canvas.session_id,
+            messages=messages,
+        )
+        self.asession.add(canvas_db)
+        await self.asession.commit()
+        await self.asession.refresh(canvas_db)
+
+        return Canvas.model_validate(canvas_db)
+
+    async def get_canvas_by_id(self, id: str | UUID) -> Canvas | None:
+        stmt = select(CanvasModel).where(CanvasModel.id == str(id))
+        result = await self.asession.execute(stmt)
+        canvas = result.scalar_one_or_none()
+        if canvas:
+            return Canvas.model_validate(canvas)
+        return None
+
+    async def get_canvas_data(self, id: str | UUID) -> dict | None:
+        canvas = await self.get_canvas_by_id(id)
+
+        if canvas:
+            stmt = select(ChatSessionModel).where(ChatSessionModel.canvas_id == str(id))
+            result = await self.asession.execute(stmt)
+            chat_sessions = result.scalars().all()
+            sessions = [
+                ChatSession.model_validate(session) for session in chat_sessions
+            ]
+
+            data = {
+                "data": canvas.data,
+                "name": canvas.name,
+                "sessions": sessions,
+            }
+            return data
+        return None
+
+    async def get_canvases(self) -> list[Canvas] | None:
+        stmt = select(CanvasModel).order_by(CanvasModel.id)
+        result = await self.asession.execute(stmt)
+        canvas_models = result.scalars().all()
+        if not canvas_models:
+            return None
+        canvases = [Canvas.model_validate(canvas) for canvas in canvas_models]
+        return canvases
+
+    async def delete_canvas(self, id: str | UUID) -> bool:
+        stmt = delete(CanvasModel).where(CanvasModel.id == str(id))
+        result = await self.asession.execute(stmt)
+        await self.asession.commit()
+        return True
+
+    async def save_canvas_data(
+        self, id: str | UUID, data: str, thumbnail: str
+    ) -> Canvas | None:
+        stmt = select(CanvasModel).where(CanvasModel.id == str(id))
+        result = await self.asession.execute(stmt)
+        canvas_db = result.scalar_one_or_none()
+        if canvas_db:
+            stmt = (
+                update(CanvasModel)
+                .where(CanvasModel.id == str(id))
+                .values(data=data, thumbnail=thumbnail, updated_at=get_current_date())
+            )
+            await self.asession.execute(stmt)
+            await self.asession.commit()
+            await self.asession.refresh(canvas_db)
+            return Canvas.model_validate(canvas_db)
+        return None
+
+        pass
+
+    async def rename_canvas(self, id: str | UUID, name: str) -> Canvas:
+        stmt = select(CanvasModel).where(CanvasModel.id == str(id))
+        result = await self.asession.execute(stmt)
+        canvas_db = result.scalar_one_or_none()
+        if canvas_db:
+            stmt = (
+                update(CanvasModel)
+                .where(CanvasModel.id == str(id))
+                .values(name=name, updated_at=get_current_date())
+            )
+            await self.asession.execute(stmt)
+            await self.asession.commit()
+            await self.asession.refresh(canvas_db)
+            return Canvas.model_validate(canvas_db)
+        return None
+
+        pass
 
 
 class CanvasService:
