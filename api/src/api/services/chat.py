@@ -20,7 +20,6 @@ from api.services.stream import add_stream_task, remove_stream_task
 from api.services.websocket import broadcast_session_update, send_to_websocket
 from lib.image import parse_data_url
 from sqlalchemy import delete, select, update
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 from tools.images.gemini import magic_generate_with_gemini
 
@@ -84,7 +83,7 @@ class InMemoryChatRepo(ChatRepo):
             for message in self.chat_message.values()
             if message.session_id == session_id
         ]
-        messages_raw = sorted(matched_messages, key=lambda m: str(m.id))
+        messages_raw = sorted(matched_messages, key=lambda m: str(m.created_at))
         for chat_message in messages_raw:
             if chat_message.message:
                 try:
@@ -129,15 +128,14 @@ class InMemoryChatRepo(ChatRepo):
 
 
 class PostgresChatRepo(ChatRepo):
-    def __init__(self, session: Session, asession: AsyncSession):
-        self.asession = asession
+    def __init__(self, session: Session):
         self.session = session
 
     async def create_chat(self, id: int, name: str) -> Chat:
         db_chat = ChatModel(id=id, name=name)
-        self.asession.add(db_chat)
-        await self.asession.commit()
-        await self.asession.refresh(db_chat)
+        self.session.add(db_chat)
+        self.session.commit()
+        self.session.refresh(db_chat)
         chat = Chat.model_validate(db_chat)
         return chat
 
@@ -145,8 +143,8 @@ class PostgresChatRepo(ChatRepo):
         pass
 
     async def get_chat_history(self, session_id: str):
-        stmt = select(ChatMessageModel).where(ChatMessageModel.session_id == session_id)
-        result = await self.asession.execute(stmt)
+        stmt = select(ChatMessageModel).where(ChatMessageModel.session_id == session_id).order_by(ChatMessageModel.created_at)
+        result = self.session.execute(stmt)
         messages_raw = result.scalars().all()
         messages = []
         for chat_message in messages_raw:
@@ -161,53 +159,62 @@ class PostgresChatRepo(ChatRepo):
 
     async def save_chat(self, chat: Chat) -> Chat:
         chat_db = ChatModel(**chat.model_dump(exclude_unset=True))
-        self.asession.add(chat_db)
-        await self.asession.commit()
-        await self.asession.refresh(chat_db)
+        self.session.add(chat_db)
+        self.session.commit()
+        self.session.refresh(chat_db)
         return Chat.model_validate(chat_db)
 
     async def delete_chat(self, id: int) -> bool:
         select_stmt = select(ChatModel).where(ChatModel.id == id)
-        result = await self.asession.execute(select_stmt)
+        result = self.session.execute(select_stmt)
         chat_db = result.scalars().one_or_none()
         if not chat_db:
             return False
         stmt = delete(ChatModel).where(ChatModel.id == id)
-        await self.asession.execute(stmt)
-        await self.asession.commit()
+        self.session.execute(stmt)
+        self.session.commit()
         return True
         pass
 
     async def get_sessions(self, canvas_id: str) -> list[ChatSession]:
         stmt = select(ChatSessionModel).where(ChatSessionModel.canvas_id == canvas_id)
-        result = await self.asession.execute(stmt)
+        result = self.session.execute(stmt)
         sessions_raw = result.scalars().all()
         sessions = [ChatSession.model_validate(s) for s in sessions_raw]
         return sessions
 
     async def create_chat_session(self, session_create: SessionCreate) -> ChatSession:
-        session_db = await self.asession.get(ChatSessionModel, session_create.id)
+        session_db = self.session.get(ChatSessionModel, session_create.id)
         if session_db:
             update_stmt = (
                 update(ChatSessionModel)
                 .where(ChatSessionModel.id == session_create.id)
                 .values(**session_create.model_dump(exclude_unset=True))
             )
-            await self.asession.execute(update_stmt)
+            self.session.execute(update_stmt)
         else:
             session_create.session_id = session_create.id
             session_db = ChatSessionModel(
                 **session_create.model_dump(exclude_unset=True)
             )
-            self.asession.add(session_db)
-        await self.asession.commit()
-        await self.asession.refresh(session_db)
+            self.session.add(session_db)
+        self.session.commit()
+        self.session.refresh(session_db)
         session = ChatSession.model_validate(session_db)
         return session
 
         pass
 
     async def create_message(self, session_id: str, role: str, message: str):
+        id = str(uuid.uuid4())
+        chat_message_db = ChatMessageModel(id=id, session_id=session_id, role=role, message=message)
+        self.session.add(chat_message_db)
+        self.session.commit()
+        self.session.refresh(chat_message_db)
+        session = ChatMessage.model_validate(chat_message_db)
+        return session
+
+
         pass
 
 
@@ -337,7 +344,7 @@ async def magic_generation(magic: MagicCreate, chat_service: ChatService):
             magic_prompt = """
             理解视觉意图. 基于我绘制的草图, 然后基于理解到的意图, 并逐步创作 
             """
-            magic_prompt = """
+            magic_prompt="""
             理解视觉意图或视觉指令. 理解图像中的草图,涂鸦或视觉指令并生成图像
             """
             if prompt:

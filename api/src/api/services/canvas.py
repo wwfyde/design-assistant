@@ -9,7 +9,6 @@ from api.models import ChatSession as ChatSessionModel
 from api.models.canvas import Canvas as CanvasModel
 from api.schemas.canvas import CanvasCreate
 from sqlalchemy import delete, select, update
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 
 from lib import get_current_date
@@ -118,8 +117,7 @@ class InMemoryCanvasRepo(CanvasRepo):
 
 
 class PostgresCanvasRepo(CanvasRepo):
-    def __init__(self, session: Session, asession: AsyncSession):
-        self.asession = asession
+    def __init__(self, session: Session):
         self.session = session
 
     async def create_canvas(self, canvas: CanvasCreate) -> Canvas:
@@ -133,15 +131,15 @@ class PostgresCanvasRepo(CanvasRepo):
             session_id=canvas.session_id,
             messages=messages,
         )
-        self.asession.add(canvas_db)
-        await self.asession.commit()
-        await self.asession.refresh(canvas_db)
+        self.session.add(canvas_db)
+        self.session.commit()
+        self.session.refresh(canvas_db)
 
         return Canvas.model_validate(canvas_db)
 
     async def get_canvas_by_id(self, id: str | UUID) -> Canvas | None:
         stmt = select(CanvasModel).where(CanvasModel.id == str(id))
-        result = await self.asession.execute(stmt)
+        result = self.session.execute(stmt)
         canvas = result.scalar_one_or_none()
         if canvas:
             return Canvas.model_validate(canvas)
@@ -152,7 +150,7 @@ class PostgresCanvasRepo(CanvasRepo):
 
         if canvas:
             stmt = select(ChatSessionModel).where(ChatSessionModel.canvas_id == str(id))
-            result = await self.asession.execute(stmt)
+            result = self.session.execute(stmt)
             chat_sessions = result.scalars().all()
             sessions = [
                 ChatSession.model_validate(session) for session in chat_sessions
@@ -168,7 +166,7 @@ class PostgresCanvasRepo(CanvasRepo):
 
     async def get_canvases(self) -> list[Canvas] | None:
         stmt = select(CanvasModel).order_by(CanvasModel.id)
-        result = await self.asession.execute(stmt)
+        result = self.session.execute(stmt)
         canvas_models = result.scalars().all()
         if not canvas_models:
             return None
@@ -177,15 +175,15 @@ class PostgresCanvasRepo(CanvasRepo):
 
     async def delete_canvas(self, id: str | UUID) -> bool:
         stmt = delete(CanvasModel).where(CanvasModel.id == str(id))
-        result = await self.asession.execute(stmt)
-        await self.asession.commit()
+        result = self.session.execute(stmt)
+        self.session.commit()
         return True
 
     async def save_canvas_data(
         self, id: str | UUID, data: str, thumbnail: str
     ) -> Canvas | None:
         stmt = select(CanvasModel).where(CanvasModel.id == str(id))
-        result = await self.asession.execute(stmt)
+        result = self.session.execute(stmt)
         canvas_db = result.scalar_one_or_none()
         if canvas_db:
             stmt = (
@@ -193,9 +191,9 @@ class PostgresCanvasRepo(CanvasRepo):
                 .where(CanvasModel.id == str(id))
                 .values(data=data, thumbnail=thumbnail, updated_at=get_current_date())
             )
-            await self.asession.execute(stmt)
-            await self.asession.commit()
-            await self.asession.refresh(canvas_db)
+            self.session.execute(stmt)
+            self.session.commit()
+            self.session.refresh(canvas_db)
             return Canvas.model_validate(canvas_db)
         return None
 
@@ -203,7 +201,7 @@ class PostgresCanvasRepo(CanvasRepo):
 
     async def rename_canvas(self, id: str | UUID, name: str) -> Canvas:
         stmt = select(CanvasModel).where(CanvasModel.id == str(id))
-        result = await self.asession.execute(stmt)
+        result = self.session.execute(stmt)
         canvas_db = result.scalar_one_or_none()
         if canvas_db:
             stmt = (
@@ -211,9 +209,9 @@ class PostgresCanvasRepo(CanvasRepo):
                 .where(CanvasModel.id == str(id))
                 .values(name=name, updated_at=get_current_date())
             )
-            await self.asession.execute(stmt)
-            await self.asession.commit()
-            await self.asession.refresh(canvas_db)
+            self.session.execute(stmt)
+            self.session.commit()
+            self.session.refresh(canvas_db)
             return Canvas.model_validate(canvas_db)
         return None
 

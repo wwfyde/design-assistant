@@ -41,7 +41,7 @@ class ChatMessage(Base):
     chat_id: Mapped[str | None] = mapped_column(String, nullable=True)
     session_id: Mapped[str | None] = mapped_column(String, nullable=True)
     role: Mapped[str | None] = mapped_column(String, nullable=True)
-    messages: Mapped[str | None] = mapped_column(String, nullable=True)
+    message: Mapped[str | None] = mapped_column(String, nullable=True)
     content: Mapped[str | None] = mapped_column(String, nullable=True)
 
     created_at = mapped_column(DateTime(timezone=True), server_default=func.now())

@@ -6,6 +6,8 @@ from uuid import UUID
 from openai import BaseModel
 from pydantic import ConfigDict, field_validator
 
+from lib import get_current_date
+
 
 class Chat(BaseModel):
     id: str | UUID
@@ -22,8 +24,22 @@ class ChatMessage(BaseModel):
     role: str
     message: str | None = None
     content: str | None = None
+    created_at: str = get_current_date()
+    updated_at: str = get_current_date()
 
     model_config = ConfigDict(from_attributes=True)
+
+    @field_validator("created_at", "updated_at", mode="before")
+    @classmethod
+    def format_datetime(cls, v: Any) -> Any:
+        """
+        如果输入是 datetime 对象（来自数据库），转换为字符串。
+        """
+        if v is None:
+            return None
+        if isinstance(v, datetime):
+            return v.astimezone().isoformat(timespec="seconds")
+        return v
 
 
 class ChatSession(BaseModel):

@@ -44,7 +44,7 @@ def get_canvas_service(
         return CanvasService(InMemoryCanvasRepo(memory_store))
     elif settings.repo_type == "postgres":
         # pass the async_sessionmaker so the repo creates fresh AsyncSession per operation
-        return CanvasService(PostgresCanvasRepo(session=session, asession=asession))
+        return CanvasService(PostgresCanvasRepo(session=session))
     else:
         return CanvasService(InMemoryCanvasRepo(memory_store))
 
@@ -60,7 +60,7 @@ def get_chat_service(
     if settings.repo_type == "in-memory":
         return ChatService(InMemoryChatRepo(memory_store))
     elif settings.repo_type == "postgres":
-        return ChatService(PostgresChatRepo(session=session, asession=asession))
+        return ChatService(PostgresChatRepo(session=session))
     else:
         return ChatService(InMemoryChatRepo(memory_store))
 
