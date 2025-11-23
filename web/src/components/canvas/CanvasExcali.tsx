@@ -102,7 +102,7 @@ const CanvasExcali: React.FC<CanvasExcaliProps> = ({
 
       saveCanvas(canvasId, {data, thumbnail})
     },
-    1000
+    5000  // 5000
   )
 
   // Combined handler that calls both immediate and debounced functions
