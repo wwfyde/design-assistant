@@ -10,7 +10,7 @@ from tools.images.seedream import (
 class SeedreamArgs(BaseModel):
     image_urls: list[str] | str | None = Field(
         None,
-        description="image_urls, optional, when multiple image urls passed,  split them with commas.",
+        description="image_urls, optional, when multiple image urls passed,  split them with commas. 网络图片传入图片url, 本地文件传入文件. 如果只有文件名默认当做本地文件.",
     )
     prompt: str = Field(
         description="Required. The prompt for image generation. If you want to edit an image, please describe what you want to edit in the prompt."
