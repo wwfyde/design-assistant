@@ -110,6 +110,9 @@ importers:
       lucide-react:
         specifier: ^0.484.0
         version: 0.484.0(react@19.2.0)
+      markdown-it:
+        specifier: ^14.1.0
+        version: 14.1.0
       mitt:
         specifier: ^3.0.1
         version: 3.0.1
@@ -189,6 +192,9 @@ importers:
       '@types/lodash.debounce':
         specifier: ^4.0.9
         version: 4.0.9
+      '@types/markdown-it':
+        specifier: ^14.1.2
+        version: 14.1.2
       '@types/node':
         specifier: ^22.13.13
         version: 22.19.1

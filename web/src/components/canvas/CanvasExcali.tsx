@@ -138,7 +138,7 @@ const CanvasExcali: React.FC<CanvasExcaliProps> = ({
       excalidrawAPI.updateScene({
         appState: {
           viewBackgroundColor: '#121212',
-          gridColor: 'rgba(255, 255, 255, 0.1)',
+          // gridColor: 'rgba(255, 255, 255, 0.1)',
         }
       })
     } else if (excalidrawAPI && theme === 'light') {
@@ -146,7 +146,7 @@ const CanvasExcali: React.FC<CanvasExcaliProps> = ({
       excalidrawAPI.updateScene({
         appState: {
           viewBackgroundColor: '#ffffff',
-          gridColor: 'rgba(0, 0, 0, 0.1)',
+          // gridColor: 'rgba(0, 0, 0, 0.1)',
         }
       })
     }
