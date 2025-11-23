@@ -195,6 +195,7 @@ class PostgresChatRepo(ChatRepo):
                     .values(**session_create.model_dump(exclude_unset=True))
                 )
                 await self.asession.execute(update_stmt)
+                await self.asession.flush()
                 await self.asession.refresh(session_db)
                 session = ChatSession.model_validate(session_db)
                 return session
@@ -204,6 +205,7 @@ class PostgresChatRepo(ChatRepo):
                     **session_create.model_dump(exclude_unset=True)
                 )
                 self.asession.add(session_db)
+                await self.asession.flush()
                 await self.asession.refresh(session_db)
                 session = ChatSession.model_validate(session_db)
                 return session
