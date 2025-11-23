@@ -12,7 +12,11 @@ from lib import settings, upload_image
 
 api_key = settings.providers.gemini.api_key
 
-client = genai.Client(api_key=api_key)
+http_options = genai.types.HttpOptions(
+    client_args={'proxy': settings.proxy_url},
+    async_client_args={'proxy': settings.proxy_url},
+)
+client = genai.Client(api_key=api_key, http_options=http_options)
 
 
 class GeminiArgs(BaseModel):

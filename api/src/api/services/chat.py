@@ -340,6 +340,9 @@ async def magic_generation(magic: MagicCreate, chat_service: ChatService):
             magic_prompt = """
             理解视觉意图. 基于我绘制的草图, 然后基于理解到的意图, 并逐步创作 
             """
+            magic_prompt="""
+            理解视觉意图或视觉指令. 理解图像中的草图,涂鸦或视觉指令并生成图像
+            """
             if prompt:
                 magic_prompt = f"{magic_prompt}\n{prompt}"
             url = parse_data_url(image_content)
