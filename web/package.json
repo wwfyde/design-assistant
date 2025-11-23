@@ -20,6 +20,7 @@
         "build": "tsc -b && vite build",
         "build:lib": "vite build --mode lib && cp src/index.d.ts dist/index.d.ts",
         "lint": "eslint .",
+        "prod": "vite build && vite preview",
         "preview": "vite preview"
     },
     "dependencies": {

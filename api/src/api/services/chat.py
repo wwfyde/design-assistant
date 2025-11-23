@@ -352,7 +352,7 @@ async def magic_generation(magic: MagicCreate, chat_service: ChatService):
             url = parse_data_url(image_content)
             image_info = magic_generate_with_gemini(
                 # prompt=magic_prompt,
-                prompt=magic_prompt,
+                # prompt=magic_prompt,
                 image_url=url,
             )
 

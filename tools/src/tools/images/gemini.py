@@ -13,8 +13,8 @@ from lib import settings, upload_image
 api_key = settings.providers.gemini.api_key
 
 http_options = genai.types.HttpOptions(
-    client_args={'proxy': settings.proxy_url},
-    async_client_args={'proxy': settings.proxy_url},
+    client_args={"proxy": settings.proxy_url},
+    async_client_args={"proxy": settings.proxy_url},
 )
 client = genai.Client(api_key=api_key, http_options=http_options)
 
@@ -94,7 +94,8 @@ def magic_generate_with_gemini(
         pil_image = Image.open(image)
 
     response = client.models.generate_content(
-        model="gemini-3-pro-image-preview",
+        # model="gemini-3-pro-image-preview",
+        model="gemini-2.5-flash-image-preview",
         contents=[prompt, pil_image],
     )
     image_urls = []
