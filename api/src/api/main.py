@@ -11,6 +11,7 @@ from api.states import sio
 from fastapi import FastAPI, Header, Request
 from fastapi.exceptions import HTTPException
 from fastapi.openapi.docs import get_swagger_ui_html
+from fastapi.staticfiles import StaticFiles
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import FileResponse
 from uvicorn import run
@@ -126,9 +127,24 @@ def create_app(lifespan: Callable = lifespan):
     # 绑定静态文件
     static_dir = settings.static_dir
 
+    if static_dir.exists():
+        app.mount("/", StaticFiles(directory=static_dir, html=True), name="frontend")
+        # app.mount("/as", StaticFiles(directory=static_dir), name="frontend")
+
     @app.get("/")
+    # async def serve_react_app(full_path: str):
     async def serve_react_app():
-        response = FileResponse(settings.static_dir / "index.html")
+        # 如果是 API 请求，不处理
+        # if full_path.startswith("api"):
+        #     raise HTTPException(status_code=404, detail="Not Found")
+        #
+        # # 尝试直接返回文件（针对 favicon.ico 等根目录文件）
+        # file_path = static_dir / full_path
+        # if file_path.exists() and file_path.is_file():
+        #     return FileResponse(file_path)
+
+        # SPA fallback
+        response = FileResponse(static_dir / "index.html")
         response.headers["Cache-Control"] = (
             "no-store, no-cache, must-revalidate, max-age=0"
         )

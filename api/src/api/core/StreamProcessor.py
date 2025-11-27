@@ -3,6 +3,9 @@ import json
 import traceback
 from typing import Any, Awaitable, Callable, Dict, List, Optional
 
+from api.core.db import async_session, engine
+from api.core.memory import memory_store
+from api.services.chat import ChatService, InMemoryChatRepo, PostgresChatRepo
 from langchain_core.messages import (
     AIMessageChunk,
     ToolCall,
@@ -10,6 +13,9 @@ from langchain_core.messages import (
     convert_to_openai_messages,
 )
 from langgraph.graph.state import CompiledStateGraph
+from sqlalchemy.orm import Session
+
+from lib import settings
 
 
 class StreamProcessor:
@@ -18,11 +24,9 @@ class StreamProcessor:
     def __init__(
         self,
         session_id: str,
-        chat_service: Any,
         websocket_service: Callable[[str, Dict[str, Any]], Awaitable[None]],
     ):
         self.session_id = session_id
-        self.chat_service = chat_service
         self.websocket_service = websocket_service
         self.tool_calls: List[ToolCall] = []
         self.last_saved_message_index = 0
@@ -41,7 +45,6 @@ class StreamProcessor:
             messages: 消息列表
             context: 上下文信息
         """
-        self.last_saved_message_index = len(messages) - 1
 
         # agent = supervisor.compile()
         print(messages)
@@ -71,8 +74,13 @@ class StreamProcessor:
 
     async def _handle_values_chunk(self, chunk_data: Dict[str, Any]) -> None:
         """处理 values 类型的 chunk"""
+
+        # TODO 这里是langchain中维护的消息列表
+
         all_messages = chunk_data.get("messages", [])
-        oai_messages = convert_to_openai_messages(all_messages)
+        print(f"{all_messages=}")
+        oai_messages = convert_to_openai_messages(all_messages, include_id=False)
+        print(f"{oai_messages=}")
         # 确保 oai_messages 是列表类型
         if not isinstance(oai_messages, list):
             oai_messages = [oai_messages] if oai_messages else []
@@ -84,15 +92,42 @@ class StreamProcessor:
         )
 
         # 保存新消息到数据库
-        for i in range(self.last_saved_message_index + 1, len(oai_messages)):
-            new_message = oai_messages[i]
-            if len(oai_messages) > 0:  # 确保有消息才保存
-                await self.chat_service.create_message(
-                    self.session_id,
-                    new_message.get("role", "user"),
-                    json.dumps(new_message),
+        async with async_session() as asession:
+            with Session(engine) as session:
+                if settings.repo_type == "in-memory":
+                    chat_service = ChatService(InMemoryChatRepo(memory_store))
+                elif settings.repo_type == "postgres":
+                    chat_service = ChatService(
+                        PostgresChatRepo(session=session, asession=asession)
+                    )
+                else:
+                    chat_service = ChatService(InMemoryChatRepo(memory_store))
+
+                # 获取最近保存消息的lc_id
+                last_saved_index = next(
+                    (
+                        i
+                        for i in range(len(oai_messages) - 1, -1, -1)
+                        if oai_messages[i]["role"] == "user"
+                    ),
+                    None,
                 )
-            self.last_saved_message_index = i
+
+                for oai_message, message in zip(
+                    oai_messages[last_saved_index + 1 :],
+                    all_messages[last_saved_index + 1 :],
+                ):
+                    print(f"assistant message {message=}")
+                    chat_service.create_message(
+                        self.session_id,
+                        oai_message.get("role", "user"),  # message.role or "user",
+                        json.dumps(oai_message, ensure_ascii=False),
+                        message_id=message.id
+                        if not message.id.startswith("lc_run--")
+                        else None,
+                        lc_id=message.id,
+                        # getattr(all_messages[i], "id", None) if i < len(all_messages) else None,  # langchain生成的id 不规范, 或者替换lc_run---
+                    )
 
     async def _handle_message_chunk(self, ai_message_chunk: AIMessageChunk) -> None:
         """处理消息类型的 chunk"""

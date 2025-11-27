@@ -28,6 +28,7 @@ async def create_canvas(
     canvas: CanvasCreate,
     canvas_service: CanvasService = Depends(get_canvas_service),
     chat_service: ChatService = Depends(get_chat_service),
+    # checkpointer = Depends(get_checkpointer_async),
 ):
     # canvas = ChatRequest.model_validate(canvas_create)
     # asyncio.create_task(handle_chat(canvas, chat_service))

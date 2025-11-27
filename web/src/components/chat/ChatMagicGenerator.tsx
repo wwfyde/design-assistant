@@ -4,6 +4,7 @@ import {eventBus, TCanvasMagicGenerateEvent} from '@/lib/event'
 import {Message, PendingType} from '@/types/types'
 import {useCallback, useEffect} from 'react'
 import {DEFAULT_SYSTEM_PROMPT} from '@/constants'
+import {v7 as uuidv7} from 'uuid'
 // import { useAuth } from '@/contexts/AuthContext'
 
 type ChatMagicGeneratorProps = {
@@ -40,6 +41,7 @@ const ChatMagicGenerator: React.FC<ChatMagicGeneratorProps> = ({
 
       // 创建包含图片的消息
       const magicMessage: Message = {
+        id: uuidv7(),
         role: 'user',
         content: [
           {

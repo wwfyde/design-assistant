@@ -6,8 +6,8 @@ import socketio
 sio = socketio.AsyncServer(
     cors_allowed_origins="*",
     async_mode="asgi",
-    logger=True,
-    engineio_logger=True,
+    # logger=True,
+    # engineio_logger=True,
 )
 
 active_connections: Dict[str, dict] = {}

@@ -1,4 +1,7 @@
-from sqlalchemy import Boolean, DateTime, String, func
+import uuid
+
+from pydantic import Json
+from sqlalchemy import UUID, Boolean, DateTime, String, func, text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from .base import Base
@@ -7,7 +10,7 @@ from .base import Base
 class Chat(Base):
     __tablename__ = "chat"
 
-    id: Mapped[str] = mapped_column(String, primary_key=True, index=True)
+    id: Mapped[str] = mapped_column(UUID(as_uuid=True), primary_key=True, index=True)
     session_id: Mapped[str | None] = mapped_column(String, nullable=True)
     name = mapped_column(String, index=True, nullable=False)
 
@@ -36,12 +39,19 @@ class ChatSession(Base):
 
 class ChatMessage(Base):
     __tablename__ = "chat_message"
-
-    id: Mapped[str] = mapped_column(String, primary_key=True, index=True)
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid7,
+        server_default=text("uuidv7()"),
+    )
+    lc_id: Mapped[str] = mapped_column(
+        String, nullable=True, comment="langchain run id", unique=True, index=True
+    )
     chat_id: Mapped[str | None] = mapped_column(String, nullable=True)
     session_id: Mapped[str | None] = mapped_column(String, nullable=True)
     role: Mapped[str | None] = mapped_column(String, nullable=True)
-    message: Mapped[str | None] = mapped_column(String, nullable=True)
+    message: Mapped[Json | None] = mapped_column(String, nullable=True)
     content: Mapped[str | None] = mapped_column(String, nullable=True)
 
     created_at = mapped_column(DateTime(timezone=True), server_default=func.now())

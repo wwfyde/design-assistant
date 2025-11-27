@@ -4,7 +4,7 @@ from typing import Any
 from uuid import UUID
 
 from openai import BaseModel
-from pydantic import ConfigDict, field_validator
+from pydantic import ConfigDict, Json, field_validator
 
 from lib import get_current_date
 
@@ -18,11 +18,12 @@ class Chat(BaseModel):
 
 
 class ChatMessage(BaseModel):
-    id: str | UUID = str(uuid.uuid4())
+    id: str | UUID = str(uuid.uuid7())
+    lc_id: str | UUID | None
     session_id: str | UUID
     chat_id: str | UUID | None = None
     role: str
-    message: str | None = None
+    message: Json | None = None
     content: str | None = None
     created_at: str = get_current_date()
     updated_at: str = get_current_date()

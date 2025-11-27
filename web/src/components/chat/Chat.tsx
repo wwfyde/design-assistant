@@ -557,7 +557,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   const onSendMessages = useCallback(
     (data: Message[], configs: { textModel: Model; toolList: ToolInfo[] }) => {
       setPending('text')
-      setMessages(data)
+      setMessages((prev) => [...prev, ...data])
 
       sendMessages({
         sessionId: sessionId!,
@@ -735,7 +735,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
                 transition={{duration: 0.5}}
                 className='text-muted-foreground text-3xl'
               >
-                <ShinyText text='Hello, Jaaz!'/>
+                <ShinyText text='Hello, Designer!'/>
               </motion.span>
               <motion.span
                 initial={{opacity: 0, y: 10}}

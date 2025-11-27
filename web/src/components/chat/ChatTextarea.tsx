@@ -12,6 +12,7 @@ import {useDrop} from 'ahooks'
 import {produce} from 'immer'
 import {ArrowUp, ChevronDown, Hash, Loader2, PlusIcon, RectangleVertical, Square, XIcon,} from 'lucide-react'
 import {AnimatePresence, motion} from 'motion/react'
+import {v7 as uuidv7} from 'uuid'
 import Textarea, {TextAreaRef} from 'rc-textarea'
 import {useCallback, useEffect, useRef, useState} from 'react'
 import {useTranslation} from 'react-i18next'
@@ -217,17 +218,18 @@ const ChatTextarea: React.FC<ChatTextareaProps> = ({
       })),
     ] as MessageContent[]
 
-    const newMessage = messages.concat([
+    const newMessages = [
       {
+        id: uuidv7(),
         role: 'user',
         content: final_content,
       },
-    ])
+    ] as Message[]
 
     setImages([])
     setPrompt('')
 
-    onSendMessages(newMessage, {
+    onSendMessages(newMessages, {
       textModel: textModel,
       toolList: selectedTools && selectedTools.length > 0 ? selectedTools : [],
     })

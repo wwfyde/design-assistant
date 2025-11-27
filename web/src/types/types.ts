@@ -23,16 +23,19 @@ export type MessageContent =
   | { image_url: { url: string }; type: 'image_url' }
 
 export type ToolResultMessage = {
+  id?: string
   role: 'tool'
   tool_call_id: string
   content: string
 }
 export type AssistantMessage = {
+  id?: string
   role: 'assistant'
   tool_calls?: ToolCall[]
   content?: MessageContent[] | string
 }
 export type UserMessage = {
+  id?: string
   role: 'user'
   content: MessageContent[] | string
 }

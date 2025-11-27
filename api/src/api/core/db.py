@@ -4,6 +4,7 @@ from typing import Mapping
 
 from sqlalchemy import create_engine, text
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy.orm import Session
 
 from lib import settings
 
@@ -44,18 +45,23 @@ async_engine = create_async_engine(
     # json_serializer=dumps,
 )
 
+
+#  ⚠️Important 需要考虑避免线程安全问题, 不要随意传递会话到另一个线程或协程中
 async_session = async_sessionmaker(async_engine, expire_on_commit=False)
 
 if __name__ == "__main__":
 
     async def main():
         async_session = async_sessionmaker(async_engine, expire_on_commit=False)
-        async with async_session() as session:
-            async with session.begin():
-                result = await session.execute(text("select version()"))
-
+        async with async_session() as asession:
+            with Session(engine) as session:
+                async with asession.begin():
+                    result = await asession.execute(text("select version()"))
+                    version = result.scalar_one_or_none()
+                    print(version)
+                    pass
+                result = session.execute(text("select version()"))
                 print(result.scalar_one_or_none())
-                pass
         await async_engine.dispose()
 
     asyncio.run(main())

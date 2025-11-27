@@ -8,6 +8,11 @@ from pydantic import BaseModel, ConfigDict
 from lib import get_current_date
 
 
+class Message(BaseModel):
+    id: str | None = None
+    role: str
+    content: dict[str, Any] | str
+
 class ChatRequest(BaseModel):
     messages: list[dict[str, Any]]
     session_id: str

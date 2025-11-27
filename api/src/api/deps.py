@@ -1,5 +1,6 @@
 import asyncio
 import json
+import uuid
 from typing import Annotated, Any, AsyncGenerator, Generator, Optional
 
 from agents.rednote_agent import (
@@ -17,6 +18,7 @@ from api.services.stream import add_stream_task, remove_stream_task
 from api.services.websocket import send_to_websocket
 from fastapi import Depends
 from langgraph.checkpoint.postgres import PostgresSaver
+from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 
@@ -60,20 +62,24 @@ def get_chat_service(
     if settings.repo_type == "in-memory":
         return ChatService(InMemoryChatRepo(memory_store))
     elif settings.repo_type == "postgres":
-        return ChatService(PostgresChatRepo(session=session))
+        return ChatService(PostgresChatRepo(session=session, asession=asession))
     else:
         return ChatService(InMemoryChatRepo(memory_store))
 
 
 def get_checkpointer() -> Generator[PostgresSaver, None, None]:
     # DB_URI = "postgresql://postgres:postgres@127.0.0.1:5432/postgres"
-    DB_URI = f"postgresql://{settings.postgres.username}:{settings.postgres.password.get_secret_value()}@{settings.postgres.host}:{settings.postgres.port}/{settings.postgres.database}"
+    db_uri = f"postgresql://{settings.postgres.username}:{settings.postgres.password.get_secret_value()}@{settings.postgres.host}:{settings.postgres.port}/{settings.postgres.database}"
 
-    with PostgresSaver.from_conn_string(DB_URI) as checkpointer:
+    with PostgresSaver.from_conn_string(db_uri) as checkpointer:
         checkpointer.setup()
         yield checkpointer
 
 
+async def get_checkpointer_async() -> AsyncGenerator[AsyncPostgresSaver, None]:
+    db_uri = f"postgresql://{settings.postgres.username}:{settings.postgres.password.get_secret_value()}@{settings.postgres.host}:{settings.postgres.port}/{settings.postgres.database}"
+    async with AsyncPostgresSaver.from_conn_string(db_uri) as checkpointer:
+        yield checkpointer
 # ChatServiceDep = Annotated[ChatService, Depends(get_chat_service)]
 
 
@@ -148,17 +154,26 @@ async def handle_chat(data: ChatRequest, chat_service: ChatService) -> None:
             )
         )
 
-    # TODO
-    await chat_service.create_message(
-        session_id, messages[-1].get("role", "user"), json.dumps(messages[-1])
-    ) if len(messages) > 0 else None
+        # TODO 保存用户发送的消息
+        message = messages[-1]
+        message_id = message.get("id", str(uuid.uuid7()))
+        role = message.get("role", "user")
+
+        message_data = message.copy()  # 存储消息到数据库的message字段, 移除id
+        message_data.pop("id", None)
+        chat_service.create_message(
+            session_id,
+            role,
+            json.dumps(message_data, ensure_ascii=False),
+            message_id,
+            lc_id=message_id,
+        )
 
     # Create and start langgraph_agent task for chat processing
     # rednote_agent = get_rednote_agent(checkpointer=memory_checkpointer)
+    # TODO: 支持多agent 切换
     task = asyncio.create_task(
-        langgraph_supervisor_agent(
-            messages, canvas_id, session_id, tool_list, chat_service=chat_service
-        )
+        langgraph_supervisor_agent(messages, canvas_id, session_id, tool_list)
     )
     #
     # # Register the task in stream_tasks (for possible cancellation)

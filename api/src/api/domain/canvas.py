@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import Any
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, Json, field_validator
 
 from lib import get_current_date
 
@@ -14,7 +14,7 @@ class Canvas(BaseModel):
     session_id: str | None = None
     canvas_id: str | None = None
     data: str | dict | None = None  # 画布数据
-    messages: list[dict] = None
+    messages: Json | list[dict] = None
     system_prompt: str | None = None
     tool_list: list[str] | None = None
     thumbnail: str | None = None
