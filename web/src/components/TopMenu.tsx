@@ -45,7 +45,7 @@ export default function TopMenu({
         <Button
           variant={window.location.pathname === '/assets' ? 'default' : 'ghost'}
           size="sm"
-          className={cn('flex items-center font-bold rounded-none')}
+          className={cn('flex items-center font-bold rounded-none hidden')}
           onClick={() => navigate({to: '/assets'})}
         >
           <ImageIcon className="size-4"/>
@@ -61,6 +61,7 @@ export default function TopMenu({
         <Button
           size={'sm'}
           variant="ghost"
+          className={cn('hidden')}
           onClick={() => setShowSettingsDialog(true)}
         >
           <SettingsIcon size={30}/>
