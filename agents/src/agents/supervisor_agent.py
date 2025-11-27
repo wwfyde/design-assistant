@@ -3,7 +3,6 @@ from api.core.memory import memory_checkpointer
 from api.core.StreamProcessor import StreamProcessor
 from api.domain.model import ModelInfo
 from api.domain.tool import ToolInfo
-from api.services.chat import ChatService
 from api.services.websocket import send_to_websocket
 
 from lib import settings
@@ -88,7 +87,6 @@ async def langgraph_supervisor_agent(
     canvas_id: str,
     session_id: str,
     tool_list: list[ToolInfo | dict],
-    chat_service: ChatService | None = None,
 ) -> None:
     """多智能体处理函数
 
@@ -102,7 +100,7 @@ async def langgraph_supervisor_agent(
     """
     try:
         # 0. 修复消息历史
-        fixed_messages = _fix_chat_history(messages)
+        # fixed_messages = _fix_chat_history(messages)
 
         # 2. 文本模型
         # text_model_instance = _create_text_model(text_model)
@@ -125,8 +123,6 @@ async def langgraph_supervisor_agent(
         #     agents=agents,  # type: ignore
         #     default_active_agent=last_agent if last_agent else agent_names[0]
         # )
-        # TODO 创建智能体
-        agent = build_creative_assistant(checkpointer=memory_checkpointer)
 
         # 5. 创建上下文
         context = {
@@ -136,9 +132,31 @@ async def langgraph_supervisor_agent(
             "tool_list": tool_list,
         }
 
-        # 6. 流处理
-        processor = StreamProcessor(session_id, chat_service, send_to_websocket)  # type: ignore
-        await processor.process_stream(agent, fixed_messages, context)
+        # TODO 创建智能体
+        if settings.repo_type == "postgres":
+
+            db_uri = f"postgresql://{settings.postgres.username}:{settings.postgres.password.get_secret_value()}@{settings.postgres.host}:{settings.postgres.port}/{settings.postgres.database}"
+            # db_uri = settings.postgres_dsn
+            from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
+
+            async with AsyncPostgresSaver.from_conn_string(db_uri) as checkpointer:
+                agent = build_creative_assistant(checkpointer=checkpointer)
+                # 6. 流处理
+                processor = StreamProcessor(session_id, send_to_websocket)  # type: ignore
+                await processor.process_stream(
+                    agent,
+                    messages,
+                    context,
+                )
+        else:
+            agent = build_creative_assistant(checkpointer=memory_checkpointer)
+            # 6. 流处理
+            processor = StreamProcessor(session_id, send_to_websocket)  # type: ignore
+            await processor.process_stream(
+                agent,
+                messages,
+                context,
+            )
 
     except Exception as e:
         await _handle_error(e, session_id)
