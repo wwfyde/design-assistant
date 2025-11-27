@@ -78,9 +78,9 @@ class StreamProcessor:
         # TODO 这里是langchain中维护的消息列表
 
         all_messages = chunk_data.get("messages", [])
-        print(f"{all_messages=}")
+        # print(f"{all_messages=}")
         oai_messages = convert_to_openai_messages(all_messages, include_id=False)
-        print(f"{oai_messages=}")
+        # print(f"{oai_messages=}")
         # 确保 oai_messages 是列表类型
         if not isinstance(oai_messages, list):
             oai_messages = [oai_messages] if oai_messages else []
@@ -117,7 +117,7 @@ class StreamProcessor:
                     oai_messages[last_saved_index + 1 :],
                     all_messages[last_saved_index + 1 :],
                 ):
-                    print(f"assistant message {message=}")
+                    # print(f"assistant message {message=}")
                     chat_service.create_message(
                         self.session_id,
                         oai_message.get("role", "user"),  # message.role or "user",
@@ -138,7 +138,7 @@ class StreamProcessor:
             if isinstance(ai_message_chunk, ToolMessage):
                 # 工具调用结果之后会在 values 类型中发送到前端，这里会更快出现一些
                 oai_message = convert_to_openai_messages([ai_message_chunk])[0]
-                print("👇toolcall res oai_message", oai_message)
+                # print("👇toolcall res oai_message", oai_message)
                 await self.websocket_service(
                     self.session_id,
                     {

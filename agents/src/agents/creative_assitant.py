@@ -1,13 +1,17 @@
 from typing import NotRequired, Optional
 
 import httpx
+from agents.common import get_text_model
 from api.core.memory import memory_checkpointer
+from api.domain.model import ModelInfo
+from api.domain.tool import ToolInfo
 from langchain.agents import AgentState, create_agent
 from langchain.agents.middleware import AgentMiddleware, ModelRequest, dynamic_prompt
 from langchain_core.messages import HumanMessage
 from langchain_openai import ChatOpenAI
+from langgraph.checkpoint.base import BaseCheckpointSaver
 from langgraph.graph.state import CompiledStateGraph
-from langgraph_tools.images import image_create_with_seedream
+from langgraph_tools.images import image_create_with_gemini, image_create_with_seedream
 from pydantic import BaseModel, Field
 
 from lib import settings
@@ -340,10 +344,30 @@ model = ChatOpenAI(
 )
 
 
-def build_creative_assistant(checkpointer):
+def get_tools(tools: list[ToolInfo]):
+    tool_instances = []
+    for tool in tools:
+        if tool.id == "image_create_with_seedream":
+            tool_instances.append(image_create_with_seedream)
+        elif tool.id == "image_create_with_gemini":
+            tool_instances.append(image_create_with_gemini)
+        # elif tool.name == "web_search":
+        #     tool_instances.append(web_search_tool)
+        # elif tool.name ==
+    return tool_instances
+
+
+def build_creative_assistant(
+    text_model: ModelInfo,
+    tools: list[ToolInfo],
+    checkpointer: BaseCheckpointSaver,
+):
+    model = get_text_model(text_model)
+    tools = get_tools(tools)
+    print(tools)
     agent: CompiledStateGraph = create_agent(
         model=model,
-        tools=[image_create_with_seedream],
+        tools=tools,
         middleware=[],
         system_prompt=creative_system_prompt,
         state_schema=CreativeAssistantState,  # noqa F401

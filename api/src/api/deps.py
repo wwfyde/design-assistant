@@ -134,7 +134,7 @@ async def handle_chat(data: ChatRequest, chat_service: ChatService) -> None:
     text_model: ModelInfo = data.text_model
     tool_list: list[ToolInfo] = data.tool_list
 
-    print("👇 chat_service got tool_list", tool_list)
+    # print("👇 chat_service got tool_list", tool_list)
 
     # TODO: save and fetch system prompt from db or settings config
     system_prompt: Optional[str] = data.system_prompt
@@ -173,7 +173,8 @@ async def handle_chat(data: ChatRequest, chat_service: ChatService) -> None:
     # rednote_agent = get_rednote_agent(checkpointer=memory_checkpointer)
     # TODO: 支持多agent 切换
     task = asyncio.create_task(
-        langgraph_supervisor_agent(messages, canvas_id, session_id, tool_list)
+        langgraph_supervisor_agent(
+            messages, canvas_id, session_id, tool_list=tool_list, text_model=text_model)
     )
     #
     # # Register the task in stream_tasks (for possible cancellation)

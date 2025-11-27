@@ -330,7 +330,7 @@ dependencies = [
     { name = "fastapi", extra = ["standard"] },
     { name = "google-genai" },
     { name = "httpx", extra = ["http2", "socks"] },
-    { name = "langchain", extra = ["openai"] },
+    { name = "langchain", extra = ["google-genai", "openai"] },
     { name = "langchain-google-genai" },
     { name = "langgraph" },
     { name = "langgraph-checkpoint" },
@@ -363,7 +363,7 @@ requires-dist = [
     { name = "fastapi", extras = ["standard"], specifier = ">=0.121.0" },
     { name = "google-genai", specifier = ">=1.51.0" },
     { name = "httpx", extras = ["http2", "socks"], specifier = ">=0.28.1" },
-    { name = "langchain", extras = ["openai"], specifier = ">=1.0.3" },
+    { name = "langchain", extras = ["google-genai", "openai"], specifier = ">=1.0.3" },
     { name = "langchain-google-genai", specifier = ">=3.1.0" },
     { name = "langgraph", specifier = ">=1.0.3" },
     { name = "langgraph-checkpoint", specifier = ">=3.0.1" },
@@ -976,6 +976,9 @@ wheels = [
 ]
 
 [package.optional-dependencies]
+google-genai = [
+    { name = "langchain-google-genai" },
+]
 openai = [
     { name = "langchain-openai" },
 ]

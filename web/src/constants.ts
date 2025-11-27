@@ -56,6 +56,14 @@ export const PROVIDER_NAME_MAPPING: {
     name: 'Qwen Image',
     icon: 'https://img.alicdn.com/imgextra/i2/O1CN01B9mlGG1msAz3fxxWL_!!6000000005009-2-tps-84-84.png',
   },
+  dashscope: {
+    name: 'Qwen Image',
+    icon: 'https://img.alicdn.com/imgextra/i2/O1CN01B9mlGG1msAz3fxxWL_!!6000000005009-2-tps-84-84.png',
+  },
+  deepseek: {
+    name: 'Qwen Image',
+    icon: 'https://www.deepseek.com/favicon.ico',
+  },
   flux: {
     name: 'Flux Kontext',
     icon: 'https://bfl.ai/favicon.ico',

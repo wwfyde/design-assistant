@@ -34,7 +34,9 @@ class GeminiArgs(BaseModel):
     description="Image Creation tool, generate or edit image With Google Gemini(aka Nano Banana) model using prompt and  image_urls. pass prompt with simple and specific instruction text, pass image with image_urls. Use this model for high-quality image modification.",
     args_schema=GeminiArgs,
 )
-def image_create_with_gemini(prompt: str, image_urls: str):
+def image_create_with_gemini(
+    prompt: str, image_urls: str | None = None, aspect_ratio: str | None = None
+) -> str:
     if image_urls:
         # image_list = [ i.strip() for i in image_urls.split(",")]
         image_list = [

@@ -13,8 +13,6 @@ supervisor_prompt = """You are a supervisor managing two agents"""
 import traceback
 from typing import Any, Dict, List, Set, TypedDict, cast
 
-from langchain_openai import ChatOpenAI
-
 # from services.websocket_service import send_to_websocket  # type: ignore
 
 
@@ -86,7 +84,9 @@ async def langgraph_supervisor_agent(
     messages: List[Dict[str, Any]],
     canvas_id: str,
     session_id: str,
+    *,
     tool_list: list[ToolInfo | dict],
+    text_model: ModelInfo,
 ) -> None:
     """多智能体处理函数
 
@@ -134,13 +134,14 @@ async def langgraph_supervisor_agent(
 
         # TODO 创建智能体
         if settings.repo_type == "postgres":
-
             db_uri = f"postgresql://{settings.postgres.username}:{settings.postgres.password.get_secret_value()}@{settings.postgres.host}:{settings.postgres.port}/{settings.postgres.database}"
             # db_uri = settings.postgres_dsn
             from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 
             async with AsyncPostgresSaver.from_conn_string(db_uri) as checkpointer:
-                agent = build_creative_assistant(checkpointer=checkpointer)
+                agent = build_creative_assistant(
+                    text_model, tools=tool_list, checkpointer=checkpointer
+                )
                 # 6. 流处理
                 processor = StreamProcessor(session_id, send_to_websocket)  # type: ignore
                 await processor.process_stream(
@@ -149,7 +150,9 @@ async def langgraph_supervisor_agent(
                     context,
                 )
         else:
-            agent = build_creative_assistant(checkpointer=memory_checkpointer)
+            agent = build_creative_assistant(
+                text_model, tools=tool_list, checkpointer=memory_checkpointer
+            )
             # 6. 流处理
             processor = StreamProcessor(session_id, send_to_websocket)  # type: ignore
             await processor.process_stream(
@@ -160,33 +163,6 @@ async def langgraph_supervisor_agent(
 
     except Exception as e:
         await _handle_error(e, session_id)
-
-
-def _create_text_model(text_model: ModelInfo) -> Any:
-    """创建语言模型实例"""
-    model = text_model.get("model")
-    provider = text_model.get("provider")
-    url = text_model.get("url")
-    api_key = settings.providers.openai.api_key
-
-    # TODO: Verify if max token is working
-    # max_tokens = text_model.get('max_tokens', 8148)
-
-    if provider == "ollama":
-        pass
-
-    else:
-        # Create httpx client with SSL configuration for ChatOpenAI
-        print(url)
-        print(api_key)
-        return ChatOpenAI(
-            model=model,
-            api_key=api_key,  # type: ignore
-            timeout=300,
-            base_url=url,
-            temperature=0,
-            # max_tokens=max_tokens, # TODO: 暂时注释掉有问题的参数
-        )
 
 
 async def _handle_error(error: Exception, session_id: str) -> None:

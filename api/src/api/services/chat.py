@@ -423,6 +423,7 @@ async def handle_magic(magic: MagicCreate, chat_service: ChatService) -> None:
             messages[-1].get("role", "user"),
             json.dumps(messages[-1], ensure_ascii=False),
             messages[-1].get("id"),
+            messages[-1].get("id"),
         )
 
     # Create and start magic generation task
@@ -509,9 +510,13 @@ async def magic_generation(magic: MagicCreate, chat_service: ChatService):
                 {"type": "text", "text": f"✨ Magic Generation Error: {str(exc)}"}
             ],
         }
-
+    message_id = str(uuid.uuid7())
     chat_service.create_message(
-        magic.session_id, "assistant", json.dumps(ai_response, ensure_ascii=False)
+        magic.session_id,
+        "assistant",
+        json.dumps(ai_response, ensure_ascii=False),
+        message_id,
+        message_id,
     )
 
     # Send messages to frontend immediately

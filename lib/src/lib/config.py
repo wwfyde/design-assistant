@@ -199,3 +199,4 @@ if __name__ == "__main__":
     print(settings.providers.ark.api_key)
     print(project_dir := settings.project_dir)
     print(settings.proxy_url)
+    print(getattr(settings.providers, "ark").base_url)

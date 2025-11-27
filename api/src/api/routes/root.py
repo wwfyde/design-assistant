@@ -20,25 +20,31 @@ async def get_models() -> list[ModelInfo]:
         ModelInfo(
             provider="openai",
             model="gpt-4.1-mini",
-            url="https://api.openai.com/v1/",
+            url="https://api.openai.com/v1",
             type="text",
         ),
         ModelInfo(
             provider="ark",
             model="seed-1.6",
-            url="https://api.openai.com/v1/",
+            url="https://api.openai.com/v1",
             type="text",
         ),
         ModelInfo(
             provider="deepseek",
-            model="deepseek-r1",
-            url="https://api.openai.com/v1/",
+            model="deepseek-v3",
+            url="https://api.openai.com/v1",
             type="text",
         ),
         ModelInfo(
-            provider="qwen",
-            model="qwen-3vl",
-            url="https://api.openai.com/v1/",
+            provider="gemini",
+            model="gemini-3-pro-preview",
+            url="https://api.openai.com/v1",
+            type="text",
+        ),
+        ModelInfo(
+            provider="dashscope",
+            model="qwen-plus",
+            url="https://api.openai.com/v1",
             type="text",
         ),
     ]
@@ -50,34 +56,34 @@ async def list_tools() -> list[ToolInfo]:
     return [
         ToolInfo(
             provider="seedream",
-            id="create_image_with_seedream",
+            id="image_create_with_seedream",
             type="image",
             display_name="Seedream",
         ),
         ToolInfo(
             provider="gemini",
-            id="create_image_with_gemini",
+            id="image_create_with_gemini",
             type="image",
             display_name="Gemini",
         ),
-        ToolInfo(
-            provider="openai",
-            id="create_image_with_gemini",
-            type="image",
-            display_name="GPT-1",
-        ),
-        ToolInfo(
-            provider="qwen",
-            id="create_image_with_gemini",
-            type="image",
-            display_name="Qwen Image",
-        ),
-        ToolInfo(
-            provider="flux",
-            id="create_image_with_gemini",
-            type="image",
-            display_name="Flux  Kontext",
-        ),
+        # ToolInfo(
+        #     provider="openai",
+        #     id="gpt",
+        #     type="image",
+        #     display_name="GPT-1",
+        # ),
+        # ToolInfo(
+        #     provider="qwen",
+        #     id="gpt1",
+        #     type="image",
+        #     display_name="Qwen Image",
+        # ),
+        # ToolInfo(
+        #     provider="flux",
+        #     id="gpt3",
+        #     type="image",
+        #     display_name="Flux  Kontext",
+        # ),
     ]
 
 
