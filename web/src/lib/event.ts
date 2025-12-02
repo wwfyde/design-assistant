@@ -46,6 +46,7 @@ export type TEvents = {
   'Canvas::AddImagesToChat': TCanvasAddImagesToChatEvent
   'Canvas::MagicGenerate': TCanvasMagicGenerateEvent
   'Chat::AddImageToCanvas': { url: string }
+  'Chat::SetPrompt': { prompt: string }
   // ********** Canvas events - End **********
 
   // ********** Material events - Start **********

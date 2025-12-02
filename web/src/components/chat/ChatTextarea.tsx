@@ -324,9 +324,14 @@ const ChatTextarea: React.FC<ChatTextareaProps> = ({
 
     eventBus.on('Canvas::AddImagesToChat', handleAddImagesToChat)
     eventBus.on('Material::AddImagesToChat', handleMaterialAddImagesToChat)
+    eventBus.on('Chat::SetPrompt', (data) => {
+      setPrompt(data.prompt)
+      textareaRef.current?.focus()
+    })
     return () => {
       eventBus.off('Canvas::AddImagesToChat', handleAddImagesToChat)
       eventBus.off('Material::AddImagesToChat', handleMaterialAddImagesToChat)
+      eventBus.off('Chat::SetPrompt')
     }
   }, [uploadImageMutation])
 
@@ -431,7 +436,7 @@ const ChatTextarea: React.FC<ChatTextareaProps> = ({
 
       <Textarea
         ref={textareaRef}
-        className="w-full h-full border-none outline-none resize-none"
+        className="w-full h-full border-none outline-none resize-none text-sm"
         placeholder={t('chat:textarea.placeholder')}
         value={prompt}
         autoSize

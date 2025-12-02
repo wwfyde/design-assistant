@@ -4,6 +4,8 @@ import {Button} from "@/components/ui/button"
 import {Dialog, DialogContent, DialogTitle, DialogTrigger} from "@/components/ui/dialog"
 import {useState} from "react"
 import {Prompt} from "@/types/prompt"
+import {eventBus} from "@/lib/event"
+import {Sparkles} from "lucide-react"
 
 interface PromptCardProps {
   prompt: Prompt
@@ -11,6 +13,7 @@ interface PromptCardProps {
 
 export function PromptCard({prompt}: PromptCardProps) {
   const [copyState, setCopyState] = useState<string | null>(null)
+  const [isOpen, setIsOpen] = useState(false)
 
   const handleCopy = (text: string, type: string) => {
     navigator.clipboard.writeText(text)
@@ -18,8 +21,13 @@ export function PromptCard({prompt}: PromptCardProps) {
     setTimeout(() => setCopyState(null), 2000)
   }
 
+  const handleUsePrompt = (text: string) => {
+    eventBus.emit('Chat::SetPrompt', {prompt: text})
+    setIsOpen(false)
+  }
+
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <Card
         className="group relative overflow-hidden rounded-xl border-0 shadow-none hover:shadow-lg transition-all duration-300 bg-transparent">
         <div className="relative overflow-hidden rounded-xl">
@@ -92,14 +100,25 @@ export function PromptCard({prompt}: PromptCardProps) {
                       <div className="flex items-center justify-between">
                         <span
                           className="text-xs font-bold text-muted-foreground tracking-wider uppercase">Prompt(中文)</span>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-8 rounded-full text-xs px-4"
-                          onClick={() => handleCopy(prompt.prompt_zh!, 'zh')}
-                        >
-                          {copyState === 'zh' ? "Copied!" : "Copy"}
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-8 rounded-full text-xs px-3 gap-1.5 hover:bg-primary hover:text-primary-foreground transition-colors"
+                            onClick={() => handleUsePrompt(prompt.prompt_zh!)}
+                          >
+                            <Sparkles className="w-3.5 h-3.5" />
+                            使用此prompt
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-8 rounded-full text-xs px-4"
+                            onClick={() => handleCopy(prompt.prompt_zh!, 'zh')}
+                          >
+                            {copyState === 'zh' ? "Copied!" : "Copy"}
+                          </Button>
+                        </div>
                       </div>
                       <div className="text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
                         {prompt.prompt_zh}
@@ -111,14 +130,25 @@ export function PromptCard({prompt}: PromptCardProps) {
                         <div className="flex items-center justify-between">
                             <span
                                 className="text-xs font-bold text-muted-foreground tracking-wider uppercase">Prompt</span>
-                            <Button
+                            <div className="flex gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-8 rounded-full text-xs px-3 gap-1.5 hover:bg-primary hover:text-primary-foreground transition-colors"
+                                onClick={() => handleUsePrompt(prompt.prompt_en!)}
+                              >
+                                <Sparkles className="w-3.5 h-3.5" />
+                                使用此prompt
+                              </Button>
+                              <Button
                                 variant="outline"
                                 size="sm"
                                 className="h-8 rounded-full text-xs px-4"
                                 onClick={() => handleCopy(prompt.prompt_en!, 'en')}
-                            >
-                              {copyState === 'en' ? "Copied!" : "Copy"}
-                            </Button>
+                              >
+                                {copyState === 'en' ? "Copied!" : "Copy"}
+                              </Button>
+                            </div>
                         </div>
                         <div className="text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
                           {prompt.prompt_en}

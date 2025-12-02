@@ -387,7 +387,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
       console.log('⭐️dispatching image_generated', data)
       setPending(false)
-      
+
       // Append the image as a new message
       setMessages(
         produce((prev) => {
@@ -588,7 +588,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
   return (
     <PhotoProvider>
-      <div className='flex flex-col h-screen relative'>
+      <div className='flex flex-col h-screen relative text-sm'>
         {/* Chat messages */}
 
         <header className='flex items-center px-2 py-2 absolute top-0 z-1 w-full'>
@@ -620,7 +620,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
               className='ml-2 shrink-0 text-muted-foreground hover:text-foreground'
               onClick={onCollapse}
             >
-              <ChevronsRight className='h-5 w-5' />
+              <ChevronsRight className='h-5 w-5'/>
             </Button>
           )}
 
