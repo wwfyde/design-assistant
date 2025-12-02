@@ -1,9 +1,9 @@
 import asyncio
 import json
-import uuid
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List
 
+import uuid_utils as uuid
 from api.core.memory import AppStore
 from api.domain.chat import Chat, ChatMessage, ChatSession
 from api.models import (

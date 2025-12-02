@@ -17,17 +17,20 @@ dependencies = [
     "langgraph>=1.0.3",
     "pillow>=12.0.0",
     "oss2>=2.19.1",
-    "fastapi[standard]>=0.121.0",
+    "fastapi[standard]>=0.123.0",
     "uvicorn>=0.38.0",
     "python-socketio>=5.14.3",
     "psycopg[binary,pool]>=3.2.13",
     "langgraph-checkpoint-postgres>=3.0.1",
     "langgraph-checkpoint>=3.0.1",
-    "google-genai>=1.51.0",
+    "google-genai>=1.52.0",
     "sqlalchemy[asyncio]>=2.0.44",
     "alembic>=1.17.2",
     "langchain-google-genai>=3.1.0",
     "redis>=7.1.0",
+    "rembg[gpu]>=2.0.67;sys_platform == 'linux'",
+    "rembg[cpu]>=2.0.67;sys_platform == 'darwin'",
+    "uuid-utils>=0.11.1",
 ]
 
 [tool.uv.workspace]

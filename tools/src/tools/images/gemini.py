@@ -4,6 +4,7 @@ from typing import Optional
 
 import requests
 from google import genai
+from google.genai import types
 from langchain_core.tools import tool
 from PIL import Image
 from pydantic import BaseModel, Field
@@ -58,6 +59,15 @@ def image_create_with_gemini(prompt: str, image_urls: str):
         response = client.models.generate_content(
             model="gemini-3-pro-image-preview",
             contents=[prompt, *image_pils],
+            config=types.GenerateContentConfig(
+                # response_modalities=["IMAGE"],
+                image_config=types.ImageConfig(
+                    aspect_ratio="21:9",  # "1:1", "2:3", "3:2", "3:4", "4:3", "9:16", "16:9", and "21:9"
+                    image_size="2K",  # Literal["1K", "2K", "4K"]
+                    number_of_images=4,
+                    # output_mime_type=
+                ),
+            ),
         )
         image_parts = [
             (part.inline_data.data, part.inline_data.mime_type)

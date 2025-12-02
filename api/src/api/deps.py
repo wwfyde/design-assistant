@@ -1,8 +1,8 @@
 import asyncio
 import json
-import uuid
 from typing import Annotated, Any, AsyncGenerator, Generator, Optional
 
+import uuid_utils as uuid
 from agents.rednote_agent import (
     build_rednote_agent,
 )
@@ -16,11 +16,13 @@ from api.services.canvas import CanvasService, InMemoryCanvasRepo, PostgresCanva
 from api.services.chat import ChatService, InMemoryChatRepo, PostgresChatRepo
 from api.services.stream import add_stream_task, remove_stream_task
 from api.services.websocket import send_to_websocket
-from fastapi import Depends
+from fastapi import Depends, HTTPException
+from fastapi.security import APIKeyHeader
 from langgraph.checkpoint.postgres import PostgresSaver
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
+from starlette import status
 
 from lib import settings
 
@@ -80,6 +82,8 @@ async def get_checkpointer_async() -> AsyncGenerator[AsyncPostgresSaver, None]:
     db_uri = f"postgresql://{settings.postgres.username}:{settings.postgres.password.get_secret_value()}@{settings.postgres.host}:{settings.postgres.port}/{settings.postgres.database}"
     async with AsyncPostgresSaver.from_conn_string(db_uri) as checkpointer:
         yield checkpointer
+
+
 # ChatServiceDep = Annotated[ChatService, Depends(get_chat_service)]
 
 
@@ -156,6 +160,8 @@ async def handle_chat(data: ChatRequest, chat_service: ChatService) -> None:
 
         # TODO 保存用户发送的消息
         message = messages[-1]
+
+        # 推荐优先使用服务端生成uuid
         message_id = message.get("id", str(uuid.uuid7()))
         role = message.get("role", "user")
 
@@ -174,7 +180,8 @@ async def handle_chat(data: ChatRequest, chat_service: ChatService) -> None:
     # TODO: 支持多agent 切换
     task = asyncio.create_task(
         langgraph_supervisor_agent(
-            messages, canvas_id, session_id, tool_list=tool_list, text_model=text_model)
+            messages, canvas_id, session_id, tool_list=tool_list, text_model=text_model
+        )
     )
     #
     # # Register the task in stream_tasks (for possible cancellation)
@@ -189,3 +196,16 @@ async def handle_chat(data: ChatRequest, chat_service: ChatService) -> None:
         remove_stream_task(session_id)
         # Notify frontend WebSocket that chat processing is done
         await send_to_websocket(session_id, {"type": "done"})
+
+
+header_scheme = APIKeyHeader(name="X-Api-Key")
+
+
+async def verify_header_token(token: Annotated[str, Depends(header_scheme)]) -> str:
+    if token != settings.simple_api_key:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid header token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return token

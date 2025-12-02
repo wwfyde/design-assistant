@@ -6,6 +6,7 @@ from . import (  # noqa F401
     chat,
     config,
     file,
+    prompt,
     root,
     tool,
     websocket,
@@ -22,3 +23,4 @@ router.include_router(root.router, tags=["default"])
 router.include_router(tool.router, prefix="/tools", tags=["tool"])
 router.include_router(agent.router, prefix="/agents", tags=["agents"])
 router.include_router(file.router, prefix="", tags=["file"])
+router.include_router(prompt.router, prefix="/prompts", tags=["prompt"])

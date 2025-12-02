@@ -47,8 +47,8 @@ class StreamProcessor:
         """
 
         # agent = supervisor.compile()
-        print(messages)
-        print("测试")
+        print(f"用户消息: {messages}")
+        # print("测试")
 
         async for chunk in supervisor.astream(
             {"messages": messages},

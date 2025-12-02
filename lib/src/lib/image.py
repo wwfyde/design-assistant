@@ -1,7 +1,7 @@
 import base64
-import uuid
 
 import oss2
+import uuid_utils as uuid
 
 from lib import settings
 
@@ -29,7 +29,7 @@ def upload_image(
     bucket = oss2.Bucket(auth, endpoint, bucket_name)
 
     if rename:
-        uid = uuid.uuid4()
+        uid = uuid.uuid7()
         upload_file_name = f"{prefix}/{uid}.{filename.split('.')[-1]}"
     else:
         upload_file_name = f"{prefix}/{filename}"
@@ -47,6 +47,24 @@ def upload_image(
         return image_link
     else:
         return None
+
+
+def parse_data_url_to_bytes(data_url: str) -> str:
+    # pattern = r"^data:(.*?);(base64),(.*)$"
+    # match = re.match(pattern, data_url, re.DOTALL)
+    if not data_url.startswith("data:"):
+        raise ValueError("Invalid Data URL: must start with 'data:'")
+
+    header, data = data_url[5:].split(",")
+
+    mime_type, charset = header.split(";") if ";" in header else [header, ""]
+    mime_type = "text/plain" if mime_type == "" else mime_type
+
+    is_base64 = True if charset.lower() == "base64" else False
+
+    data_bytes = base64.b64decode(data) if is_base64 else data
+
+    return data_bytes
 
 
 def parse_data_url(data_url: str) -> str:

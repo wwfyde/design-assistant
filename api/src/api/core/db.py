@@ -4,7 +4,7 @@ from typing import Mapping
 
 from sqlalchemy import create_engine, text
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import sessionmaker
 
 from lib import settings
 
@@ -47,14 +47,15 @@ async_engine = create_async_engine(
 
 
 #  ⚠️Important 需要考虑避免线程安全问题, 不要随意传递会话到另一个线程或协程中
-async_session = async_sessionmaker(async_engine, expire_on_commit=False)
+async_session = async_sessionmaker(async_engine, autoflush=True, expire_on_commit=False)
+SessionLocal = sessionmaker(bind=engine, autoflush=True, autocommit=False)
 
 if __name__ == "__main__":
 
     async def main():
         async_session = async_sessionmaker(async_engine, expire_on_commit=False)
         async with async_session() as asession:
-            with Session(engine) as session:
+            with SessionLocal() as session:
                 async with asession.begin():
                     result = await asession.execute(text("select version()"))
                     version = result.scalar_one_or_none()

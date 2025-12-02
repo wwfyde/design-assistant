@@ -1,10 +1,10 @@
-import uuid
 from datetime import datetime
 from typing import Any
 from uuid import UUID
 
+import uuid_utils as uuid
 from openai import BaseModel
-from pydantic import ConfigDict, Json, field_validator
+from pydantic import ConfigDict, Field, Json, field_validator
 
 from lib import get_current_date
 
@@ -12,16 +12,16 @@ from lib import get_current_date
 class Chat(BaseModel):
     id: str | UUID
     name: str
-    session_id: str | UUID
+    session_id: str
 
     model_config = ConfigDict(from_attributes=True)
 
 
 class ChatMessage(BaseModel):
-    id: str | UUID = str(uuid.uuid7())
-    lc_id: str | UUID | None
-    session_id: str | UUID
-    chat_id: str | UUID | None = None
+    id: UUID = Field(default_factory=uuid.uuid7)
+    lc_id: str | None = Field(default=None)
+    session_id: str
+    chat_id: str | None = None
     role: str
     message: Json | None = None
     content: str | None = None

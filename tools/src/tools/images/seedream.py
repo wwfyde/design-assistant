@@ -1,8 +1,8 @@
 import math
 from io import BytesIO
-from uuid import uuid4
 
 import httpx
+import uuid_utils as uuid
 from lib.image import upload_image
 from PIL import Image
 
@@ -79,15 +79,20 @@ def image_create_with_seedream(
     new_urls = []
     for item in image_list:
         # 处理本地文件
-        if not item.startswith("http"):
+        if item.startswith("data:") and "base64;" in item:
+            pass
+        elif item.startswith("http"):
+            new_urls.append(item)
+        # 绝对路径
+        elif item.startswith("/"):
+            pass
+        else:
             filename = item
             local_file_path = settings.data_dir / "files" / filename
             content = local_file_path.read_bytes()
 
             new = upload_image(filename, content, prefix="files", rename=False)
             new_urls.append(new)
-        else:
-            new_urls.append(item)
 
     image_list = new_urls
 
@@ -144,7 +149,7 @@ def image_create_with_seedream(
                     content = response.content
                     pil = Image.open(BytesIO(content))
                     img_format = pil.format.lower().replace("jpeg", "jpg") or "png"
-                    filename = f"{str(uuid4())}.{img_format}"
+                    filename = f"{str(uuid.uuid7())}.{img_format}"
                     image_url = upload_image(filename, data=content, prefix="seedream")
                     # metadata = {"mime_type": f"image/{img_format}"}
 

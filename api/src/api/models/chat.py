@@ -1,5 +1,4 @@
-import uuid
-
+import uuid_utils as uuid
 from pydantic import Json
 from sqlalchemy import UUID, Boolean, DateTime, String, func, text
 from sqlalchemy.orm import Mapped, mapped_column
@@ -43,7 +42,7 @@ class ChatMessage(Base):
         UUID(as_uuid=True),
         primary_key=True,
         default=uuid.uuid7,
-        server_default=text("uuidv7()"),
+        server_default=text("uuidv7()"),  # noqa F821
     )
     lc_id: Mapped[str] = mapped_column(
         String, nullable=True, comment="langchain run id", unique=True, index=True
