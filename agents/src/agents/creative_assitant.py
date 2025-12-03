@@ -102,6 +102,7 @@ creative_system_prompt = """
 你可以使用一下工具:
 
 - image_create_with_seedream: 图像创作, 图像生成图像编辑
+- image_create_with_gemini: 图像创作, 英文Prompt优先使用此工具, 明确用此工具时, 将中文Prompt翻译为英文再传入
 
 
 # IMAGE INPUT DETECTION:
@@ -111,6 +112,10 @@ When the user's message contains input images in XML format like:
 You MUST:
 1. Parse the XML to extract image_url attributes from <image> tags
 2. Use tools that support images_urls parameter when images are present
+
+# 检测Prompt与指令
+
+检测到图像编辑指令,或Prompt时, 直接传递给创作工具, 不要修改其Prompt
 
 # 规则
 
