@@ -1,27 +1,27 @@
-import {cancelChat} from '@/api/chat'
-import {cancelMagicGenerate} from '@/api/magic'
-import {uploadImage} from '@/api/upload'
-import {Button} from '@/components/ui/button'
-import {useConfigs} from '@/contexts/configs'
-import {eventBus, TCanvasAddImagesToChatEvent, TMaterialAddImagesToChatEvent,} from '@/lib/event'
-import {cn, dataURLToFile} from '@/lib/utils'
-import {Message, MessageContent, Model} from '@/types/types'
-import {ToolInfo} from '@/api/model'
-import {useMutation} from '@tanstack/react-query'
-import {useDrop} from 'ahooks'
-import {produce} from 'immer'
-import {ArrowUp, ChevronDown, Hash, Loader2, PlusIcon, RectangleVertical, Square, XIcon,} from 'lucide-react'
-import {AnimatePresence, motion} from 'motion/react'
-import {v7 as uuidv7} from 'uuid'
-import Textarea, {TextAreaRef} from 'rc-textarea'
-import {useCallback, useEffect, useRef, useState} from 'react'
-import {useTranslation} from 'react-i18next'
-import {toast} from 'sonner'
+import { cancelChat } from '@/api/chat'
+import { cancelMagicGenerate } from '@/api/magic'
+import { uploadImage, uploadImageFromUrl } from '@/api/upload'
+import { Button } from '@/components/ui/button'
+import { useConfigs } from '@/contexts/configs'
+import { eventBus, TCanvasAddImagesToChatEvent, TMaterialAddImagesToChatEvent, } from '@/lib/event'
+import { cn, dataURLToFile } from '@/lib/utils'
+import { Message, MessageContent, Model } from '@/types/types'
+import { ToolInfo } from '@/api/model'
+import { useMutation } from '@tanstack/react-query'
+import { useDrop } from 'ahooks'
+import { produce } from 'immer'
+import { ArrowUp, ChevronDown, Hash, Loader2, PlusIcon, RectangleVertical, Square, XIcon, } from 'lucide-react'
+import { AnimatePresence, motion } from 'motion/react'
+import { v7 as uuidv7 } from 'uuid'
+import Textarea, { TextAreaRef } from 'rc-textarea'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 import ModelSelectorV3 from './ModelSelectorV3'
 // import { useAuth } from '@/contexts/AuthContext'
 // import { useBalance } from '@/hooks/use-balance'
-import {BASE_API_URL} from '@/constants'
-import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,} from '@/components/ui/dropdown-menu'
+import { BASE_API_URL } from '@/constants'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, } from '@/components/ui/dropdown-menu'
 
 type ChatTextareaProps = {
   pending: boolean
@@ -39,17 +39,17 @@ type ChatTextareaProps = {
 }
 
 const ChatTextarea: React.FC<ChatTextareaProps> = ({
-                                                     pending,
-                                                     className,
-                                                     messages,
-                                                     sessionId,
-                                                     onSendMessages,
-                                                     onCancelChat,
-                                                   }) => {
-  const {t} = useTranslation()
+  pending,
+  className,
+  messages,
+  sessionId,
+  onSendMessages,
+  onCancelChat,
+}) => {
+  const { t } = useTranslation()
   // const { authStatus } = useAuth()
   const is_logged_in = true
-  const {textModel, selectedTools, setShowLoginDialog} = useConfigs()
+  const { textModel, selectedTools, setShowLoginDialog } = useConfigs()
   // const { balance } = useBalance()
   const [prompt, setPrompt] = useState('')
   const textareaRef = useRef<TextAreaRef>(null)
@@ -93,7 +93,7 @@ const ChatTextarea: React.FC<ChatTextareaProps> = ({
     </div>
   ), [t])
 
-  const {mutate: uploadImageMutation} = useMutation({
+  const { mutate: uploadImageMutation } = useMutation({
     mutationFn: (file: File) => uploadImage(file),
     onSuccess: (data) => {
       console.log('🦄uploadImageMutation onSuccess', data)
@@ -147,7 +147,7 @@ const ChatTextarea: React.FC<ChatTextareaProps> = ({
     // 只有当使用 Jaaz 服务且余额为 0 时才提醒充值
     if (is_logged_in && isUsingJaaz) {
       toast.error(t('chat:insufficientBalance'), {
-        description: <RechargeContent/>,
+        description: <RechargeContent />,
         duration: 10000, // 10s，给用户更多时间操作
       })
       return
@@ -325,15 +325,49 @@ const ChatTextarea: React.FC<ChatTextareaProps> = ({
     eventBus.on('Canvas::AddImagesToChat', handleAddImagesToChat)
     eventBus.on('Material::AddImagesToChat', handleMaterialAddImagesToChat)
     eventBus.on('Chat::SetPrompt', (data) => {
+      console.log('Received Chat::SetPrompt', data)
       setPrompt(data.prompt)
       textareaRef.current?.focus()
+    })
+    eventBus.on('Chat::Clear', () => {
+      setPrompt('')
+      setImages([])
     })
     return () => {
       eventBus.off('Canvas::AddImagesToChat', handleAddImagesToChat)
       eventBus.off('Material::AddImagesToChat', handleMaterialAddImagesToChat)
       eventBus.off('Chat::SetPrompt')
+      eventBus.off('Chat::Clear')
+      eventBus.off('Chat::AddImageFromUrl')
     }
   }, [uploadImageMutation])
+
+  useEffect(() => {
+    const handleAddImageFromUrl = async (data: { url: string; name?: string }) => {
+      try {
+        const result = await uploadImageFromUrl(data.url)
+        setImages((prev) => [
+          ...prev,
+          {
+            file_id: result.file_id,
+            width: result.width,
+            height: result.height,
+          },
+        ])
+        textareaRef.current?.focus()
+      } catch (error) {
+        console.error('Failed to add image from URL:', error)
+        toast.error('Failed to add image', {
+          description: String(error),
+        })
+      }
+    }
+
+    eventBus.on('Chat::AddImageFromUrl', handleAddImageFromUrl)
+    return () => {
+      eventBus.off('Chat::AddImageFromUrl', handleAddImageFromUrl)
+    }
+  }, [])
 
   // Close quantity slider when clicking outside
   useEffect(() => {
@@ -368,19 +402,19 @@ const ChatTextarea: React.FC<ChatTextareaProps> = ({
           ? '0 0 0 4px color-mix(in oklab, var(--primary) 10%, transparent)'
           : 'none',
       }}
-      initial={{opacity: 0}}
-      animate={{opacity: 1}}
-      transition={{duration: 0.3, ease: 'linear'}}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3, ease: 'linear' }}
       onClick={() => textareaRef.current?.focus()}
     >
       <AnimatePresence>
         {isDragOver && (
           <motion.div
             className="absolute top-0 left-0 right-0 bottom-0 bg-background/50 backdrop-blur-xl rounded-2xl z-10"
-            initial={{opacity: 0}}
-            animate={{opacity: 1}}
-            exit={{opacity: 0}}
-            transition={{duration: 0.2, ease: 'easeInOut'}}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2, ease: 'easeInOut' }}
           >
             <div className="flex items-center justify-center h-full">
               <p className="text-sm text-muted-foreground">
@@ -395,19 +429,19 @@ const ChatTextarea: React.FC<ChatTextareaProps> = ({
         {images.length > 0 && (
           <motion.div
             className="flex items-center gap-2 w-full"
-            initial={{opacity: 0, height: 0}}
-            animate={{opacity: 1, height: 'auto'}}
-            exit={{opacity: 0, height: 0}}
-            transition={{duration: 0.2, ease: 'easeInOut'}}
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2, ease: 'easeInOut' }}
           >
             {images.map((image) => (
               <motion.div
                 key={image.file_id}
                 className="relative size-10"
-                initial={{opacity: 0, scale: 0.95}}
-                animate={{opacity: 1, scale: 1}}
-                exit={{opacity: 0, scale: 0.95}}
-                transition={{duration: 0.2, ease: 'easeInOut'}}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.2, ease: 'easeInOut' }}
               >
                 <img
                   key={image.file_id}
@@ -426,7 +460,7 @@ const ChatTextarea: React.FC<ChatTextareaProps> = ({
                     )
                   }
                 >
-                  <XIcon className="size-3"/>
+                  <XIcon className="size-3" />
                 </Button>
               </motion.div>
             ))}
@@ -466,10 +500,10 @@ const ChatTextarea: React.FC<ChatTextareaProps> = ({
             size="sm"
             onClick={() => imageInputRef.current?.click()}
           >
-            <PlusIcon className="size-4"/>
+            <PlusIcon className="size-4" />
           </Button>
 
-          <ModelSelectorV3/>
+          <ModelSelectorV3 />
 
           {/* Aspect Ratio Selector */}
           <DropdownMenu>
@@ -479,9 +513,9 @@ const ChatTextarea: React.FC<ChatTextareaProps> = ({
                 className="flex items-center gap-1"
                 size={'sm'}
               >
-                <RectangleVertical className="size-4"/>
+                <RectangleVertical className="size-4" />
                 <span className="text-sm">{selectedAspectRatio}</span>
-                <ChevronDown className="size-3 opacity-50"/>
+                <ChevronDown className="size-3 opacity-50" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-32">
@@ -493,7 +527,7 @@ const ChatTextarea: React.FC<ChatTextareaProps> = ({
                 >
                   <span>{ratio}</span>
                   {selectedAspectRatio === ratio && (
-                    <div className="size-2 rounded-full bg-primary"/>
+                    <div className="size-2 rounded-full bg-primary" />
                   )}
                 </DropdownMenuItem>
               ))}
@@ -508,9 +542,9 @@ const ChatTextarea: React.FC<ChatTextareaProps> = ({
               onClick={() => setShowQuantitySlider(!showQuantitySlider)}
               size={'sm'}
             >
-              <Hash className="size-4"/>
+              <Hash className="size-4" />
               <span className="text-sm">{quantity}</span>
-              <ChevronDown className="size-3 opacity-50"/>
+              <ChevronDown className="size-3 opacity-50" />
             </Button>
 
             {/* Quantity Slider */}
@@ -518,10 +552,10 @@ const ChatTextarea: React.FC<ChatTextareaProps> = ({
               {showQuantitySlider && (
                 <motion.div
                   className="absolute bottom-full mb-2 left-0  bg-background border border-border rounded-lg p-4 shadow-lg min-w-48"
-                  initial={{opacity: 0, y: 10, scale: 0.95}}
-                  animate={{opacity: 1, y: 0, scale: 1}}
-                  exit={{opacity: 0, y: 10, scale: 0.95}}
-                  transition={{duration: 0.15, ease: 'easeOut'}}
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                  transition={{ duration: 0.15, ease: 'easeOut' }}
                 >
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center justify-between">
@@ -570,8 +604,8 @@ const ChatTextarea: React.FC<ChatTextareaProps> = ({
             size="icon"
             onClick={handleCancelChat}
           >
-            <Loader2 className="size-5.5 animate-spin absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"/>
-            <Square className="size-2 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"/>
+            <Loader2 className="size-5.5 animate-spin absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+            <Square className="size-2 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
           </Button>
         ) : (
           <Button
@@ -581,7 +615,7 @@ const ChatTextarea: React.FC<ChatTextareaProps> = ({
             onClick={handleSendPrompt}
             disabled={!textModel || !selectedTools || prompt.length === 0}
           >
-            <ArrowUp className="size-4"/>
+            <ArrowUp className="size-4" />
           </Button>
         )}
       </div>

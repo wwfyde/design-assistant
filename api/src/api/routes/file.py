@@ -2,11 +2,12 @@ import os
 from io import BytesIO
 from mimetypes import guess_type
 
-from fastapi import APIRouter, File, HTTPException, UploadFile
+from fastapi import APIRouter, File, HTTPException, UploadFile, Body
 from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import FileResponse
 from lib.utils import generate_file_id
 from PIL import Image
+import httpx
 
 from lib import settings
 
@@ -109,6 +110,63 @@ async def upload_image(file: UploadFile = File(...), max_size_mb: float = 3.0):
         "width": width,
         "height": height,
     }
+
+
+@router.post("/upload_image_from_url")
+async def upload_image_from_url(url: str = Body(..., embed=True)):
+    print("🦄upload_image_from_url url", url)
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url)
+            response.raise_for_status()
+            content = response.content
+            
+            # Get filename from URL or default
+            filename = url.split("/")[-1]
+            if "?" in filename:
+                filename = filename.split("?")[0]
+            if not filename:
+                filename = "image.jpg"
+                
+            # Reuse upload logic by creating an UploadFile-like object or refactoring
+            # For simplicity, I'll duplicate the core logic or wrap it
+            
+            file_id = generate_file_id()
+            
+            # Open image to get dimensions and validate
+            with Image.open(BytesIO(content)) as img:
+                width, height = img.size
+                
+                # Determine extension
+                mime_type, _ = guess_type(filename)
+                if mime_type and mime_type.startswith("image/"):
+                    extension = mime_type.split("/")[-1]
+                    if extension == "jpeg":
+                        extension = "jpg"
+                else:
+                    extension = "jpg"
+                
+                # Save image
+                file_path = os.path.join(FILES_DIR, f"{file_id}.{extension}")
+                save_format = "JPEG" if extension.lower() in ["jpg", "jpeg"] else extension.upper()
+                
+                if save_format == "JPEG" and img.mode != "RGB":
+                    img = img.convert("RGB")
+                    
+                await run_in_threadpool(img.save, file_path, format=save_format)
+                
+                return {
+                    "file_id": f"{file_id}.{extension}",
+                    "url": f"http://localhost:{settings.api_port}/api/file/{file_id}.{extension}",
+                    "width": width,
+                    "height": height,
+                }
+                
+    except Exception as e:
+        print(f"Error fetching image from URL: {e}")
+        raise HTTPException(status_code=400, detail=f"Failed to fetch image: {str(e)}")
+
 
 
 def compress_image(img: Image.Image, max_size_mb: float) -> bytes:

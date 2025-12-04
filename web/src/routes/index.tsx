@@ -3,11 +3,13 @@ import ChatTextarea from '@/components/chat/ChatTextarea'
 import CanvasList from '@/components/home/CanvasList'
 import {ScrollArea} from '@/components/ui/scroll-area'
 import {useConfigs} from '@/contexts/configs'
+import {eventBus} from '@/lib/event'
 import {DEFAULT_SYSTEM_PROMPT} from '@/constants'
 import {useMutation} from '@tanstack/react-query'
 import {createFileRoute, useNavigate} from '@tanstack/react-router'
 import {motion} from 'motion/react'
 import {nanoid} from 'nanoid'
+import {useEffect} from 'react'
 import {useTranslation} from 'react-i18next'
 import {toast} from 'sonner'
 import TopMenu from '@/components/TopMenu'
@@ -41,6 +43,20 @@ function Home() {
     },
   })
 
+  useEffect(() => {
+    const handleScrollToTop = () => {
+      const viewport = document.querySelector('[data-radix-scroll-area-viewport]')
+      if (viewport) {
+        viewport.scrollTo({top: 0, behavior: 'smooth'})
+      }
+    }
+
+    eventBus.on('Chat::ScrollToTop', handleScrollToTop)
+    return () => {
+      eventBus.off('Chat::ScrollToTop', handleScrollToTop)
+    }
+  }, [])
+
   return (
     // <div className='flex flex-col h-screen'>
     <div className='flex flex-col min-h-full'>
@@ -65,7 +81,7 @@ function Home() {
           </motion.div>
 
           <ChatTextarea
-            className='w-full max-w-xl'
+            className='w-full max-w-xl max-h-60'
             messages={[]}
             onSendMessages={(messages, configs) => {
               createCanvasMutation({
@@ -81,7 +97,7 @@ function Home() {
             pending={isPending}
           />
         </div>
-        <PromptList />
+        <PromptList/>
         <CanvasList/>
       </ScrollArea>
     </div>

@@ -1,0 +1,27 @@
+FROM python:3.12-slim
+
+# Install uv
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
+
+WORKDIR /app
+
+# Copy workspace configuration
+COPY pyproject.toml uv.lock ./
+
+# Copy workspace members
+COPY api/ api/
+COPY lib/ lib/
+COPY tools/ tools/
+COPY agents/ agents/
+COPY langgraph-tools/ langgraph-tools/
+
+# Install dependencies
+# --frozen ensures we use the exact versions from uv.lock
+RUN uv sync --frozen
+
+# Expose port
+EXPOSE 8000
+
+# Run application
+# Using uv run ensures we use the virtual environment created by uv sync
+CMD ["uv", "run", "uvicorn", "api.main:socket_app", "--host", "0.0.0.0", "--port", "8000"]
