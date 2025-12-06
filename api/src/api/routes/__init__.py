@@ -15,7 +15,8 @@ from . import (  # noqa F401
     workspace,
 )
 
-router = APIRouter(dependencies=[Depends(verify_header_token)])
+# router = APIRouter(dependencies=[Depends(verify_header_token)])
+router = APIRouter()
 
 router.include_router(canvas.router, prefix="/canvas", tags=["canvas"])
 router.include_router(chat.router, tags=["chat"])
