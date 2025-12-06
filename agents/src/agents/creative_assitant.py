@@ -1,19 +1,19 @@
 from typing import NotRequired, Optional
 
 import httpx
-from agents.common import get_text_model
-from api.core.memory import memory_checkpointer
-from api.domain.model import ModelInfo
-from api.domain.tool import ToolInfo
 from langchain.agents import AgentState, create_agent
 from langchain.agents.middleware import AgentMiddleware, ModelRequest, dynamic_prompt
 from langchain_core.messages import HumanMessage
 from langchain_openai import ChatOpenAI
 from langgraph.checkpoint.base import BaseCheckpointSaver
 from langgraph.graph.state import CompiledStateGraph
-from langgraph_tools.images import image_create_with_gemini, image_create_with_seedream
+from langgraph_tools import get_langgraph_tools
 from pydantic import BaseModel, Field
 
+from agents.common import get_text_model
+from api.core.memory import memory_checkpointer
+from api.domain.model import ModelInfo
+from api.domain.tool import ToolInfo
 from lib import settings
 
 
@@ -93,7 +93,7 @@ def creative_dynamic_system_prompt(request: ModelRequest):
 rednote_prompt = """你是一名AI助手,请和我聊天"""
 
 
-creative_system_prompt = """
+creative_system_prompt_basic = """
 # 角色（Role）
 
 你是创意设计Agent.
@@ -102,6 +102,7 @@ creative_system_prompt = """
 你可以使用一下工具:
 
 - image_create_with_seedream: 图像创作, 图像生成图像编辑
+- image_create_with_seedream4_5: 即梦4.5, 用于 图像创作, 图像生成图像编辑
 - image_create_with_gemini: 图像创作, 英文Prompt优先使用此工具, 明确用此工具时, 将中文Prompt翻译为英文再传入
 
 
@@ -176,7 +177,9 @@ You MUST:
 - 拆分图层: 同名词(素材分割, 素材提取, 素材分解), 首先识别其中可独立的层, 拆分图层时传入参考,然后根据识别到的层数, 多次使用seedream进行处理, 每次处理均保留要保留的对象, 并抹除其他地方
 
 # 工具说明
-## image_create_with_seedream
+## image_create_with_seedream / image_create_with_seedream4_5
+
+该工具包含多个版本: image_create_with_seedream / image_create_with_seedream4_5
 图像编辑,风格迁移, 智能图片参考,  图像生成, 图像创作,  擅长字体设计
 用户未指定图像尺寸比例是aspect_ratio 默认不传入, 
 prompt 中不要写入3:4, 竖版 , 1920*1080等比例信息, 通过aspect_ratio约束
@@ -331,13 +334,14 @@ RGB/CMYK： RGB（红绿蓝）是屏幕显示的加色模式；CMYK（青、品�
  - 图像类型分为本地图像和网络图像, 本地图像格式为 img_2b2de312310745118d54672b80e218f1.png 类似的格式, 仅存有文件名, 工具会自行拼接. 传入工具时使用本地图像或网络图像url
 - 获取近期营销日历时 使用web_search, 不要使用LLM记忆的时间, 
 
-
-
-
-
 """
 
-model = ChatOpenAI(
+
+def build_system_prompt(raw: str, *args):
+    return "\n".join([raw, *args])
+
+
+openai_model = ChatOpenAI(
     model="gpt-4.1-mini",
     api_key=settings.providers.openai.api_key,
     # base_url=settings.providers.ark.base_url,
@@ -349,32 +353,29 @@ model = ChatOpenAI(
 )
 
 
-def get_tools(tools: list[ToolInfo]):
-    tool_instances = []
-    for tool in tools:
-        if tool.id == "image_create_with_seedream":
-            tool_instances.append(image_create_with_seedream)
-        elif tool.id == "image_create_with_gemini":
-            tool_instances.append(image_create_with_gemini)
-        # elif tool.name == "web_search":
-        #     tool_instances.append(web_search_tool)
-        # elif tool.name ==
-    return tool_instances
-
-
 def build_creative_assistant(
     text_model: ModelInfo,
     tools: list[ToolInfo],
     checkpointer: BaseCheckpointSaver,
 ):
     model = get_text_model(text_model)
-    tools = get_tools(tools)
-    print(tools)
+    print(f"前端注册的工具:{tools=}")
+    tools = get_langgraph_tools([tool.id for tool in tools])
+    print(f"前端注册的工具:{tools=}")
+
+    tools_prompt = f"""
+
+    # support tools
+    {tools}
+
+    """
+    system_prompt = build_system_prompt(creative_system_prompt, tools_prompt)
+
     agent: CompiledStateGraph = create_agent(
         model=model,
         tools=tools,
         middleware=[],
-        system_prompt=creative_system_prompt,
+        system_prompt=system_prompt,
         state_schema=CreativeAssistantState,  # noqa F401
         # context_schema=RednoteContext,
         checkpointer=checkpointer,

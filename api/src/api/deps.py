@@ -3,6 +3,14 @@ import json
 from typing import Annotated, Any, AsyncGenerator, Generator, Optional
 
 import uuid_utils as uuid
+from fastapi import Depends, HTTPException
+from fastapi.security import APIKeyHeader
+from langgraph.checkpoint.postgres import PostgresSaver
+from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session
+from starlette import status
+
 from agents.rednote_agent import (
     build_rednote_agent,
 )
@@ -16,14 +24,6 @@ from api.services.canvas import CanvasService, InMemoryCanvasRepo, PostgresCanva
 from api.services.chat import ChatService, InMemoryChatRepo, PostgresChatRepo
 from api.services.stream import add_stream_task, remove_stream_task
 from api.services.websocket import send_to_websocket
-from fastapi import Depends, HTTPException
-from fastapi.security import APIKeyHeader
-from langgraph.checkpoint.postgres import PostgresSaver
-from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Session
-from starlette import status
-
 from lib import settings
 
 # canvas_service = CanvasService(store=memory_store)
@@ -202,7 +202,7 @@ header_scheme = APIKeyHeader(name="X-Api-Key")
 
 
 async def verify_header_token(token: Annotated[str, Depends(header_scheme)]) -> str:
-    if token != settings.simple_api_key:
+    if token != settings.api_key_header:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid header token",

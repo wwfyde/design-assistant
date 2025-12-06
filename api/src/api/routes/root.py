@@ -1,11 +1,12 @@
+from fastapi import APIRouter
+from fastapi.params import Depends
+
 from api.deps import get_chat_service
 
 # services
 from api.domain.model import ModelInfo
 from api.domain.tool import ToolInfo
 from api.services.chat import ChatService
-from fastapi import APIRouter
-from fastapi.params import Depends
 
 # from services.config_service import config_service
 # from services.db_service import db_service
@@ -31,8 +32,8 @@ async def get_models() -> list[ModelInfo]:
         ),
         ModelInfo(
             provider="deepseek",
-            model="deepseek-v3",
-            url="https://api.openai.com/v1",
+            model="deepseek-v3.2",
+            url="https://deepseek.com",
             type="text",
         ),
         ModelInfo(
@@ -58,13 +59,19 @@ async def list_tools() -> list[ToolInfo]:
             provider="seedream",
             id="image_create_with_seedream",
             type="image",
-            display_name="Seedream",
+            display_name="即梦4.0",
+        ),
+        ToolInfo(
+            provider="seedream",
+            id="image_create_with_seedream4_5",
+            type="image",
+            display_name="即梦4.5",
         ),
         ToolInfo(
             provider="gemini",
             id="image_create_with_gemini",
             type="image",
-            display_name="Gemini",
+            display_name="Gemini 3 Pro(Nano Banana)",
         ),
         # ToolInfo(
         #     provider="openai",
@@ -72,17 +79,17 @@ async def list_tools() -> list[ToolInfo]:
         #     type="image",
         #     display_name="GPT-1",
         # ),
-        # ToolInfo(
-        #     provider="qwen",
-        #     id="gpt1",
-        #     type="image",
-        #     display_name="Qwen Image",
-        # ),
+        ToolInfo(
+            provider="qwen",
+            id="gpt1",
+            type="image",
+            display_name="千问Image",
+        ),
         # ToolInfo(
         #     provider="flux",
         #     id="gpt3",
         #     type="image",
-        #     display_name="Flux  Kontext",
+        #     display_name="Flux Kontext",
         # ),
     ]
 

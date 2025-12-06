@@ -1,10 +1,10 @@
 import httpx
-from api.domain.model import ModelInfo
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_openai import ChatOpenAI
-from lib.config import LLMConfig
 
+from api.domain.model import ModelInfo
 from lib import settings
+from lib.config import LLMConfig
 
 openai_model_config = settings.providers.openai
 
@@ -35,6 +35,7 @@ model_with_search = google_model.bind_tools([{"google_search": {}}])
 
 def get_text_model(model: ModelInfo) -> ChatOpenAI:
     provider: LLMConfig = getattr(settings.providers, model.provider)
+    print(f"当前使用的文本模型: {provider.model}")
     return ChatOpenAI(
         model=provider.model,
         openai_api_key=provider.api_key,  # type: ignore

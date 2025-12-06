@@ -1,4 +1,6 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+
+from api.deps import verify_header_token
 
 from . import (  # noqa F401
     agent,
@@ -13,7 +15,7 @@ from . import (  # noqa F401
     workspace,
 )
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(verify_header_token)])
 
 router.include_router(canvas.router, prefix="/canvas", tags=["canvas"])
 router.include_router(chat.router, tags=["chat"])

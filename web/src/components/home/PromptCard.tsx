@@ -40,7 +40,7 @@ export function PromptCard({prompt}: PromptCardProps) {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <Card
-        className="group relative overflow-hidden rounded-xl border-0 shadow-none hover:shadow-lg transition-all duration-300 bg-gray-100 p-3">
+        className="group relative overflow-hidden rounded-xl border-0 shadow-none hover:shadow-lg transition-all duration-300 bg-gray-200 p-3">
         <div className="relative overflow-hidden rounded-xl">
           {prompt.image && (
             <img

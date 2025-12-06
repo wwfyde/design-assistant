@@ -31,6 +31,7 @@ dependencies = [
     "rembg[gpu]>=2.0.67;sys_platform == 'linux'",
     "rembg[cpu]>=2.0.67;sys_platform == 'darwin'",
     "uuid-utils>=0.11.1",
+    "langchain-deepseek>=1.0.1",
 ]
 
 [tool.uv.workspace]
@@ -62,3 +63,5 @@ tools = { workspace = true }
 agents = { workspace = true }
 langgraph-tools = { workspace = true }
 
+[tool.ruff.lint.isort]
+known-first-party = ["api", "lib", "tools", "langgraph-tools", "agents"]

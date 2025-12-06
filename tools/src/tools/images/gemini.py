@@ -1,15 +1,14 @@
 import uuid
 from io import BytesIO
-from typing import Optional
+from typing import Literal
 
 import requests
 from google import genai
 from google.genai import types
-from langchain_core.tools import tool
 from PIL import Image
-from pydantic import BaseModel, Field
 
 from lib import settings, upload_image
+from lib.image import parse_data_url_to_bytes
 
 api_key = settings.providers.gemini.api_key
 
@@ -20,39 +19,50 @@ http_options = genai.types.HttpOptions(
 client = genai.Client(api_key=api_key, http_options=http_options)
 
 
-class GeminiArgs(BaseModel):
-    image_urls: list[str] | str | None = Field(
-        None,
-        description="image_urls, optional, when multiple image urls passed,  split them with commas.",
-    )
-    prompt: str = Field(
-        description="Required. The prompt for image generation. If you want to edit an image, please describe what you want to edit in the prompt."
-    )
-    aspect_ratio: Optional[str] = Field(
-        None,
-        description="Required. Aspect ratio of the image, only these values are allowed: 1:1, 16:9, 4:3, 3:4, 9:16. Choose the best fitting aspect ratio according to the prompt. Best ratio for posters is 3:4",
-    )
-
-
-@tool(
-    "image_create_with_gemini",
-    description="Image Creation tool, generate or edit image With Google Gemini(aka Nano Banana) model using prompt and  image_urls. pass prompt with simple and specific instruction text, pass image with image_urls. Use this model for high-quality image modification.",
-    args_schema=GeminiArgs,
-)
-def image_create_with_gemini(prompt: str, image_urls: str):
-    if image_urls:
-        # image_list = [ i.strip() for i in image_urls.split(",")]
+def image_create_with_gemini(
+    prompt: str,
+    *,
+    image_urls: str | list | None = None,
+    aspect_ratio: Literal["1:1", "2:3", "3:2", "3:4", "4:3", "9:16", "16:9", "21:9"]
+    | None = None,
+    image_size: Literal["1K", "2K", "4K"] | None = "2K",
+):
+    if isinstance(image_urls, str):
         image_list = [
             i.strip() for i in image_urls.replace("，", ",").split(",") if i.strip()
         ]
-    else:
+    elif image_urls is None:
         image_list = []
+    else:
+        image_list = image_urls
+
+    new_urls: list[bytes] = []
+    for item in image_list:
+        # 处理本地文件
+        if item.startswith("data:") and "base64;" in item:
+            image_bytes = parse_data_url_to_bytes(item)
+            new_urls.append(image_bytes)
+        elif item.startswith("http"):
+            content = requests.get(item).content
+            new_urls.append(content)
+        # 绝对路径
+        elif item.startswith("/"):
+            pass
+        else:
+            filename = item
+            local_file_path = settings.data_dir / "files" / filename
+            content = local_file_path.read_bytes()
+
+            # new = upload_image(filename, content, prefix="files", rename=False)
+            new_urls.append(content)
+
+    image_list = new_urls
 
     client = genai.Client(api_key=api_key)
     try:
         image_pils = []
         for image in image_list:
-            image_bytes = BytesIO(requests.get(image).content)
+            image_bytes = BytesIO(image)
             image_pil = Image.open(image_bytes)
             image_pils.append(image_pil)
 
@@ -61,10 +71,11 @@ def image_create_with_gemini(prompt: str, image_urls: str):
             contents=[prompt, *image_pils],
             config=types.GenerateContentConfig(
                 # response_modalities=["IMAGE"],
+                response_modalities=["Text", "Image"],
                 image_config=types.ImageConfig(
-                    aspect_ratio="21:9",  # "1:1", "2:3", "3:2", "3:4", "4:3", "9:16", "16:9", and "21:9"
-                    image_size="2K",  # Literal["1K", "2K", "4K"]
-                    number_of_images=4,
+                    aspect_ratio=aspect_ratio,  # "1:1", "2:3", "3:2", "3:4", "4:3", "9:16", "16:9", and "21:9"
+                    image_size=image_size,  # Literal["1K", "2K", "4K"]
+                    # number_of_images=4,
                     # output_mime_type=
                 ),
             ),
@@ -80,7 +91,7 @@ def image_create_with_gemini(prompt: str, image_urls: str):
             # print(f"Image format: {format}")
             image_url = upload_image(f"{str(uuid.uuid4())}.{extension}", content)
 
-            return image_url
+            return f"![image]({image_url})"
 
         else:
             return None
@@ -139,4 +150,6 @@ def magic_generate_with_gemini(
 
 
 if __name__ == "__main__":
-    magic_generate_with_gemini(image_url="unknown.png")
+    # magic_generate_with_gemini(image_url="unknown.png")
+    result = image_create_with_gemini("将图片改成写实风格", "img.png", "2:3")
+    print(result)

@@ -96,7 +96,6 @@ class PromptResponseFormat(BaseModel):
             "3:4",
             "2:3",
             "9:16",
-            "9:21",
         ],
     )
     input: str = Field(title="用户输入")

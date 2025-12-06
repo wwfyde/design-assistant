@@ -15,7 +15,10 @@ export const PROVIDER_NAME_MAPPING: {
     name: 'Claude',
     icon: 'https://registry.npmmirror.com/@lobehub/icons-static-png/latest/files/dark/claude-color.png',
   },
-  openai: {name: 'OpenAI', icon: 'https://openai.com/favicon.ico'},
+  openai: {
+    name: 'OpenAI',
+    icon: 'https://upload.wikimedia.org/wikipedia/commons/e/ef/ChatGPT-Logo.svg'
+  },
   replicate: {
     name: 'Replicate',
     icon: 'https://images.seeklogo.com/logo-png/61/1/replicate-icon-logo-png_seeklogo-611690.png',

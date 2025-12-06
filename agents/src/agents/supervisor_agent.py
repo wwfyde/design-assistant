@@ -1,3 +1,6 @@
+import traceback
+from typing import Any, Dict, List, Set, TypedDict, cast
+
 from agents.creative_assitant import build_creative_assistant
 from api.core.memory import memory_checkpointer
 from api.core.StreamProcessor import StreamProcessor
@@ -9,9 +12,6 @@ from lib import settings
 
 supervisor_prompt = """You are a supervisor managing two agents"""
 
-
-import traceback
-from typing import Any, Dict, List, Set, TypedDict, cast
 
 # from services.websocket_service import send_to_websocket  # type: ignore
 

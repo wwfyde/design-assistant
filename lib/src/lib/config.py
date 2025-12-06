@@ -70,6 +70,7 @@ class LLMProvider(BaseModel):
     ark: LLMConfig | None = None
     openai: LLMConfig | None = None
     gemini: LLMConfig | None = None
+    deepseek: LLMConfig | None = None
 
 
 class JimengConfig(BaseModel):
@@ -90,6 +91,7 @@ class Settings(BaseSettings):
         "in-memory"
     )
     api_port: int = 8013
+    api_key_header: str = "fastapi"
     httpx_timeout: int = 60
     wait_max_seconds: int = 60 * 2
     project_dir: Path = Path(__file__).parent.parent.parent.parent

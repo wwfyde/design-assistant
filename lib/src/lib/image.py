@@ -49,7 +49,7 @@ def upload_image(
         return None
 
 
-def parse_data_url_to_bytes(data_url: str) -> str:
+def parse_data_url_to_bytes(data_url: str) -> bytes:
     # pattern = r"^data:(.*?);(base64),(.*)$"
     # match = re.match(pattern, data_url, re.DOTALL)
     if not data_url.startswith("data:"):

@@ -5,9 +5,6 @@ from time import sleep
 from typing import Callable
 
 import socketio
-from api.routes import router
-from api.services.websocket import broadcast_init_done
-from api.states import sio
 from fastapi import FastAPI, Header, Request
 from fastapi.exceptions import HTTPException
 from fastapi.openapi.docs import get_swagger_ui_html
@@ -16,6 +13,9 @@ from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import FileResponse
 from uvicorn import run
 
+from api.routes import router
+from api.services.websocket import broadcast_init_done
+from api.states import sio
 from lib import settings
 
 root_path = os.getenv("ROOT_PATH", "") or settings.api_prefix
@@ -115,7 +115,7 @@ def create_app(lifespan: Callable = lifespan):
 
         return {"message": f"Hello, {s}!", "data": f"hello, {s}!"}
 
-    app.include_router(router, prefix="/api")
+    app.include_router(router, prefix="/api",)
 
     # registering logfire
     # import logfire

@@ -1,6 +1,6 @@
 import uuid
 from io import BytesIO
-from typing import Optional
+from typing import Literal, Optional
 
 import requests
 from google import genai
@@ -9,6 +9,7 @@ from PIL import Image
 from pydantic import BaseModel, Field
 
 from lib import settings, upload_image
+from tools.images import image_create_with_gemini as image_create_with_gemini_tool
 
 api_key = settings.providers.gemini.api_key
 
@@ -25,7 +26,14 @@ class GeminiArgs(BaseModel):
     )
     aspect_ratio: Optional[str] = Field(
         None,
-        description="Required. Aspect ratio of the image, only these values are allowed: 1:1, 16:9, 4:3, 3:4, 9:16. Choose the best fitting aspect ratio according to the prompt. Best ratio for posters is 3:4",
+        description="""Optional. Aspect ratio of the generated images. Supported values are
+      "1:1", "2:3", "3:2", "3:4", "4:3", "9:16", "16:9", and "21:9".""",
+    )
+    image_size: Literal["1K", "2K", "4K"] = Field(
+        None,
+        description="""Optional. Specifies the size of generated images. Supported
+      values are `1K`, `2K`, `4K`. If not specified, the model will use default
+      value `1K`.""",
     )
 
 
@@ -35,46 +43,14 @@ class GeminiArgs(BaseModel):
     args_schema=GeminiArgs,
 )
 def image_create_with_gemini(
-    prompt: str, image_urls: str | None = None, aspect_ratio: str | None = None
+    prompt: str,
+    image_urls: str | None = None,
+    aspect_ratio: str | None = None,
+    image_size: Literal["1K", "2K", "4K"] | None = "1K",
 ) -> str:
-    if image_urls:
-        # image_list = [ i.strip() for i in image_urls.split(",")]
-        image_list = [
-            i.strip() for i in image_urls.replace("，", ",").split(",") if i.strip()
-        ]
-    else:
-        image_list = []
-
-    client = genai.Client(api_key=api_key)
-    try:
-        image_pils = []
-        for image in image_list:
-            image_bytes = BytesIO(requests.get(image).content)
-            image_pil = Image.open(image_bytes)
-            image_pils.append(image_pil)
-
-        response = client.models.generate_content(
-            model="gemini-3-pro-image-preview",
-            contents=[prompt, *image_pils],
-        )
-        image_parts = [
-            (part.inline_data.data, part.inline_data.mime_type)
-            for part in response.candidates[0].content.parts
-            if part.inline_data
-        ]
-        if image_parts:
-            content, mime_type = image_parts[0]
-            extension = mime_type.split("/")[-1].replace("jpeg", "jpg")
-            # print(f"Image format: {format}")
-            image_url = upload_image(f"{str(uuid.uuid4())}.{extension}", content)
-
-            return image_url
-
-        else:
-            return None
-
-    except Exception as e:
-        return f"工具调用失败, 错误提示: {e}"
+    return image_create_with_gemini_tool(
+        prompt, image_urls=image_urls, aspect_ratio=aspect_ratio, image_size=image_size
+    )
 
 
 def magic_generate_with_gemini(
