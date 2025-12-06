@@ -1,6 +1,4 @@
-from fastapi import APIRouter, Depends
-
-from api.deps import verify_header_token
+from fastapi import APIRouter
 
 from . import (  # noqa F401
     agent,
