@@ -36,12 +36,12 @@ async def get_models() -> list[ModelInfo]:
             url="https://deepseek.com",
             type="text",
         ),
-        ModelInfo(
-            provider="gemini",
-            model="gemini-3-pro-preview",
-            url="https://api.openai.com/v1",
-            type="text",
-        ),
+        # ModelInfo(
+        #     provider="gemini",
+        #     model="gemini-3-pro-preview",
+        #     url="https://api.openai.com/v1",
+        #     type="text",
+        # ),
         ModelInfo(
             provider="dashscope",
             model="qwen-plus",
