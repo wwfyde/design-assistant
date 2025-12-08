@@ -12,7 +12,7 @@ from lib.image import parse_data_url_to_bytes
 
 api_key = settings.providers.gemini.api_key
 
-http_options = genai.types.HttpOptions(
+http_options = types.HttpOptions(
     client_args={"proxy": settings.proxy_url},
     async_client_args={"proxy": settings.proxy_url},
 )
@@ -23,14 +23,11 @@ def image_create_with_gemini(
     prompt: str,
     *,
     image_urls: str | list | None = None,
-    aspect_ratio: Literal["1:1", "2:3", "3:2", "3:4", "4:3", "9:16", "16:9", "21:9"]
-    | None = None,
+    aspect_ratio: Literal["1:1", "2:3", "3:2", "3:4", "4:3", "9:16", "16:9", "21:9"] | None = None,
     image_size: Literal["1K", "2K", "4K"] | None = "2K",
 ):
     if isinstance(image_urls, str):
-        image_list = [
-            i.strip() for i in image_urls.replace("，", ",").split(",") if i.strip()
-        ]
+        image_list = [i.strip() for i in image_urls.replace("，", ",").split(",") if i.strip()]
     elif image_urls is None:
         image_list = []
     else:
@@ -58,7 +55,6 @@ def image_create_with_gemini(
 
     image_list = new_urls
 
-    client = genai.Client(api_key=api_key)
     try:
         image_pils = []
         for image in image_list:
@@ -100,9 +96,7 @@ def image_create_with_gemini(
         return f"工具调用失败, 错误提示: {e}"
 
 
-def magic_generate_with_gemini(
-    *, prompt: str | None = None, image_url: str
-) -> list[dict]:
+def magic_generate_with_gemini(*, prompt: str | None = None, image_url: str) -> list[dict]:
     if not prompt:
         prompt = "理解图片上的视觉指令并生图"
 
@@ -116,7 +110,7 @@ def magic_generate_with_gemini(
 
     response = client.models.generate_content(
         # model="gemini-3-pro-image-preview",
-        model="gemini-2.5-flash-image-preview",
+        model="gemini-2.5-flash-image",
         contents=[prompt, pil_image],
     )
     image_urls = []
@@ -127,9 +121,7 @@ def magic_generate_with_gemini(
             image_bytes = part.inline_data.data
             ext = part.inline_data.mime_type.split("/")[-1].replace("jpeg", "jpg")
             filename = f"{str(uuid.uuid4())}.{ext}"
-            url = upload_image(
-                filename, data=image_bytes, prefix="creative", rename=False
-            )
+            url = upload_image(filename, data=image_bytes, prefix="creative", rename=False)
 
             image = Image.open(BytesIO(part.inline_data.data))
             width, height = image.size
@@ -151,5 +143,7 @@ def magic_generate_with_gemini(
 
 if __name__ == "__main__":
     # magic_generate_with_gemini(image_url="unknown.png")
+    print(settings.proxy_url)
     result = image_create_with_gemini("将图片改成写实风格", image_urls="img.png", aspect_ratio="2:3")
     print(result)
+    print(settings.proxy_url)
