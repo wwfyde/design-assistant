@@ -3,6 +3,7 @@ export type ModelInfo = {
   model: string
   type: 'text' | 'image' | 'tool' | 'video'
   url: string
+  display_name: string
 }
 
 export type ToolInfo = {
