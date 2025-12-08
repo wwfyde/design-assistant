@@ -20,13 +20,7 @@ import {toast} from 'sonner'
 // import { useAuth } from '@/contexts/AuthContext'
 // import { useBalance } from '@/hooks/use-balance'
 import {BASE_API_URL, PROVIDER_NAME_MAPPING} from '@/constants'
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,} from '@/components/ui/dropdown-menu'
 
 type ChatTextareaProps = {
   pending: boolean
@@ -74,7 +68,7 @@ const ChatTextarea: React.FC<ChatTextareaProps> = ({
     }[]
   >([])
   const [isFocused, setIsFocused] = useState(false)
-  const [selectedAspectRatio, setSelectedAspectRatio] = useState<string>('auto')
+  const [selectedAspectRatio, setSelectedAspectRatio] = useState<string>('Auto')
   const [quantity, setQuantity] = useState<number>(1)
 
   const imageInputRef = useRef<HTMLInputElement>(null)
@@ -498,8 +492,15 @@ const ChatTextarea: React.FC<ChatTextareaProps> = ({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm" className="flex items-center gap-1">
+                {textModel && PROVIDER_NAME_MAPPING[textModel.provider]?.icon && (
+                  <img
+                    src={PROVIDER_NAME_MAPPING[textModel.provider].icon}
+                    alt={textModel.provider}
+                    className="size-4 rounded-full"
+                  />
+                )}
                 <span className="text-sm truncate max-w-[100px]">
-                  {textModel?.provider || t('chat:modelSelector.selectModel')}
+                  {textModel?.display_name || t('chat:modelSelector.selectModel')}
                 </span>
                 <ChevronDown className="size-3 opacity-50"/>
               </Button>
@@ -522,7 +523,7 @@ const ChatTextarea: React.FC<ChatTextareaProps> = ({
                         className="size-4 rounded-full"
                       />
                     )}
-                    <span>{model.provider}</span>
+                    <span>{model.display_name}</span>
                   </div>
                   {textModel?.provider === model.provider && textModel?.model === model.model && (
                     <Check className="size-4"/>
@@ -536,9 +537,26 @@ const ChatTextarea: React.FC<ChatTextareaProps> = ({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm" className="flex items-center gap-1">
-                <span className="text-sm">
-                  {t('chat:modelSelector.tabs.image')} ({selectedTools?.filter(t => t.type === 'image').length || 0})
-                </span>
+                {(() => {
+                  const selectedImageTool = selectedTools?.find((t) => t.type === 'image')
+                  if (selectedImageTool) {
+                    return (
+                      <>
+                        {PROVIDER_NAME_MAPPING[selectedImageTool.provider]?.icon && (
+                          <img
+                            src={PROVIDER_NAME_MAPPING[selectedImageTool.provider].icon}
+                            alt={selectedImageTool.provider}
+                            className="size-4 rounded-full"
+                          />
+                        )}
+                        <span className="text-sm truncate max-w-[100px]">
+                          {selectedImageTool.display_name || selectedImageTool.id}
+                        </span>
+                      </>
+                    )
+                  }
+                  return <span className="text-sm">{t('chat:modelSelector.tabs.image')}</span>
+                })()}
                 <ChevronDown className="size-3 opacity-50"/>
               </Button>
             </DropdownMenuTrigger>
@@ -546,23 +564,11 @@ const ChatTextarea: React.FC<ChatTextareaProps> = ({
               {allTools.filter(t => t.type === 'image').map((tool) => {
                 const isSelected = selectedTools?.some(t => t.id === tool.id)
                 return (
-                  <DropdownMenuCheckboxItem
+                  <DropdownMenuItem
                     key={`${tool.provider}:${tool.id}`}
-                    checked={isSelected}
-                    onCheckedChange={(checked) => {
-                      const currentImageTools = selectedTools?.filter(t => t.type === 'image') || []
-
-                      if (!checked && currentImageTools.length <= 1 && isSelected) {
-                        toast.warning(t('chat:textarea.atLeastOneImageModel', 'At least one image model must be selected'))
-                        return
-                      }
-
-                      let newSelectedTools = []
-                      if (checked) {
-                        newSelectedTools = [...(selectedTools || []), tool]
-                      } else {
-                        newSelectedTools = (selectedTools || []).filter(t => t.id !== tool.id)
-                      }
+                    onClick={() => {
+                      const otherTools = selectedTools?.filter(t => t.type !== 'image') || []
+                      const newSelectedTools = [...otherTools, tool]
 
                       setSelectedTools(newSelectedTools)
                       localStorage.setItem(
@@ -572,6 +578,7 @@ const ChatTextarea: React.FC<ChatTextareaProps> = ({
                         )
                       )
                     }}
+                    className="flex items-center justify-between"
                   >
                     <div className="flex items-center gap-2">
                       {PROVIDER_NAME_MAPPING[tool.provider]?.icon && (
@@ -583,7 +590,10 @@ const ChatTextarea: React.FC<ChatTextareaProps> = ({
                       )}
                       <span>{tool.display_name || tool.id}</span>
                     </div>
-                  </DropdownMenuCheckboxItem>
+                    {isSelected && (
+                      <Check className="size-4"/>
+                    )}
+                  </DropdownMenuItem>
                 )
               })}
             </DropdownMenuContent>
@@ -606,7 +616,7 @@ const ChatTextarea: React.FC<ChatTextareaProps> = ({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-32">
-              {['auto', '1:1', '3:4', '4:3', '9:16', '16:9', '2:3', '3:2', '21:9'].map((ratio) => (
+              {['Auto', '1:1', '3:4', '4:3', '9:16', '16:9', '2:3', '3:2', '21:9'].map((ratio) => (
                 <DropdownMenuItem
                   key={ratio}
                   onClick={() => setSelectedAspectRatio(ratio)}

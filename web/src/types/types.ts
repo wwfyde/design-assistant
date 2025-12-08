@@ -102,4 +102,5 @@ export type Model = {
   provider: string
   model: string
   url: string
+  display_name: string
 }

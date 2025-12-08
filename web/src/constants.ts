@@ -17,7 +17,7 @@ export const PROVIDER_NAME_MAPPING: {
   },
   openai: {
     name: 'OpenAI',
-    icon: 'https://upload.wikimedia.org/wikipedia/commons/e/ef/ChatGPT-Logo.svg'
+    icon: '/models/chatgpt.svg'
   },
   replicate: {
     name: 'Replicate',
@@ -37,7 +37,7 @@ export const PROVIDER_NAME_MAPPING: {
   },
   volces: {
     name: 'Volces',
-    icon: 'https://portal.volccdn.com/obj/volcfe/misc/favicon.png',
+    icon: '/models/volc.png',
   },
   ark: {
     name: 'Seed',
@@ -45,7 +45,8 @@ export const PROVIDER_NAME_MAPPING: {
   },
   seedream: {
     name: 'Seedream',
-    icon: 'https://portal.volccdn.com/obj/volcfe/misc/favicon.png',
+    // icon: 'https://portal.volccdn.com/obj/volcfe/misc/favicon.png',
+    icon: '/models/volc.png',
   },
   comfyui: {
     name: 'ComfyUI',
@@ -53,7 +54,7 @@ export const PROVIDER_NAME_MAPPING: {
   },
   gemini: {
     name: 'Gemini',
-    icon: 'https://upload.wikimedia.org/wikipedia/commons/8/8f/Google-gemini-icon.svg',
+    icon: '/models/gemini.svg',
   },
   qwen: {
     name: 'Qwen Image',
@@ -61,11 +62,11 @@ export const PROVIDER_NAME_MAPPING: {
   },
   dashscope: {
     name: 'Qwen Image',
-    icon: 'https://img.alicdn.com/imgextra/i2/O1CN01B9mlGG1msAz3fxxWL_!!6000000005009-2-tps-84-84.png',
+    icon: '/models/qwen.png',
   },
   deepseek: {
-    name: 'Qwen Image',
-    icon: 'https://www.deepseek.com/favicon.ico',
+    name: 'Deepseek',
+    icon: '/models/deepseek.svg',
   },
   flux: {
     name: 'Flux Kontext',
