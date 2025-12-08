@@ -144,9 +144,12 @@ async def handle_chat(data: ChatRequest, chat_service: ChatService) -> None:
     system_prompt: Optional[str] = data.system_prompt
 
     # If there is only one message, create a new chat session
+    print(f"{data.messages=}")
     if len(messages) == 1:
         # create new session
-        prompt = messages[0].get("content", "")
+        prompt = messages[0].get("content", [])
+        title = prompt[0].get("text", "")[:200] if prompt else ""
+        print(f"{prompt=}, {title=}")
         # TODO: Better way to determin when to create new chat session.
         await chat_service.create_chat_session(
             SessionCreate(
@@ -154,7 +157,7 @@ async def handle_chat(data: ChatRequest, chat_service: ChatService) -> None:
                 model=text_model.model,
                 provider=text_model.provider,
                 canvas_id=canvas_id,
-                title=prompt[:200] if isinstance(prompt, str) else "",
+                title=title,
             )
         )
 
@@ -179,9 +182,7 @@ async def handle_chat(data: ChatRequest, chat_service: ChatService) -> None:
     # rednote_agent = get_rednote_agent(checkpointer=memory_checkpointer)
     # TODO: 支持多agent 切换
     task = asyncio.create_task(
-        langgraph_supervisor_agent(
-            messages, canvas_id, session_id, tool_list=tool_list, text_model=text_model
-        )
+        langgraph_supervisor_agent(messages, canvas_id, session_id, tool_list=tool_list, text_model=text_model)
     )
     #
     # # Register the task in stream_tasks (for possible cancellation)

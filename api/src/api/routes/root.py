@@ -79,12 +79,12 @@ async def list_tools() -> list[ToolInfo]:
         #     type="image",
         #     display_name="GPT-1",
         # ),
-        ToolInfo(
-            provider="qwen",
-            id="gpt1",
-            type="image",
-            display_name="千问Image",
-        ),
+        # ToolInfo(
+        #     provider="qwen",
+        #     id="gpt1",
+        #     type="image",
+        #     display_name="千问Image",
+        # ),
         # ToolInfo(
         #     provider="flux",
         #     id="gpt3",

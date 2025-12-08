@@ -63,5 +63,8 @@ tools = { workspace = true }
 agents = { workspace = true }
 langgraph-tools = { workspace = true }
 
+[tool.ruff]
+line-length = 120
+
 [tool.ruff.lint.isort]
 known-first-party = ["api", "lib", "tools", "langgraph-tools", "agents"]
