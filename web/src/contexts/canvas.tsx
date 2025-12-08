@@ -6,11 +6,7 @@ export const CanvasContext = createContext<{
 } | null>(null)
 
 export const CanvasProvider = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <CanvasContext.Provider value={{ canvasStore: useCanvasStore }}>
-      {children}
-    </CanvasContext.Provider>
-  )
+  return <CanvasContext.Provider value={{ canvasStore: useCanvasStore }}>{children}</CanvasContext.Provider>
 }
 
 export const useCanvas = () => {

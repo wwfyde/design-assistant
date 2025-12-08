@@ -49,11 +49,7 @@ export class SocketIOManager {
         this.reconnectAttempts++
 
         if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-          reject(
-            new Error(
-              `Failed to connect after ${this.maxReconnectAttempts} attempts`
-            )
-          )
+          reject(new Error(`Failed to connect after ${this.maxReconnectAttempts} attempts`))
         }
       })
 

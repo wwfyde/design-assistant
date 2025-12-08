@@ -1,21 +1,14 @@
 // import InstallComfyUIDialog from '@/components/comfyui/InstallComfyUIDialog'
 import UninstallProgressDialog from '@/components/comfyui/UninstallProgressDialog'
 import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { PROVIDER_NAME_MAPPING } from '@/constants'
-import { LLMConfig } from '@/types/types'
-import {
-  AlertCircle,
-  CheckCircle,
-  Play,
-  SquareSquareIcon,
-  Trash2,
-} from 'lucide-react'
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import { useConfigs } from '@/contexts/configs'
+import { LLMConfig } from '@/types/types'
+import { AlertCircle, CheckCircle, Play, Trash2 } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import ComfuiWorkflowSetting from './ComfyuiWorkflowSetting'
 
 interface ComfyuiSettingProps {
@@ -23,15 +16,10 @@ interface ComfyuiSettingProps {
   onConfigChange: (key: string, newConfig: LLMConfig) => void
 }
 
-export default function ComfyuiSetting({
-  config,
-  onConfigChange,
-}: ComfyuiSettingProps) {
+export default function ComfyuiSetting({ config, onConfigChange }: ComfyuiSettingProps) {
   const { t } = useTranslation()
   const { setShowInstallDialog } = useConfigs()
-  const [comfyUIStatus, setComfyUIStatus] = useState<
-    'unknown' | 'running' | 'not-running'
-  >('unknown')
+  const [comfyUIStatus, setComfyUIStatus] = useState<'unknown' | 'running' | 'not-running'>('unknown')
   const [isComfyUIInstalled, setIsComfyUIInstalled] = useState<boolean>(false)
   const [showUninstallDialog, setShowUninstallDialog] = useState<boolean>(false)
   const provider = PROVIDER_NAME_MAPPING.comfyui
@@ -82,8 +70,7 @@ export default function ComfyuiSetting({
       .then((res) => res.json())
       .then((data) => {
         if (data?.CheckpointLoaderSimple?.input?.required?.ckpt_name?.[0]) {
-          const modelList =
-            data?.CheckpointLoaderSimple?.input?.required?.ckpt_name?.[0]
+          const modelList = data?.CheckpointLoaderSimple?.input?.required?.ckpt_name?.[0]
           console.log('ComfyUI models:', modelList)
           setComfyuiModels(modelList)
 
@@ -133,10 +120,7 @@ export default function ComfyuiSetting({
         setComfyUIStatus('not-running')
       }
     } catch (error) {
-      console.log(
-        'ComfyUI connection failed:',
-        error instanceof Error ? error.message : String(error)
-      )
+      console.log('ComfyUI connection failed:', error instanceof Error ? error.message : String(error))
       setComfyUIStatus('not-running')
     }
   }, [comfyUrl])
@@ -230,16 +214,16 @@ export default function ComfyuiSetting({
     if (!isComfyUIInstalled) return null
 
     if (!comfyUrl) {
-      return <AlertCircle className="w-5 h-5 text-yellow-500" />
+      return <AlertCircle className='w-5 h-5 text-yellow-500' />
     }
 
     switch (comfyUIStatus) {
       case 'running':
-        return <CheckCircle className="w-5 h-5 text-green-500" />
+        return <CheckCircle className='w-5 h-5 text-green-500' />
       case 'not-running':
-        return <AlertCircle className="w-5 h-5 text-red-500" />
+        return <AlertCircle className='w-5 h-5 text-red-500' />
       default:
-        return <AlertCircle className="w-5 h-5 text-gray-500" />
+        return <AlertCircle className='w-5 h-5 text-gray-500' />
     }
   }
 
@@ -261,46 +245,39 @@ export default function ComfyuiSetting({
   }
 
   return (
-    <div className="space-y-4">
+    <div className='space-y-4'>
       {/* Provider Header */}
-      <div className="flex items-center gap-2">
-        <img
-          src={provider.icon}
-          alt={provider.name}
-          className="w-10 h-10 rounded-full"
-        />
-        <p className="font-bold text-2xl w-fit">{provider.name}</p>
+      <div className='flex items-center gap-2'>
+        <img src={provider.icon} alt={provider.name} className='w-10 h-10 rounded-full' />
+        <p className='font-bold text-2xl w-fit'>{provider.name}</p>
         <span>{t('settings:comfyui.localImageGeneration')}</span>
 
         {/* Status or Start/Uninstall Button */}
-        <div className="ml-auto">
+        <div className='ml-auto'>
           {isComfyUIInstalled ? (
             // Show status, start and uninstall buttons if ComfyUI is installed
-            <div className="flex items-center gap-2">
+            <div className='flex items-center gap-2'>
               {getComfyUIStatusIcon()}
-              <span className="text-sm text-muted-foreground">
-                {getComfyUIStatusText()}
-              </span>
-              {(comfyUIStatus === 'not-running' ||
-                (!comfyUrl && isComfyUIInstalled)) && (
+              <span className='text-sm text-muted-foreground'>{getComfyUIStatusText()}</span>
+              {(comfyUIStatus === 'not-running' || (!comfyUrl && isComfyUIInstalled)) && (
                 <Button
                   onClick={handleStartClick}
-                  variant="outline"
-                  size="sm"
-                  className="border-green-300 text-green-700 hover:bg-green-50"
+                  variant='outline'
+                  size='sm'
+                  className='border-green-300 text-green-700 hover:bg-green-50'
                 >
-                  <Play className="w-4 h-4 mr-2" />
+                  <Play className='w-4 h-4 mr-2' />
                   {t('settings:comfyui.startButton')}
                 </Button>
               )}
               <Button
                 onClick={handleUninstallClick}
-                variant="outline"
-                size="sm"
-                className="border-red-300 text-red-700 hover:bg-red-50"
+                variant='outline'
+                size='sm'
+                className='border-red-300 text-red-700 hover:bg-red-50'
                 disabled={showUninstallDialog}
               >
-                <Trash2 className="w-4 h-4 mr-2" />
+                <Trash2 className='w-4 h-4 mr-2' />
                 {t('settings:comfyui.uninstallButton')}
               </Button>
             </div>
@@ -321,26 +298,18 @@ export default function ComfyuiSetting({
       </div>
 
       {/* API URL Input */}
-      <div className="space-y-2">
-        <Label htmlFor="comfyui-url">{t('settings:provider.apiUrl')}</Label>
+      <div className='space-y-2'>
+        <Label htmlFor='comfyui-url'>{t('settings:provider.apiUrl')}</Label>
         <Input
-          id="comfyui-url"
-          placeholder="http://127.0.0.1:8188"
+          id='comfyui-url'
+          placeholder='http://127.0.0.1:8188'
           value={comfyUrl}
           onChange={(e) => handleUrlChange(e.target.value)}
-          className={`w-full ${
-            comfyUrl && !isValidUrl(comfyUrl)
-              ? 'border-red-300 focus:border-red-500'
-              : ''
-          }`}
+          className={`w-full ${comfyUrl && !isValidUrl(comfyUrl) ? 'border-red-300 focus:border-red-500' : ''}`}
         />
-        <p className="text-xs text-gray-500">
-          {t('settings:comfyui.urlDescription')}
-        </p>
+        <p className='text-xs text-gray-500'>{t('settings:comfyui.urlDescription')}</p>
         {comfyUrl && !isValidUrl(comfyUrl) && (
-          <p className="text-xs text-red-500 mt-1">
-            {t('settings:comfyui.invalidUrl')}
-          </p>
+          <p className='text-xs text-red-500 mt-1'>{t('settings:comfyui.invalidUrl')}</p>
         )}
       </div>
       <ComfuiWorkflowSetting />

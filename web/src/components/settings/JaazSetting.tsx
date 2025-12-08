@@ -1,31 +1,28 @@
-import {Input} from '@/components/ui/input'
-import {Label} from '@/components/ui/label'
-import {Button} from '@/components/ui/button'
-import {LLMConfig} from '@/types/types'
-import {useTranslation} from 'react-i18next'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { LLMConfig } from '@/types/types'
+import { useTranslation } from 'react-i18next'
 // import { useAuth } from '@/contexts/AuthContext'
-import {useConfigs} from '@/contexts/configs'
+import { useConfigs } from '@/contexts/configs'
 
 interface JaazSettingProps {
   config: LLMConfig
   onConfigChange: (key: string, newConfig: LLMConfig) => void
 }
 
-export default function JaazSetting({
-                                      config,
-                                      onConfigChange,
-                                    }: JaazSettingProps) {
-  const {t} = useTranslation()
+export default function JaazSetting({ config, onConfigChange }: JaazSettingProps) {
+  const { t } = useTranslation()
   // const { authStatus } = useAuth()
   const is_logged_in = true
-  const {setShowLoginDialog} = useConfigs()
+  const { setShowLoginDialog } = useConfigs()
 
   // Get available models from constants
   const availableModels = config.models || {}
 
   const handleModelToggle = (modelName: string, enabled: boolean) => {
     const currentModels = config.models || {}
-    const updatedModels = {...currentModels}
+    const updatedModels = { ...currentModels }
 
     if (enabled) {
       // Add model with its type from available models
@@ -42,8 +39,7 @@ export default function JaazSetting({
     }
 
     // Filter out any models that don't exist in availableModels
-    const validModels: Record<string, { type?: 'text' | 'image' | 'video' }> =
-      {}
+    const validModels: Record<string, { type?: 'text' | 'image' | 'video' }> = {}
     Object.keys(updatedModels).forEach((key) => {
       if (availableModels[key]) {
         validModels[key] = updatedModels[key]
@@ -64,17 +60,17 @@ export default function JaazSetting({
   }
 
   const ModelsList = () => (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
+    <div className='space-y-2'>
+      <div className='flex items-center justify-between'>
         <Label>{t('settings:models.title')}</Label>
       </div>
 
-      <div className="space-y-2">
+      <div className='space-y-2'>
         {Object.entries(availableModels).map(([modelName, modelConfig]) => {
           return (
-            <div key={modelName} className="flex items-center justify-between">
-              <p className="w-[50%]">{modelName}</p>
-              <div className="flex items-center gap-6">
+            <div key={modelName} className='flex items-center justify-between'>
+              <p className='w-[50%]'>{modelName}</p>
+              <div className='flex items-center gap-6'>
                 <p>{modelConfig.type || 'text'}</p>
                 {/* TODO: re-enable this switch */}
                 {/* <Switch
@@ -92,22 +88,18 @@ export default function JaazSetting({
   )
 
   return (
-    <div className="space-y-4">
+    <div className='space-y-4'>
       {/* Provider Header */}
-      <div className="flex items-center gap-2 justify-between">
-        <div className="flex items-center gap-2">
-          <img src="/favicon.ico" alt="AiMark" className="w-10 h-10 rounded-full"/>
-          <p className="font-bold text-2xl w-fit">AiMark</p>
+      <div className='flex items-center gap-2 justify-between'>
+        <div className='flex items-center gap-2'>
+          <img src='/favicon.ico' alt='AiMark' className='w-10 h-10 rounded-full' />
+          <p className='font-bold text-2xl w-fit'>AiMark</p>
           {/* <span>✨ Custom Provider</span> */}
         </div>
 
         {/* Show login button if not logged in */}
         {!is_logged_in && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowLoginDialog(true)}
-          >
+          <Button variant='outline' size='sm' onClick={() => setShowLoginDialog(true)}>
             {t('common:auth.login')}
           </Button>
         )}
@@ -117,28 +109,22 @@ export default function JaazSetting({
       {is_logged_in && (
         <>
           {/* Models Configuration */}
-          <div className="space-y-2">
-            <ModelsList/>
+          <div className='space-y-2'>
+            <ModelsList />
           </div>
 
           {/* Max Tokens Input */}
-          <div className="space-y-2">
-            <Label htmlFor="jaaz-maxTokens">
-              {t('settings:provider.maxTokens')}
-            </Label>
+          <div className='space-y-2'>
+            <Label htmlFor='jaaz-maxTokens'>{t('settings:provider.maxTokens')}</Label>
             <Input
-              id="jaaz-maxTokens"
-              type="number"
+              id='jaaz-maxTokens'
+              type='number'
               placeholder={t('settings:provider.maxTokensPlaceholder')}
               value={config.max_tokens ?? 8192}
-              onChange={(e) =>
-                handleChange('max_tokens', parseInt(e.target.value))
-              }
-              className="w-full"
+              onChange={(e) => handleChange('max_tokens', parseInt(e.target.value))}
+              className='w-full'
             />
-            <p className="text-xs text-gray-500">
-              {t('settings:provider.maxTokensDescription')}
-            </p>
+            <p className='text-xs text-gray-500'>{t('settings:provider.maxTokensDescription')}</p>
           </div>
         </>
       )}

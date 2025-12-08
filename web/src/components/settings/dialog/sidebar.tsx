@@ -10,7 +10,7 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
 import { cn } from '@/lib/utils'
-import { PlugZap, Network, ChevronLeft } from 'lucide-react'
+import { ChevronLeft, Network, PlugZap } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 export type SettingSidebarType = 'provider' | 'proxy'
@@ -21,11 +21,7 @@ type SettingSidebar = {
   onClose?: () => void
 }
 
-const SettingSidebar: React.FC<SettingSidebar> = ({
-  current,
-  setCurrent,
-  onClose,
-}) => {
+const SettingSidebar: React.FC<SettingSidebar> = ({ current, setCurrent, onClose }) => {
   const { t } = useTranslation()
 
   // Menu items.
@@ -47,19 +43,17 @@ const SettingSidebar: React.FC<SettingSidebar> = ({
   ]
 
   return (
-    <Sidebar className="h-full rounded-l-lg overflow-hidden">
+    <Sidebar className='h-full rounded-l-lg overflow-hidden'>
       <SidebarContent>
         <SidebarGroup>
-          <div className="flex items-center justify-between mb-2">
+          <div className='flex items-center justify-between mb-2'>
             {onClose && (
               <Button onClick={onClose}>
-                <ChevronLeft className="h-6 w-6" />
-                <span className="sr-only">Close</span>
+                <ChevronLeft className='h-6 w-6' />
+                <span className='sr-only'>Close</span>
               </Button>
             )}
-            <SidebarGroupLabel className="text-lg font-bold select-none">
-              {t('settings:title')}
-            </SidebarGroupLabel>
+            <SidebarGroupLabel className='text-lg font-bold select-none'>{t('settings:title')}</SidebarGroupLabel>
           </div>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -69,7 +63,7 @@ const SettingSidebar: React.FC<SettingSidebar> = ({
                     <div
                       className={cn(
                         'flex items-center gap-2 select-none cursor-pointer',
-                        current === item.type && 'bg-muted'
+                        current === item.type && 'bg-muted',
                       )}
                       onClick={() => setCurrent(item.type)}
                     >

@@ -78,8 +78,7 @@ export interface SessionToolCallProgressEvent extends SessionBaseEvent {
   update: string
 }
 
-export interface SessionToolCallPendingConfirmationEvent
-  extends SessionBaseEvent {
+export interface SessionToolCallPendingConfirmationEvent extends SessionBaseEvent {
   type: SessionEventType.ToolCallPendingConfirmation
   id: string
   name: ToolCallFunctionName

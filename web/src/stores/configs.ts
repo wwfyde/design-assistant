@@ -1,4 +1,4 @@
-import { ModelInfo, ToolInfo } from '@/api/model'
+import { ToolInfo } from '@/api/model'
 import { LLMConfig, Model } from '@/types/types'
 import { create } from 'zustand'
 

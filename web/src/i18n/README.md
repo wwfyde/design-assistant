@@ -79,9 +79,7 @@ function LanguageButton() {
   const { changeLanguage, currentLanguage } = useLanguage()
 
   return (
-    <button
-      onClick={() => changeLanguage(currentLanguage === 'zh-CN' ? 'en' : 'zh-CN')}
-    >
+    <button onClick={() => changeLanguage(currentLanguage === 'zh-CN' ? 'en' : 'zh-CN')}>
       {currentLanguage === 'zh-CN' ? 'English' : '中文'}
     </button>
   )
@@ -119,7 +117,7 @@ import { LanguageSwitcher } from '@/components/common/LanguageSwitcher'
 
 function Header() {
   return (
-    <div className="header">
+    <div className='header'>
       <LanguageSwitcher />
     </div>
   )

@@ -1,12 +1,6 @@
 import CommonDialogContent from '@/components/common/DialogContent'
 import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { Dialog, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import Spinner from '@/components/ui/Spinner'
 import { useConfigs } from '@/contexts/configs'
 import { useCallback, useState } from 'react'
@@ -18,10 +12,7 @@ interface InstallComfyUIDialogProps {
   onInstallSuccess?: () => void
 }
 
-const InstallComfyUIDialog = ({
-  onOpenChange,
-  onInstallSuccess,
-}: InstallComfyUIDialogProps) => {
+const InstallComfyUIDialog = ({ onOpenChange, onInstallSuccess }: InstallComfyUIDialogProps) => {
   const [isInstalling, setIsInstalling] = useState(false)
   const [showProgressDialog, setShowProgressDialog] = useState(false)
 
@@ -41,8 +32,7 @@ const InstallComfyUIDialog = ({
         setShowProgressDialog(false)
       }
     } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error)
+      const errorMessage = error instanceof Error ? error.message : String(error)
       toast.error(`Installation failed: ${errorMessage}`)
       setShowProgressDialog(false)
     } finally {
@@ -63,7 +53,7 @@ const InstallComfyUIDialog = ({
       setShowInstallDialog(open)
       onOpenChange?.(open)
     },
-    [onOpenChange, setShowInstallDialog]
+    [onOpenChange, setShowInstallDialog],
   )
 
   return (
@@ -75,12 +65,11 @@ const InstallComfyUIDialog = ({
             <DialogDescription>
               No image generation models detected.
               <br />
-              To use AI image generation features, you can install ComfyUI and
-              Flux models.
+              To use AI image generation features, you can install ComfyUI and Flux models.
             </DialogDescription>
-            <div className="text-sm text-muted-foreground mt-2">
+            <div className='text-sm text-muted-foreground mt-2'>
               This will:
-              <ul className="list-disc list-inside mt-2 space-y-1">
+              <ul className='list-disc list-inside mt-2 space-y-1'>
                 <li>Download and install ComfyUI (~2000MB)</li>
                 <li>Configure Flux image generation models</li>
                 <li>Start local image generation service</li>
@@ -88,11 +77,7 @@ const InstallComfyUIDialog = ({
             </div>
           </DialogHeader>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => handleOpenChange(false)}
-              disabled={isInstalling}
-            >
+            <Button variant='outline' onClick={() => handleOpenChange(false)} disabled={isInstalling}>
               Cancel
             </Button>
             <Button onClick={handleInstallComfyUI} disabled={isInstalling}>

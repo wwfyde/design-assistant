@@ -6,7 +6,6 @@ import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { Button } from '../ui/button'
 
-
 const CanvasExport = () => {
   const { excalidrawAPI } = useCanvas()
   const { t } = useTranslation()
@@ -37,14 +36,10 @@ const CanvasExport = () => {
       const appState = excalidrawAPI.getAppState()
       const elements = excalidrawAPI.getSceneElements()
 
-      const selectedIds = Object.keys(appState.selectedElementIds).filter(
-        (id) => appState.selectedElementIds[id]
-      )
+      const selectedIds = Object.keys(appState.selectedElementIds).filter((id) => appState.selectedElementIds[id])
 
       const images = elements.filter(
-        (element) =>
-          selectedIds.includes(element.id) && 
-          (element.type === 'image' || element.type === 'embeddable')
+        (element) => selectedIds.includes(element.id) && (element.type === 'image' || element.type === 'embeddable'),
       )
 
       if (images.length === 0) {
@@ -55,8 +50,8 @@ const CanvasExport = () => {
       const files = excalidrawAPI.getFiles()
 
       // Separate embeddable elements (videos) and regular images
-      const embeddableElements = images.filter(element => element.type === 'embeddable')
-      const imageElements = images.filter(element => element.type === 'image')
+      const embeddableElements = images.filter((element) => element.type === 'embeddable')
+      const imageElements = images.filter((element) => element.type === 'image')
 
       // Get video URLs from embeddable elements
       const videoUrls = embeddableElements
@@ -83,7 +78,7 @@ const CanvasExport = () => {
         toast.error(t('canvas:messages.nothingSelected'))
         return
       }
-      
+
       // Generate random ID for the asset package
       const randomId = Math.random().toString(36).substring(2, 15)
       const packageName = `Asset-${randomId}.zip`
@@ -107,14 +102,14 @@ const CanvasExport = () => {
 
       // Create a zip package for multiple assets or mixed types
       const zip = new JSZip()
-      
+
       // Add videos to zip
       await Promise.all(
         videoUrls.map(async (videoUrl, index) => {
           const response = await fetch(videoUrl)
           const blob = await response.blob()
           zip.file(`video-${index + 1}.mp4`, blob)
-        })
+        }),
       )
 
       // Add images to zip
@@ -122,13 +117,9 @@ const CanvasExport = () => {
         imageUrls.map(async (imageUrl, index) => {
           const dataURL = await downloadImage(imageUrl)
           if (dataURL) {
-            zip.file(
-              `image-${index + 1}.png`,
-              dataURL.replace('data:image/png;base64,', ''),
-              { base64: true }
-            )
+            zip.file(`image-${index + 1}.png`, dataURL.replace('data:image/png;base64,', ''), { base64: true })
           }
-        })
+        }),
       )
 
       const content = await zip.generateAsync({ type: 'blob' })
@@ -143,10 +134,10 @@ const CanvasExport = () => {
   }
 
   return (
-    <div className="inline-flex -space-x-px rounded-md shadow-xs rtl:space-x-reverse">
+    <div className='inline-flex -space-x-px rounded-md shadow-xs rtl:space-x-reverse'>
       <Button
-        className="rounded-none shadow-none first:rounded-s-md last:rounded-e-md h-8"
-        variant="outline"
+        className='rounded-none shadow-none first:rounded-s-md last:rounded-e-md h-8'
+        variant='outline'
         onClick={handleExportImages}
       >
         <ImageDown />

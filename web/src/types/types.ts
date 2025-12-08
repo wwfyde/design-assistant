@@ -18,9 +18,7 @@ export type ToolCall = {
   result?: string // Only for manually merged message list by mergeToolCallResult
 }
 export type MessageContentType = MessageContent[] | string
-export type MessageContent =
-  | { text: string; type: 'text' }
-  | { image_url: { url: string }; type: 'image_url' }
+export type MessageContent = { text: string; type: 'text' } | { image_url: { url: string }; type: 'image_url' }
 
 export type ToolResultMessage = {
   id?: string

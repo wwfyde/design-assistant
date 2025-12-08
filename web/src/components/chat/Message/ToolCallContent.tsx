@@ -7,10 +7,7 @@ type ToolCallContentProps = {
   message: ToolResultMessage
 }
 
-export const ToolCallContent: React.FC<ToolCallContentProps> = ({
-  expandingToolCalls,
-  message,
-}) => {
+export const ToolCallContent: React.FC<ToolCallContentProps> = ({ expandingToolCalls, message }) => {
   const isExpanded = expandingToolCalls.includes(message.tool_call_id)
 
   if (message.content.includes('<hide_in_user_ui>')) {
@@ -26,7 +23,7 @@ export const ToolCallContent: React.FC<ToolCallContentProps> = ({
           exit={{ opacity: 0, y: -5, height: 0 }}
           layout
           transition={{ duration: 0.2, ease: 'easeOut' }}
-          className="p-3 bg-muted rounded-lg"
+          className='p-3 bg-muted rounded-lg'
         >
           <Markdown>{message.content}</Markdown>
         </motion.div>
@@ -41,7 +38,7 @@ const ToolCallContentV2: React.FC<{ content: string }> = ({ content }) => {
   }
 
   return (
-    <div className="p-2 bg-muted rounded-lg">
+    <div className='p-2 bg-muted rounded-lg'>
       <Markdown>{content}</Markdown>
     </div>
   )

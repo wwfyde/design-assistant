@@ -75,12 +75,8 @@ export async function startDeviceAuth(): Promise<DeviceAuthResponse> {
   }
 }
 
-export async function pollDeviceAuth(
-  deviceCode: string
-): Promise<DeviceAuthPollResponse> {
-  const response = await fetch(
-    `${BASE_API_URL}/api/device/poll?code=${deviceCode}`
-  )
+export async function pollDeviceAuth(deviceCode: string): Promise<DeviceAuthPollResponse> {
+  const response = await fetch(`${BASE_API_URL}/api/device/poll?code=${deviceCode}`)
 
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`)
@@ -140,9 +136,7 @@ export async function getAuthStatus(): Promise<AuthStatus> {
         return loggedOutStatus
       } else {
         // Network error or other issues, keep user logged in with old token
-        console.log(
-          'Network error during token refresh, keeping user logged in with existing token'
-        )
+        console.log('Network error during token refresh, keeping user logged in with existing token')
         const authStatus = {
           status: 'logged_in' as const,
           is_logged_in: true,
@@ -196,10 +190,7 @@ export function getAccessToken(): string | null {
 }
 
 // Helper function to make authenticated API calls
-export async function authenticatedFetch(
-  url: string,
-  options: RequestInit = {}
-): Promise<Response> {
+export async function authenticatedFetch(url: string, options: RequestInit = {}): Promise<Response> {
   const token = getAccessToken()
 
   const headers: Record<string, string> = {

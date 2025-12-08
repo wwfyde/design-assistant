@@ -56,9 +56,7 @@ export async function getSettings(): Promise<Record<string, unknown>> {
  *   console.log('Settings saved successfully');
  * }
  */
-export async function updateSettings(
-  settings: Record<string, unknown>
-): Promise<{
+export async function updateSettings(settings: Record<string, unknown>): Promise<{
   status: string
   message: string
 }> {
@@ -112,9 +110,7 @@ export async function getProxySettings(): Promise<Record<string, unknown>> {
  *   console.log('Proxy settings updated');
  * }
  */
-export async function updateProxySettings(
-  proxyConfig: Record<string, unknown>
-): Promise<{
+export async function updateProxySettings(proxyConfig: Record<string, unknown>): Promise<{
   status: string
   message: string
 }> {
@@ -130,9 +126,7 @@ export async function updateProxySettings(
 
 // 文件系统浏览相关的API
 export const browseFolderApi = async (path: string = '') => {
-  const response = await fetch(
-    `/api/browse_filesystem?path=${encodeURIComponent(path)}`
-  )
+  const response = await fetch(`/api/browse_filesystem?path=${encodeURIComponent(path)}`)
   if (!response.ok) {
     throw new Error('Failed to browse folder')
   }
@@ -140,9 +134,7 @@ export const browseFolderApi = async (path: string = '') => {
 }
 
 export const getMediaFilesApi = async (path: string) => {
-  const response = await fetch(
-    `/api/get_media_files?path=${encodeURIComponent(path)}`
-  )
+  const response = await fetch(`/api/get_media_files?path=${encodeURIComponent(path)}`)
   if (!response.ok) {
     throw new Error('Failed to get media files')
   }
@@ -164,9 +156,7 @@ export const openFolderInExplorer = async (path: string) => {
 }
 
 export const getFileThumbnailApi = async (filePath: string) => {
-  const response = await fetch(
-    `/api/get_file_thumbnail?file_path=${encodeURIComponent(filePath)}`
-  )
+  const response = await fetch(`/api/get_file_thumbnail?file_path=${encodeURIComponent(filePath)}`)
   if (!response.ok) {
     throw new Error('Failed to get file thumbnail')
   }
@@ -180,9 +170,7 @@ export const getFileServiceUrl = (filePath: string) => {
 
 // 获取文件详细信息
 export const getFileInfoApi = async (filePath: string) => {
-  const response = await fetch(
-    `/api/get_file_info?file_path=${encodeURIComponent(filePath)}`
-  )
+  const response = await fetch(`/api/get_file_info?file_path=${encodeURIComponent(filePath)}`)
   if (!response.ok) {
     throw new Error('Failed to get file info')
   }

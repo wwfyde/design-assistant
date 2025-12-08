@@ -1,11 +1,11 @@
-import {saveCanvas} from '@/api/canvas'
-import {useCanvas} from '@/contexts/canvas'
+import { saveCanvas } from '@/api/canvas'
+import { useCanvas } from '@/contexts/canvas'
 import useDebounce from '@/hooks/use-debounce'
-import {useTheme} from '@/hooks/use-theme'
-import {eventBus} from '@/lib/event'
+import { useTheme } from '@/hooks/use-theme'
+import { eventBus } from '@/lib/event'
 import * as ISocket from '@/types/socket'
-import {CanvasData} from '@/types/types'
-import {convertToExcalidrawElements, Excalidraw} from '@excalidraw/excalidraw'
+import { CanvasData } from '@/types/types'
+import { convertToExcalidrawElements, Excalidraw } from '@excalidraw/excalidraw'
 import {
   ExcalidrawEmbeddableElement,
   ExcalidrawImageElement,
@@ -14,11 +14,11 @@ import {
   Theme,
 } from '@excalidraw/excalidraw/element/types'
 import '@excalidraw/excalidraw/index.css'
-import {AppState, BinaryFileData, BinaryFiles, ExcalidrawInitialDataState,} from '@excalidraw/excalidraw/types'
-import {nanoid} from 'nanoid'
-import {useCallback, useEffect, useRef} from 'react'
-import {useTranslation} from 'react-i18next'
-import {VideoElement} from './VideoElement'
+import { AppState, BinaryFileData, BinaryFiles, ExcalidrawInitialDataState } from '@excalidraw/excalidraw/types'
+import { nanoid } from 'nanoid'
+import { useCallback, useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
+import { VideoElement } from './VideoElement'
 
 import '@/assets/style/canvas.css'
 
@@ -35,28 +35,18 @@ type CanvasExcaliProps = {
   initialData?: ExcalidrawInitialDataState
 }
 
-const CanvasExcali: React.FC<CanvasExcaliProps> = ({
-                                                     canvasId,
-                                                     initialData,
-                                                   }) => {
-  const {excalidrawAPI, setExcalidrawAPI} = useCanvas()
+const CanvasExcali: React.FC<CanvasExcaliProps> = ({ canvasId, initialData }) => {
+  const { excalidrawAPI, setExcalidrawAPI } = useCanvas()
 
-  const {i18n} = useTranslation()
+  const { i18n } = useTranslation()
 
   // Immediate handler for UI updates (no debounce)
-  const handleSelectionChange = (
-    elements: Readonly<OrderedExcalidrawElement[]>,
-    appState: AppState
-  ) => {
+  const handleSelectionChange = (elements: Readonly<OrderedExcalidrawElement[]>, appState: AppState) => {
     if (!appState) return
 
     // Check if any selected element is embeddable type
-    const selectedElements = elements.filter((element) =>
-      appState.selectedElementIds[element.id]
-    )
-    const hasEmbeddableSelected = selectedElements.some(
-      (element) => element.type === 'embeddable'
-    )
+    const selectedElements = elements.filter((element) => appState.selectedElementIds[element.id])
+    const hasEmbeddableSelected = selectedElements.some((element) => element.type === 'embeddable')
 
     // Toggle CSS class to hide/show left panel immediately
     const excalidrawContainer = document.querySelector('.excalidraw')
@@ -71,11 +61,7 @@ const CanvasExcali: React.FC<CanvasExcaliProps> = ({
 
   // Debounced handler for saving (performance optimization)
   const handleSave = useDebounce(
-    (
-      elements: Readonly<OrderedExcalidrawElement[]>,
-      appState: AppState,
-      files: BinaryFiles
-    ) => {
+    (elements: Readonly<OrderedExcalidrawElement[]>, appState: AppState, files: BinaryFiles) => {
       if (elements.length === 0 || !appState) {
         return
       }
@@ -100,17 +86,13 @@ const CanvasExcali: React.FC<CanvasExcaliProps> = ({
         }
       }
 
-      saveCanvas(canvasId, {data, thumbnail})
+      saveCanvas(canvasId, { data, thumbnail })
     },
-    5000  // 5000
+    5000, // 5000
   )
 
   // Combined handler that calls both immediate and debounced functions
-  const handleChange = (
-    elements: Readonly<OrderedExcalidrawElement[]>,
-    appState: AppState,
-    files: BinaryFiles
-  ) => {
+  const handleChange = (elements: Readonly<OrderedExcalidrawElement[]>, appState: AppState, files: BinaryFiles) => {
     // Immediate UI updates
     handleSelectionChange(elements, appState)
     // Debounced save operation
@@ -120,9 +102,9 @@ const CanvasExcali: React.FC<CanvasExcaliProps> = ({
   const lastImagePosition = useRef<LastImagePosition | null>(
     localStorage.getItem('excalidraw-last-image-position')
       ? JSON.parse(localStorage.getItem('excalidraw-last-image-position')!)
-      : null
+      : null,
   )
-  const {theme} = useTheme()
+  const { theme } = useTheme()
 
   // 添加自定义类名以便应用我们的CSS修复
   const excalidrawClassName = `excalidraw-custom ${theme === 'dark' ? 'excalidraw-dark-fix-wm76394yjopk' : 'excalidraw-wm76394yjopk'}`
@@ -139,7 +121,7 @@ const CanvasExcali: React.FC<CanvasExcaliProps> = ({
         appState: {
           viewBackgroundColor: '#121212',
           // gridColor: 'rgba(255, 255, 255, 0.1)',
-        }
+        },
       })
     } else if (excalidrawAPI && theme === 'light') {
       // 恢复浅色背景
@@ -147,7 +129,7 @@ const CanvasExcali: React.FC<CanvasExcaliProps> = ({
         appState: {
           viewBackgroundColor: '#ffffff',
           // gridColor: 'rgba(0, 0, 0, 0.1)',
-        }
+        },
       })
     }
   }, [excalidrawAPI, theme])
@@ -246,16 +228,13 @@ const CanvasExcali: React.FC<CanvasExcaliProps> = ({
             col: 0, // Not strictly used here but required by type
           }
 
-          localStorage.setItem(
-            'excalidraw-last-image-position',
-            JSON.stringify(lastImagePosition.current)
-          )
+          localStorage.setItem('excalidraw-last-image-position', JSON.stringify(lastImagePosition.current))
         }
       } catch (error) {
         console.error('Failed to add image to canvas:', error)
       }
     },
-    [excalidrawAPI]
+    [excalidrawAPI],
   )
 
   const addVideoEmbed = useCallback(
@@ -320,20 +299,13 @@ const CanvasExcali: React.FC<CanvasExcaliProps> = ({
         const currentElements = excalidrawAPI.getSceneElements()
         const newElements = [...currentElements, ...videoElements]
 
-        console.log(
-          '👇 Updating scene with elements count:',
-          newElements.length
-        )
+        console.log('👇 Updating scene with elements count:', newElements.length)
 
         excalidrawAPI.updateScene({
           elements: newElements,
         })
 
-        console.log(
-          '👇 Added video embed element:',
-          videoSrc,
-          `${elementData.width}x${elementData.height}`
-        )
+        console.log('👇 Added video embed element:', videoSrc, `${elementData.width}x${elementData.height}`)
       }
 
       // If dimensions are provided, use them directly
@@ -376,38 +348,29 @@ const CanvasExcali: React.FC<CanvasExcaliProps> = ({
 
       video.src = videoSrc
     },
-    [excalidrawAPI]
+    [excalidrawAPI],
   )
 
-  const renderEmbeddable = useCallback(
-    (element: NonDeleted<ExcalidrawEmbeddableElement>, appState: AppState) => {
-      const {link} = element
+  const renderEmbeddable = useCallback((element: NonDeleted<ExcalidrawEmbeddableElement>, appState: AppState) => {
+    const { link } = element
 
-      // Check if this is a video URL
-      if (
-        link &&
-        (link.includes('.mp4') ||
-          link.includes('.webm') ||
-          link.includes('.ogg') ||
-          link.startsWith('blob:') ||
-          link.includes('video'))
-      ) {
-        // Return the VideoPlayer component
-        return (
-          <VideoElement
-            src={link}
-            width={element.width}
-            height={element.height}
-          />
-        )
-      }
+    // Check if this is a video URL
+    if (
+      link &&
+      (link.includes('.mp4') ||
+        link.includes('.webm') ||
+        link.includes('.ogg') ||
+        link.startsWith('blob:') ||
+        link.includes('video'))
+    ) {
+      // Return the VideoPlayer component
+      return <VideoElement src={link} width={element.width} height={element.height} />
+    }
 
-      console.log('👇 Not a video URL, returning null for:', link)
-      // Return null for non-video embeds to use default rendering
-      return null
-    },
-    []
-  )
+    console.log('👇 Not a video URL, returning null for:', link)
+    // Return null for non-video embeds to use default rendering
+    return null
+  }, [])
 
   const handleImageGenerated = useCallback(
     (imageData: ISocket.SessionImageGeneratedEvent) => {
@@ -421,9 +384,7 @@ const CanvasExcali: React.FC<CanvasExcaliProps> = ({
 
       // Check if this is actually a video generation event that got mislabeled
       if (imageData.file?.mimeType?.startsWith('video/')) {
-        console.log(
-          '👇 This appears to be a video, not an image. Ignoring in image handler.'
-        )
+        console.log('👇 This appears to be a video, not an image. Ignoring in image handler.')
         return
       }
 
@@ -469,7 +430,7 @@ const CanvasExcali: React.FC<CanvasExcaliProps> = ({
 
       addImageToExcalidraw(imageElement, imageData.image_url)
     },
-    [addImageToExcalidraw, canvasId]
+    [addImageToExcalidraw, canvasId],
   )
 
   const handleVideoGenerated = useCallback(
@@ -485,7 +446,7 @@ const CanvasExcali: React.FC<CanvasExcaliProps> = ({
       // Create video embed element using the video URL
       addVideoEmbed(videoData.element, videoData.video_url)
     },
-    [addVideoEmbed, canvasId]
+    [addVideoEmbed, canvasId],
   )
 
   const handleAddImageToCanvas = useCallback(
@@ -530,7 +491,7 @@ const CanvasExcali: React.FC<CanvasExcaliProps> = ({
 
       addImageToExcalidraw(imageElement, data.url)
     },
-    [addImageToExcalidraw]
+    [addImageToExcalidraw],
   )
 
   useEffect(() => {
@@ -545,7 +506,7 @@ const CanvasExcali: React.FC<CanvasExcaliProps> = ({
   }, [handleImageGenerated, handleVideoGenerated, handleAddImageToCanvas])
 
   return (
-    <div className={excalidrawClassName} style={{width: '100%', height: '100%'}}>
+    <div className={excalidrawClassName} style={{ width: '100%', height: '100%' }}>
       <Excalidraw
         theme={customTheme as Theme}
         langCode={i18n.language}
@@ -598,5 +559,5 @@ const CanvasExcali: React.FC<CanvasExcaliProps> = ({
   )
 }
 
-export {CanvasExcali}
+export { CanvasExcali }
 export default CanvasExcali

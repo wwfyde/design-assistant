@@ -1,20 +1,15 @@
-import { useState, useEffect } from "react"
-import { useTranslation } from "react-i18next"
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { useCanvas } from "@/contexts/canvas"
-import { ExcalidrawImageElement } from "@excalidraw/excalidraw/element/types"
-import { toast } from "sonner"
-import { Share2 } from "lucide-react"
-import { Message } from "@/types/types"
-import { BASE_API_URL } from "@/constants"
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { BASE_API_URL } from '@/constants'
+import { useCanvas } from '@/contexts/canvas'
+import { Message } from '@/types/types'
+import { ExcalidrawImageElement } from '@excalidraw/excalidraw/element/types'
+import { Share2 } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 
 interface ShareTemplateDialogProps {
   open: boolean
@@ -41,9 +36,9 @@ export default function ShareTemplateDialog({
 }: ShareTemplateDialogProps) {
   const { t } = useTranslation()
   const { excalidrawAPI } = useCanvas()
-  const [templateName, setTemplateName] = useState("")
+  const [templateName, setTemplateName] = useState('')
   const [images, setImages] = useState<CanvasImage[]>([])
-  const [selectedCoverImage, setSelectedCoverImage] = useState<string>("")
+  const [selectedCoverImage, setSelectedCoverImage] = useState<string>('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   // Get canvas images when dialog opens
@@ -54,7 +49,7 @@ export default function ShareTemplateDialog({
 
       // Filter image elements and get their file data
       const imageElements = elements.filter(
-        (element) => element.type === "image" && element.fileId
+        (element) => element.type === 'image' && element.fileId,
       ) as ExcalidrawImageElement[]
 
       const canvasImages: CanvasImage[] = imageElements
@@ -83,12 +78,12 @@ export default function ShareTemplateDialog({
 
   const handleSubmit = async () => {
     if (!templateName.trim()) {
-      toast.error(t("chat:shareTemplate.nameRequired"))
+      toast.error(t('chat:shareTemplate.nameRequired'))
       return
     }
 
     if (!selectedCoverImage) {
-      toast.error(t("chat:shareTemplate.coverImageRequired"))
+      toast.error(t('chat:shareTemplate.coverImageRequired'))
       return
     }
 
@@ -98,7 +93,7 @@ export default function ShareTemplateDialog({
       // Get the selected cover image
       const coverImage = images.find((img) => img.fileId === selectedCoverImage)
       if (!coverImage) {
-        throw new Error("Cover image not found")
+        throw new Error('Cover image not found')
       }
 
       // Get canvas data
@@ -107,7 +102,7 @@ export default function ShareTemplateDialog({
       const files = excalidrawAPI?.getFiles()
 
       if (!elements || !appState || !files) {
-        throw new Error("Failed to get canvas data")
+        throw new Error('Failed to get canvas data')
       }
 
       // Prepare template data
@@ -129,38 +124,38 @@ export default function ShareTemplateDialog({
 
       // Call jaaz-cloud API to create template
       const response = await fetch(`${BASE_API_URL}/api/template/create`, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("jaaz_access_token")}`,
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('jaaz_access_token')}`,
         },
         body: JSON.stringify(templateData),
       })
 
       if (!response.ok) {
-        console.error("Failed to create template", response)
+        console.error('Failed to create template', response)
         throw new Error(`Failed to create template ${response}`)
       }
 
       const result = await response.json()
 
-      toast.success(t("chat:shareTemplate.success"))
+      toast.success(t('chat:shareTemplate.success'))
       onOpenChange(false)
 
       // Reset form
-      setTemplateName("")
-      setSelectedCoverImage("")
+      setTemplateName('')
+      setSelectedCoverImage('')
     } catch (error) {
-      console.error("Error creating template:", error)
-      toast.error(t("chat:shareTemplate.error"))
+      console.error('Error creating template:', error)
+      toast.error(t('chat:shareTemplate.error'))
     } finally {
       setIsSubmitting(false)
     }
   }
 
   const handleCancel = () => {
-    setTemplateName("")
-    setSelectedCoverImage("")
+    setTemplateName('')
+    setSelectedCoverImage('')
     onOpenChange(false)
   }
 
@@ -170,49 +165,39 @@ export default function ShareTemplateDialog({
         <DialogHeader>
           <DialogTitle className='flex items-center gap-2'>
             <Share2 className='h-5 w-5' />
-            {t("chat:shareTemplate.title")}
+            {t('chat:shareTemplate.title')}
           </DialogTitle>
         </DialogHeader>
 
         <div className='space-y-4'>
           {/* Template Name Input */}
           <div className='space-y-2'>
-            <Label htmlFor='templateName'>
-              {t("chat:shareTemplate.templateName")}
-            </Label>
+            <Label htmlFor='templateName'>{t('chat:shareTemplate.templateName')}</Label>
             <Input
               id='templateName'
               value={templateName}
               onChange={(e) => setTemplateName(e.target.value)}
-              placeholder={t("chat:shareTemplate.templateNamePlaceholder")}
+              placeholder={t('chat:shareTemplate.templateNamePlaceholder')}
             />
           </div>
 
           {/* Cover Photo Selection */}
           <div className='space-y-2'>
-            <Label>{t("chat:shareTemplate.coverPhoto")}</Label>
+            <Label>{t('chat:shareTemplate.coverPhoto')}</Label>
 
             {images.length === 0 ? (
-              <p className='text-sm text-muted-foreground'>
-                {t("chat:shareTemplate.noImagesFound")}
-              </p>
+              <p className='text-sm text-muted-foreground'>{t('chat:shareTemplate.noImagesFound')}</p>
             ) : (
               <div className='grid grid-cols-3 gap-2 max-h-64 overflow-y-auto'>
                 {images.map((image) => (
                   <div
                     key={image.fileId}
                     className={`relative cursor-pointer rounded-lg border-3 transition-colors ${
-                      selectedCoverImage === image.fileId
-                        ? "border-blue-500"
-                        : "border-gray-200 hover:border-gray-300"
+                      selectedCoverImage === image.fileId ? 'border-blue-500' : 'border-gray-200 hover:border-gray-300'
                     }`}
                     onClick={() => setSelectedCoverImage(image.fileId)}
                   >
-                    <img
-                      src={image.dataURL}
-                      alt='Canvas image'
-                      className='w-full h-20 object-cover rounded-lg'
-                    />
+                    <img src={image.dataURL} alt='Canvas image' className='w-full h-20 object-cover rounded-lg' />
                   </div>
                 ))}
               </div>
@@ -221,22 +206,11 @@ export default function ShareTemplateDialog({
 
           {/* Action Buttons */}
           <div className='flex justify-end space-x-2 pt-4'>
-            <Button
-              variant='outline'
-              onClick={handleCancel}
-              disabled={isSubmitting}
-            >
-              {t("common:buttons.cancel")}
+            <Button variant='outline' onClick={handleCancel} disabled={isSubmitting}>
+              {t('common:buttons.cancel')}
             </Button>
-            <Button
-              onClick={handleSubmit}
-              disabled={
-                isSubmitting || !templateName.trim() || !selectedCoverImage
-              }
-            >
-              {isSubmitting
-                ? t("chat:shareTemplate.creating")
-                : t("chat:shareTemplate.create")}
+            <Button onClick={handleSubmit} disabled={isSubmitting || !templateName.trim() || !selectedCoverImage}>
+              {isSubmitting ? t('chat:shareTemplate.creating') : t('chat:shareTemplate.create')}
             </Button>
           </div>
         </div>

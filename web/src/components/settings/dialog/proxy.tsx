@@ -1,3 +1,4 @@
+import { getProxySettings, updateProxySettings } from '@/api/settings'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -6,7 +7,6 @@ import { Network, Save } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
-import { getProxySettings, updateProxySettings } from '@/api/settings'
 
 type ProxyMode = 'no_proxy' | 'system' | 'custom'
 
@@ -22,7 +22,7 @@ const SettingProxy = () => {
   const [testing, setTesting] = useState(false)
   const [proxyConfig, setProxyConfig] = useState<ProxyConfig>({
     mode: 'system',
-    url: ''
+    url: '',
   })
 
   useEffect(() => {
@@ -59,11 +59,11 @@ const SettingProxy = () => {
   }, [t])
 
   const handleModeChange = (mode: ProxyMode) => {
-    setProxyConfig(prev => ({ ...prev, mode }))
+    setProxyConfig((prev) => ({ ...prev, mode }))
   }
 
   const handleUrlChange = (url: string) => {
-    setProxyConfig(prev => ({ ...prev, url }))
+    setProxyConfig((prev) => ({ ...prev, url }))
   }
 
   const handleSave = async () => {
@@ -94,7 +94,7 @@ const SettingProxy = () => {
 
       // Save proxy settings using the dedicated proxy API
       const result = await updateProxySettings({
-        proxy: proxyValue
+        proxy: proxyValue,
       })
 
       console.log('Proxy settings save result:', result)
@@ -104,7 +104,7 @@ const SettingProxy = () => {
         // Show restart notification
         setTimeout(() => {
           toast.info(t('settings:messages.restartRequired'), {
-            duration: 5000
+            duration: 5000,
           })
         }, 1000)
         setErrorMessage('')
@@ -123,45 +123,45 @@ const SettingProxy = () => {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center p-4 relative w-full sm:pb-0 pb-10">
+    <div className='flex flex-col items-center justify-center p-4 relative w-full sm:pb-0 pb-10'>
       {isLoading && (
-        <div className="flex justify-center items-center h-32">
-          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-zinc-500"></div>
+        <div className='flex justify-center items-center h-32'>
+          <div className='animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-zinc-500'></div>
         </div>
       )}
 
       {!isLoading && (
-        <div className="w-full">
-          <div className="flex items-center gap-2 mb-4">
-            <Network className="h-5 w-5" />
-            <h3 className="text-lg font-semibold">{t('settings:proxy:title')}</h3>
+        <div className='w-full'>
+          <div className='flex items-center gap-2 mb-4'>
+            <Network className='h-5 w-5' />
+            <h3 className='text-lg font-semibold'>{t('settings:proxy:title')}</h3>
           </div>
 
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="proxy-mode" className="text-sm font-medium">
+          <div className='space-y-4'>
+            <div className='flex items-center justify-between'>
+              <Label htmlFor='proxy-mode' className='text-sm font-medium'>
                 {t('settings:proxy:mode')}
               </Label>
               <Select value={proxyConfig.mode} onValueChange={handleModeChange}>
-                <SelectTrigger className="w-48">
+                <SelectTrigger className='w-48'>
                   <SelectValue placeholder={t('settings:proxy:selectMode')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="no_proxy">{t('settings:proxy:modes.no_proxy')}</SelectItem>
-                  <SelectItem value="system">{t('settings:proxy:modes.system')}</SelectItem>
-                  <SelectItem value="custom">{t('settings:proxy:modes.custom')}</SelectItem>
+                  <SelectItem value='no_proxy'>{t('settings:proxy:modes.no_proxy')}</SelectItem>
+                  <SelectItem value='system'>{t('settings:proxy:modes.system')}</SelectItem>
+                  <SelectItem value='custom'>{t('settings:proxy:modes.custom')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             {proxyConfig.mode === 'custom' && (
-              <div className="space-y-2">
-                <Label htmlFor="proxy-url" className="text-sm font-medium">
+              <div className='space-y-2'>
+                <Label htmlFor='proxy-url' className='text-sm font-medium'>
                   {t('settings:proxy:url')}
                 </Label>
                 <Input
-                  id="proxy-url"
-                  type="text"
+                  id='proxy-url'
+                  type='text'
                   placeholder={t('settings:proxy:urlPlaceholder')}
                   value={proxyConfig.url}
                   onChange={(e) => handleUrlChange(e.target.value)}
@@ -172,15 +172,13 @@ const SettingProxy = () => {
         </div>
       )}
 
-      <div className="flex justify-center fixed sm:bottom-2 sm:left-[calc(var(--sidebar-width)+0.45rem)] sm:translate-x-0 -translate-x-1/2 bottom-15 left-1/2 gap-1.5">
+      <div className='flex justify-center fixed sm:bottom-2 sm:left-[calc(var(--sidebar-width)+0.45rem)] sm:translate-x-0 -translate-x-1/2 bottom-15 left-1/2 gap-1.5'>
         <Button onClick={handleSave} disabled={isLoading}>
-          <Save className="mr-2 h-4 w-4" /> {t('settings:saveSettings')}
+          <Save className='mr-2 h-4 w-4' /> {t('settings:saveSettings')}
         </Button>
       </div>
 
-      {errorMessage && (
-        <div className="text-red-500 text-center mb-4">{errorMessage}</div>
-      )}
+      {errorMessage && <div className='text-red-500 text-center mb-4'>{errorMessage}</div>}
     </div>
   )
 }

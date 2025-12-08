@@ -1,9 +1,6 @@
 import { useCanvas } from '@/contexts/canvas'
 import { TCanvasAddImagesToChatEvent } from '@/lib/event'
-import {
-  ExcalidrawImageElement,
-  OrderedExcalidrawElement,
-} from '@excalidraw/excalidraw/element/types'
+import { ExcalidrawImageElement, OrderedExcalidrawElement } from '@excalidraw/excalidraw/element/types'
 import { AnimatePresence } from 'motion/react'
 import { useRef, useState } from 'react'
 import CanvasPopbarContainer from './CanvasPopbarContainer'
@@ -28,7 +25,7 @@ const CanvasPopbarWrapper = () => {
     }
 
     const selectedImages = elements.filter(
-      (element) => element.type === 'image' && selectedIds[element.id]
+      (element) => element.type === 'image' && selectedIds[element.id],
     ) as ExcalidrawImageElement[]
 
     // 判断是否显示添加到对话按钮：选中图片元素
@@ -62,7 +59,7 @@ const CanvasPopbarWrapper = () => {
 
     // 处理选中的元素数据
     selectedElementsRef.current = elements.filter(
-      (element) => selectedIds[element.id] && element.index !== null
+      (element) => selectedIds[element.id] && element.index !== null,
     ) as OrderedExcalidrawElement[]
 
     // 计算位置：如果有图片，基于图片；否则基于所有选中的元素
@@ -71,27 +68,20 @@ const CanvasPopbarWrapper = () => {
 
     if (hasSelectedImages) {
       // 基于选中的图片计算位置
-      centerX =
-        selectedImages.reduce((acc, image) => acc + image.x + image.width / 2, 0) /
-        selectedImages.length
+      centerX = selectedImages.reduce((acc, image) => acc + image.x + image.width / 2, 0) / selectedImages.length
 
-      bottomY = selectedImages.reduce(
-        (acc, image) => Math.max(acc, image.y + image.height),
-        Number.NEGATIVE_INFINITY
-      )
+      bottomY = selectedImages.reduce((acc, image) => Math.max(acc, image.y + image.height), Number.NEGATIVE_INFINITY)
     } else {
       // 基于所有选中的元素计算位置
       const selectedElements = elements.filter((element) => selectedIds[element.id])
 
       centerX =
-        selectedElements.reduce(
-          (acc, element) => acc + element.x + (element.width || 0) / 2,
-          0
-        ) / selectedElements.length
+        selectedElements.reduce((acc, element) => acc + element.x + (element.width || 0) / 2, 0) /
+        selectedElements.length
 
       bottomY = selectedElements.reduce(
         (acc, element) => Math.max(acc, element.y + (element.height || 0)),
-        Number.NEGATIVE_INFINITY
+        Number.NEGATIVE_INFINITY,
       )
     }
 

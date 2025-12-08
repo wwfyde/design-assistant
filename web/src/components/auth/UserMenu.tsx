@@ -1,9 +1,6 @@
-import React from 'react'
-import {useTranslation} from 'react-i18next'
-import {useAuth} from '@/contexts/AuthContext'
-import {useConfigs, useRefreshModels} from '@/contexts/configs'
-import {BASE_API_URL} from '@/constants'
-import {Button} from '@/components/ui/button'
+import { logout } from '@/api/auth'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,15 +9,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import {Avatar, AvatarFallback, AvatarImage} from '@/components/ui/avatar'
-import {logout} from '@/api/auth'
-import {PointsDisplay} from './PointsDisplay'
+import { BASE_API_URL } from '@/constants'
+import { useAuth } from '@/contexts/AuthContext'
+import { useConfigs, useRefreshModels } from '@/contexts/configs'
+import { useTranslation } from 'react-i18next'
+import { PointsDisplay } from './PointsDisplay'
 
 export function UserMenu() {
-  const {authStatus, refreshAuth} = useAuth()
-  const {setShowLoginDialog} = useConfigs()
+  const { authStatus, refreshAuth } = useAuth()
+  const { setShowLoginDialog } = useConfigs()
   const refreshModels = useRefreshModels()
-  const {t} = useTranslation()
+  const { t } = useTranslation()
 
   const handleLogout = async () => {
     await logout()
@@ -31,37 +30,36 @@ export function UserMenu() {
 
   const is_logged_ig = true
   const user_info = {
-    id: "1",
-    username: "aimark",
-    email: "string",
-    image_url: "string",
-    provider: "seedream",
-    created_at: "string",
-    updated_at: "string",
+    id: '1',
+    username: 'aimark',
+    email: 'string',
+    image_url: 'string',
+    provider: 'seedream',
+    created_at: 'string',
+    updated_at: 'string',
   }
-
 
   // 如果用户已登录，显示用户菜单
   if (authStatus.is_logged_in && authStatus.user_info) {
-    const {username, image_url} = authStatus.user_info
+    const { username, image_url } = authStatus.user_info
     const initials = username ? username.substring(0, 2).toUpperCase() : 'U'
 
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="relative p-0 h-auto">
+          <Button variant='ghost' className='relative p-0 h-auto'>
             <PointsDisplay>
-              <Avatar className="h-6 w-6">
-                <AvatarImage src={image_url} alt={username}/>
+              <Avatar className='h-6 w-6'>
+                <AvatarImage src={image_url} alt={username} />
                 <AvatarFallback>{initials}</AvatarFallback>
               </Avatar>
             </PointsDisplay>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
+        <DropdownMenuContent align='end'>
           <DropdownMenuLabel>{t('common:auth.myAccount')}</DropdownMenuLabel>
           <DropdownMenuItem disabled>{username}</DropdownMenuItem>
-          <DropdownMenuSeparator/>
+          <DropdownMenuSeparator />
           <DropdownMenuItem
             onClick={() => {
               const billingUrl = `${BASE_API_URL}/billing`
@@ -74,10 +72,8 @@ export function UserMenu() {
           >
             {t('common:auth.recharge')}
           </DropdownMenuItem>
-          <DropdownMenuSeparator/>
-          <DropdownMenuItem onClick={handleLogout}>
-            {t('common:auth.logout')}
-          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={handleLogout}>{t('common:auth.logout')}</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     )
@@ -85,7 +81,7 @@ export function UserMenu() {
 
   // 未登录状态，显示登录按钮
   return (
-    <Button variant="outline" onClick={() => setShowLoginDialog(true)}>
+    <Button variant='outline' onClick={() => setShowLoginDialog(true)}>
       {t('common:auth.login')}
     </Button>
   )

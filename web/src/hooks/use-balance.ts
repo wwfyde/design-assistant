@@ -1,15 +1,11 @@
-import { useQuery } from '@tanstack/react-query'
 import { getBalance } from '@/api/billing'
 import { useAuth } from '@/contexts/AuthContext'
+import { useQuery } from '@tanstack/react-query'
 
 export function useBalance() {
   const { authStatus } = useAuth()
 
-  const {
-    data,
-    error,
-    refetch,
-  } = useQuery({
+  const { data, error, refetch } = useQuery({
     queryKey: ['balance'],
     queryFn: getBalance,
     enabled: authStatus.is_logged_in, // 只有登录时才获取余额

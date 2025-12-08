@@ -1,10 +1,10 @@
-import {sendMagicGenerate} from '@/api/magic'
-import {useConfigs} from '@/contexts/configs'
-import {eventBus, TCanvasMagicGenerateEvent} from '@/lib/event'
-import {Message, PendingType} from '@/types/types'
-import {useCallback, useEffect} from 'react'
-import {DEFAULT_SYSTEM_PROMPT} from '@/constants'
-import {v7 as uuidv7} from 'uuid'
+import { sendMagicGenerate } from '@/api/magic'
+import { DEFAULT_SYSTEM_PROMPT } from '@/constants'
+import { useConfigs } from '@/contexts/configs'
+import { eventBus, TCanvasMagicGenerateEvent } from '@/lib/event'
+import { Message, PendingType } from '@/types/types'
+import { useCallback, useEffect } from 'react'
+import { v7 as uuidv7 } from 'uuid'
 // import { useAuth } from '@/contexts/AuthContext'
 
 type ChatMagicGeneratorProps = {
@@ -17,17 +17,16 @@ type ChatMagicGeneratorProps = {
 }
 
 const ChatMagicGenerator: React.FC<ChatMagicGeneratorProps> = ({
-                                                                 sessionId,
-                                                                 canvasId,
-                                                                 messages,
-                                                                 setMessages,
-                                                                 setPending,
-                                                                 scrollToBottom
-                                                               }) => {
-  const {setShowLoginDialog} = useConfigs()
+  sessionId,
+  canvasId,
+  messages,
+  setMessages,
+  setPending,
+  scrollToBottom,
+}) => {
+  const { setShowLoginDialog } = useConfigs()
   // const { authStatus } = useAuth()
   const is_logged_in = true
-
 
   const handleMagicGenerate = useCallback(
     async (data: TCanvasMagicGenerateEvent) => {
@@ -46,15 +45,15 @@ const ChatMagicGenerator: React.FC<ChatMagicGeneratorProps> = ({
         content: [
           {
             type: 'text',
-            text: '✨ Magic Magic! Wait about 1~2 minutes please...'
+            text: '✨ Magic Magic! Wait about 1~2 minutes please...',
           },
           {
             type: 'image_url',
             image_url: {
-              url: data.base64
-            }
+              url: data.base64,
+            },
           },
-        ]
+        ],
       }
 
       // 更新消息列表
@@ -79,7 +78,7 @@ const ChatMagicGenerator: React.FC<ChatMagicGeneratorProps> = ({
         setPending(false)
       }
     },
-    [sessionId, canvasId, messages, setMessages, setPending, scrollToBottom, setShowLoginDialog]
+    [sessionId, canvasId, messages, setMessages, setPending, scrollToBottom, setShowLoginDialog],
   )
 
   useEffect(() => {

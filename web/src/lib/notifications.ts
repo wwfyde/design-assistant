@@ -49,24 +49,13 @@ class NotificationManager {
     })
   }
 
-  private addNotification(
-    notification: Omit<Notification, 'id' | 'timestamp' | 'read'>
-  ) {
-    if (
-      notification.type === 'canvas_update' &&
-      notification.canvasId === this.currentCanvasId
-    ) {
+  private addNotification(notification: Omit<Notification, 'id' | 'timestamp' | 'read'>) {
+    if (notification.type === 'canvas_update' && notification.canvasId === this.currentCanvasId) {
       return
     }
 
     const uniqueKey = `${notification.type}_${notification.title}_${notification.canvasId || ''}_${notification.sessionId || ''}`
-    if (
-      this.notifications.some(
-        (n) =>
-          `${n.type}_${n.title}_${n.canvasId || ''}_${n.sessionId || ''}` ===
-          uniqueKey
-      )
-    ) {
+    if (this.notifications.some((n) => `${n.type}_${n.title}_${n.canvasId || ''}_${n.sessionId || ''}` === uniqueKey)) {
       return
     }
 

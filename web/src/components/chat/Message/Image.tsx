@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button'
 import { useCanvas } from '@/contexts/canvas'
 import { eventBus } from '@/lib/event'
-import { MessageSquarePlus, Plus } from 'lucide-react'
+import { MessageSquarePlus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { PhotoView } from 'react-photo-view'
 
@@ -27,25 +27,23 @@ const MessageImage = ({ content }: MessageImageProps) => {
   const handleImagePositioning = (id: string) => {
     excalidrawAPI?.scrollToContent(id, { animate: true })
   }
-  const id = filesArray.find((file) =>
-    content.image_url.url?.includes(file.url)
-  )?.id
+  const id = filesArray.find((file) => content.image_url.url?.includes(file.url))?.id
 
   return (
-    <div className="w-full max-w-[140px]">
+    <div className='w-full max-w-[140px]'>
       <PhotoView src={content.image_url.url}>
-        <div className="relative group cursor-pointer">
+        <div className='relative group cursor-pointer'>
           <img
-            className="w-full h-auto max-h-[140px] object-cover rounded-md border border-border hover:scale-105 transition-transform duration-300"
+            className='w-full h-auto max-h-[140px] object-cover rounded-md border border-border hover:scale-105 transition-transform duration-300'
             src={content.image_url.url}
-            alt="Image"
+            alt='Image'
           />
 
           {id && (
             <Button
-              variant="secondary"
-              size="sm"
-              className="group-hover:opacity-100 opacity-0 absolute top-2 right-2 z-10 text-xs"
+              variant='secondary'
+              size='sm'
+              className='group-hover:opacity-100 opacity-0 absolute top-2 right-2 z-10 text-xs'
               onClick={(e) => {
                 e.stopPropagation()
                 handleImagePositioning(id)

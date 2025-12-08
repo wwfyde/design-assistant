@@ -9,14 +9,10 @@ export const Route = createFileRoute('/assets')({
 
 function Home() {
   return (
-    <div className="flex flex-col w-screen h-screen">
+    <div className='flex flex-col w-screen h-screen'>
       <TopMenu />
-      <ResizablePanelGroup
-        direction="horizontal"
-        className="w-screen h-screen"
-        autoSaveId="jaaz-chat-panel"
-      >
-        <ResizablePanel className="relative" defaultSize={100}>
+      <ResizablePanelGroup direction='horizontal' className='w-screen h-screen' autoSaveId='jaaz-chat-panel'>
+        <ResizablePanel className='relative' defaultSize={100}>
           <MaterialManager />
         </ResizablePanel>
 

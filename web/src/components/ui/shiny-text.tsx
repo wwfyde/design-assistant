@@ -7,12 +7,7 @@ type ShinyTextProps = {
   className?: string
 }
 
-const ShinyText: React.FC<ShinyTextProps> = ({
-  text,
-  disabled = false,
-  speed = 5,
-  className = '',
-}) => {
+const ShinyText: React.FC<ShinyTextProps> = ({ text, disabled = false, speed = 5, className = '' }) => {
   const animationDuration = `${speed}s`
 
   return (
@@ -26,11 +21,7 @@ const ShinyText: React.FC<ShinyTextProps> = ({
     >
       {text}
       {!disabled && (
-        <span
-          className="shine"
-          aria-hidden="true"
-          style={{ animationDuration }}
-        >
+        <span className='shine' aria-hidden='true' style={{ animationDuration }}>
           {text}
         </span>
       )}

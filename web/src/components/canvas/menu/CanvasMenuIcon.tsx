@@ -1,16 +1,5 @@
 import { ToolType as ExcalidrawToolType } from '@excalidraw/excalidraw/types'
-import {
-  ArrowUpRight,
-  Circle,
-  Hand,
-  Image,
-  Link,
-  Minus,
-  MousePointer2,
-  Pencil,
-  Square,
-  Type,
-} from 'lucide-react'
+import { ArrowUpRight, Circle, Hand, Image, Link, Minus, MousePointer2, Pencil, Square, Type } from 'lucide-react'
 
 export type ToolType = Extract<
   ExcalidrawToolType,

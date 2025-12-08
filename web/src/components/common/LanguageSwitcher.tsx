@@ -1,13 +1,8 @@
-import { useLanguage } from '@/hooks/use-language'
-import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { useLanguage } from '@/hooks/use-language'
 import { Languages } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 const LanguageSwitcher = () => {
   const { changeLanguage, currentLanguage } = useLanguage()
@@ -21,12 +16,11 @@ const LanguageSwitcher = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button size={'sm'}
-          variant={'ghost'}>
+        <Button size={'sm'} variant={'ghost'}>
           <Languages size={30} />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent align='end'>
         {languages.map((language) => (
           <DropdownMenuItem
             key={language.code}

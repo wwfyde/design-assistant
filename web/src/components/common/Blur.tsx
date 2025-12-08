@@ -3,19 +3,8 @@ type BlurProps = {
   bgOpacity?: number
   className?: string
 }
-const Blur: React.FC<BlurProps> = ({
-  className,
-  direction = 't-b',
-  bgOpacity = 10,
-}) => {
-  const deg =
-    direction === 't-b'
-      ? 0
-      : direction === 'l-r'
-        ? -90
-        : direction === 'r-l'
-          ? 90
-          : 180
+const Blur: React.FC<BlurProps> = ({ className, direction = 't-b', bgOpacity = 10 }) => {
+  const deg = direction === 't-b' ? 0 : direction === 'l-r' ? -90 : direction === 'r-l' ? 90 : 180
 
   const bgColor = `color-mix(in oklab, var(--background) ${bgOpacity}%, transparent)`
 

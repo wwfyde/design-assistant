@@ -1,36 +1,35 @@
-import {sendMessages} from '@/api/chat'
+import { sendMessages } from '@/api/chat'
 import Blur from '@/components/common/Blur'
-import {Button} from '@/components/ui/button'
-import {ScrollArea} from '@/components/ui/scroll-area'
-import {eventBus, TEvents} from '@/lib/event'
-import ChatMagicGenerator from './ChatMagicGenerator'
-import {AssistantMessage, Message, Model, PendingType, Session,} from '@/types/types'
-import {produce} from 'immer'
-import {motion} from 'motion/react'
-import {nanoid} from 'nanoid'
-import {Dispatch, SetStateAction, useCallback, useEffect, useRef, useState,} from 'react'
-import {useTranslation} from 'react-i18next'
-import {PhotoProvider} from 'react-photo-view'
-import {toast} from 'sonner'
+import { Button } from '@/components/ui/button'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { eventBus, TEvents } from '@/lib/event'
+import { AssistantMessage, Message, Model, PendingType, Session } from '@/types/types'
+import { produce } from 'immer'
+import { ChevronsRight } from 'lucide-react'
+import { motion } from 'motion/react'
+import { nanoid } from 'nanoid'
+import { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { PhotoProvider } from 'react-photo-view'
+import { toast } from 'sonner'
 import ShinyText from '../ui/shiny-text'
+import ChatMagicGenerator from './ChatMagicGenerator'
 import ChatTextarea from './ChatTextarea'
 import MessageRegular from './Message/Regular'
-import {ToolCallContent} from './Message/ToolCallContent'
+import { ToolCallContent } from './Message/ToolCallContent'
 import ToolCallTag from './Message/ToolCallTag'
 import SessionSelector from './SessionSelector'
+import ShareTemplateDialog from './ShareTemplateDialog'
 import ChatSpinner from './Spinner'
 import ToolcallProgressUpdate from './ToolcallProgressUpdate'
-import ShareTemplateDialog from './ShareTemplateDialog'
-import {ChevronsRight} from 'lucide-react'
 
-import {useConfigs} from '@/contexts/configs'
+import { ToolInfo } from '@/api/model'
+import { DEFAULT_SYSTEM_PROMPT } from '@/constants'
+import { useConfigs } from '@/contexts/configs'
 import 'react-photo-view/dist/react-photo-view.css'
-import {DEFAULT_SYSTEM_PROMPT} from '@/constants'
-import {ToolInfo} from '@/api/model'
 // import { useAuth } from '@/contexts/AuthContext'
-import {useQueryClient} from '@tanstack/react-query'
-import {MixedContentImages, MixedContentText} from './Message/MixedContent'
-
+import { useQueryClient } from '@tanstack/react-query'
+import { MixedContentImages, MixedContentText } from './Message/MixedContent'
 
 type ChatInterfaceProps = {
   canvasId: string
@@ -41,15 +40,15 @@ type ChatInterfaceProps = {
 }
 
 const ChatInterface: React.FC<ChatInterfaceProps> = ({
-                                                       canvasId,
-                                                       sessionList,
-                                                       setSessionList,
-                                                       sessionId: searchSessionId,
-                                                       onCollapse,
-                                                     }) => {
-  const {t} = useTranslation()
+  canvasId,
+  sessionList,
+  setSessionList,
+  sessionId: searchSessionId,
+  onCollapse,
+}) => {
+  const { t } = useTranslation()
   const [session, setSession] = useState<Session | null>(null)
-  const {initCanvas, setInitCanvas} = useConfigs()
+  const { initCanvas, setInitCanvas } = useConfigs()
   // const { authStatus } = useAuth()
   const [showShareDialog, setShowShareDialog] = useState(false)
   const queryClient = useQueryClient()
@@ -69,18 +68,14 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   }, [sessionList, searchSessionId])
 
   const [messages, setMessages] = useState<Message[]>([])
-  const [pending, setPending] = useState<PendingType>(
-    initCanvas ? 'text' : false
-  )
+  const [pending, setPending] = useState<PendingType>(initCanvas ? 'text' : false)
   const mergedToolCallIds = useRef<string[]>([])
 
   const sessionId = session?.id ?? searchSessionId
 
   const sessionIdRef = useRef<string>(session?.id || nanoid())
   const [expandingToolCalls, setExpandingToolCalls] = useState<string[]>([])
-  const [pendingToolConfirmations, setPendingToolConfirmations] = useState<
-    string[]
-  >([])
+  const [pendingToolConfirmations, setPendingToolConfirmations] = useState<string[]>([])
 
   const scrollRef = useRef<HTMLDivElement>(null)
   const isAtBottomRef = useRef(false)
@@ -104,10 +99,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
           // From the next message, find the tool call result
           for (let i = index + 1; i < messages.length; i++) {
             const nextMessage = messages[i]
-            if (
-              nextMessage.role === 'tool' &&
-              nextMessage.tool_call_id === toolCall.id
-            ) {
+            if (nextMessage.role === 'tool' && nextMessage.tool_call_id === toolCall.id) {
               toolCall.result = nextMessage.content
               mergedToolCallIds.current.push(toolCall.id)
             }
@@ -130,18 +122,10 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
       setMessages(
         produce((prev) => {
           const last = prev.at(-1)
-          if (
-            last?.role === 'assistant' &&
-            last.content != null &&
-            last.tool_calls == null
-          ) {
+          if (last?.role === 'assistant' && last.content != null && last.tool_calls == null) {
             if (typeof last.content === 'string') {
               last.content += data.text
-            } else if (
-              last.content &&
-              last.content.at(-1) &&
-              last.content.at(-1)!.type === 'text'
-            ) {
+            } else if (last.content && last.content.at(-1) && last.content.at(-1)!.type === 'text') {
               ;(last.content.at(-1) as { text: string }).text += data.text
             }
           } else {
@@ -150,11 +134,11 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
               content: data.text,
             })
           }
-        })
+        }),
       )
       scrollToBottom()
     },
-    [sessionId, scrollToBottom]
+    [sessionId, scrollToBottom],
   )
 
   const handleToolCall = useCallback(
@@ -164,10 +148,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
       }
 
       const existToolCall = messages.find(
-        (m) =>
-          m.role === 'assistant' &&
-          m.tool_calls &&
-          m.tool_calls.find((t) => t.id == data.id)
+        (m) => m.role === 'assistant' && m.tool_calls && m.tool_calls.find((t) => t.id == data.id),
       )
 
       if (existToolCall) {
@@ -192,16 +173,16 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
               },
             ],
           })
-        })
+        }),
       )
 
       setExpandingToolCalls(
         produce((prev) => {
           prev.push(data.id)
-        })
+        }),
       )
     },
-    [sessionId]
+    [sessionId],
   )
 
   const handleToolCallPendingConfirmation = useCallback(
@@ -211,10 +192,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
       }
 
       const existToolCall = messages.find(
-        (m) =>
-          m.role === 'assistant' &&
-          m.tool_calls &&
-          m.tool_calls.find((t) => t.id == data.id)
+        (m) => m.role === 'assistant' && m.tool_calls && m.tool_calls.find((t) => t.id == data.id),
       )
 
       if (existToolCall) {
@@ -239,13 +217,13 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
               },
             ],
           })
-        })
+        }),
       )
 
       setPendingToolConfirmations(
         produce((prev) => {
           prev.push(data.id)
-        })
+        }),
       )
 
       // 自动展开需要确认的工具调用
@@ -254,10 +232,10 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
           if (!prev.includes(data.id)) {
             prev.push(data.id)
           }
-        })
+        }),
       )
     },
-    [sessionId]
+    [sessionId],
   )
 
   const handleToolCallConfirmed = useCallback(
@@ -269,7 +247,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
       setPendingToolConfirmations(
         produce((prev) => {
           return prev.filter((id) => id !== data.id)
-        })
+        }),
       )
 
       setExpandingToolCalls(
@@ -277,10 +255,10 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
           if (!prev.includes(data.id)) {
             prev.push(data.id)
           }
-        })
+        }),
       )
     },
-    [sessionId]
+    [sessionId],
   )
 
   const handleToolCallCancelled = useCallback(
@@ -292,7 +270,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
       setPendingToolConfirmations(
         produce((prev) => {
           return prev.filter((id) => id !== data.id)
-        })
+        }),
       )
 
       // 更新工具调用的状态
@@ -308,10 +286,10 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
               })
             }
           })
-        })
+        }),
       )
     },
-    [sessionId]
+    [sessionId],
   )
 
   const handleToolCallArguments = useCallback(
@@ -324,16 +302,11 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
         produce((prev) => {
           setPending('tool')
           const lastMessage = prev.find(
-            (m) =>
-              m.role === 'assistant' &&
-              m.tool_calls &&
-              m.tool_calls.find((t) => t.id == data.id)
+            (m) => m.role === 'assistant' && m.tool_calls && m.tool_calls.find((t) => t.id == data.id),
           ) as AssistantMessage
 
           if (lastMessage) {
-            const toolCall = lastMessage.tool_calls!.find(
-              (t) => t.id == data.id
-            )
+            const toolCall = lastMessage.tool_calls!.find((t) => t.id == data.id)
             if (toolCall) {
               // 检查是否是待确认的工具调用，如果是则跳过参数追加
               if (pendingToolConfirmations.includes(data.id)) {
@@ -342,11 +315,11 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
               toolCall.function.arguments += data.text
             }
           }
-        })
+        }),
       )
       scrollToBottom()
     },
-    [sessionId, scrollToBottom, pendingToolConfirmations]
+    [sessionId, scrollToBottom, pendingToolConfirmations],
   )
 
   const handleToolCallResult = useCallback(
@@ -368,20 +341,16 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
                 })
               }
             })
-          })
+          }),
         )
       }
     },
-    [canvasId, sessionId]
+    [canvasId, sessionId],
   )
 
   const handleImageGenerated = useCallback(
     (data: TEvents['Socket::Session::ImageGenerated']) => {
-      if (
-        data.canvas_id &&
-        data.canvas_id !== canvasId &&
-        data.session_id !== sessionId
-      ) {
+      if (data.canvas_id && data.canvas_id !== canvasId && data.session_id !== sessionId) {
         return
       }
 
@@ -395,11 +364,11 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
             role: 'assistant',
             content: `![Generated Image](${data.image_url})`,
           })
-        })
+        }),
       )
       scrollToBottom()
     },
-    [canvasId, sessionId, scrollToBottom]
+    [canvasId, sessionId, scrollToBottom],
   )
 
   const handleAllMessages = useCallback(
@@ -415,7 +384,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
       setMessages(mergeToolCallResult(data.messages))
       scrollToBottom()
     },
-    [sessionId, scrollToBottom]
+    [sessionId, scrollToBottom],
   )
 
   const handleDone = useCallback(
@@ -433,7 +402,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
       // }
     },
     // [sessionId, scrollToBottom, authStatus.is_logged_in, queryClient]
-    [sessionId, scrollToBottom]
+    [sessionId, scrollToBottom],
   )
 
   const handleError = useCallback((data: TEvents['Socket::Session::Error']) => {
@@ -441,7 +410,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
     toast.error('Error: ' + data.error, {
       closeButton: true,
       duration: 3600 * 1000,
-      style: {color: 'red'},
+      style: { color: 'red' },
     })
   }, [])
 
@@ -456,8 +425,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
     const handleScroll = () => {
       if (scrollRef.current) {
         isAtBottomRef.current =
-          scrollRef.current.scrollHeight - scrollRef.current.scrollTop <=
-          scrollRef.current.clientHeight + 1
+          scrollRef.current.scrollHeight - scrollRef.current.scrollTop <= scrollRef.current.clientHeight + 1
       }
     }
     const scrollEl = scrollRef.current
@@ -465,10 +433,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
     eventBus.on('Socket::Session::Delta', handleDelta)
     eventBus.on('Socket::Session::ToolCall', handleToolCall)
-    eventBus.on(
-      'Socket::Session::ToolCallPendingConfirmation',
-      handleToolCallPendingConfirmation
-    )
+    eventBus.on('Socket::Session::ToolCallPendingConfirmation', handleToolCallPendingConfirmation)
     eventBus.on('Socket::Session::ToolCallConfirmed', handleToolCallConfirmed)
     eventBus.on('Socket::Session::ToolCallCancelled', handleToolCallCancelled)
     eventBus.on('Socket::Session::ToolCallArguments', handleToolCallArguments)
@@ -483,22 +448,10 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
       eventBus.off('Socket::Session::Delta', handleDelta)
       eventBus.off('Socket::Session::ToolCall', handleToolCall)
-      eventBus.off(
-        'Socket::Session::ToolCallPendingConfirmation',
-        handleToolCallPendingConfirmation
-      )
-      eventBus.off(
-        'Socket::Session::ToolCallConfirmed',
-        handleToolCallConfirmed
-      )
-      eventBus.off(
-        'Socket::Session::ToolCallCancelled',
-        handleToolCallCancelled
-      )
-      eventBus.off(
-        'Socket::Session::ToolCallArguments',
-        handleToolCallArguments
-      )
+      eventBus.off('Socket::Session::ToolCallPendingConfirmation', handleToolCallPendingConfirmation)
+      eventBus.off('Socket::Session::ToolCallConfirmed', handleToolCallConfirmed)
+      eventBus.off('Socket::Session::ToolCallCancelled', handleToolCallCancelled)
+      eventBus.off('Socket::Session::ToolCallArguments', handleToolCallArguments)
       eventBus.off('Socket::Session::ToolCallResult', handleToolCallResult)
       eventBus.off('Socket::Session::ImageGenerated', handleImageGenerated)
       eventBus.off('Socket::Session::AllMessages', handleAllMessages)
@@ -533,11 +486,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
   const onSelectSession = (sessionId: string) => {
     setSession(sessionList.find((s) => s.id === sessionId) || null)
-    window.history.pushState(
-      {},
-      '',
-      `/canvas/${canvasId}?sessionId=${sessionId}`
-    )
+    window.history.pushState({}, '', `/canvas/${canvasId}?sessionId=${sessionId}`)
   }
 
   const onClickNewChat = () => {
@@ -565,21 +514,16 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
         newMessages: data,
         textModel: configs.textModel,
         toolList: configs.toolList,
-        systemPrompt:
-          localStorage.getItem('system_prompt') || DEFAULT_SYSTEM_PROMPT,
+        systemPrompt: localStorage.getItem('system_prompt') || DEFAULT_SYSTEM_PROMPT,
       })
 
       if (searchSessionId !== sessionId) {
-        window.history.pushState(
-          {},
-          '',
-          `/canvas/${canvasId}?sessionId=${sessionId}`
-        )
+        window.history.pushState({}, '', `/canvas/${canvasId}?sessionId=${sessionId}`)
       }
 
       scrollToBottom()
     },
-    [canvasId, sessionId, searchSessionId, scrollToBottom]
+    [canvasId, sessionId, searchSessionId, scrollToBottom],
   )
 
   const handleCancelChat = useCallback(() => {
@@ -620,11 +564,11 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
               className='ml-2 shrink-0 text-muted-foreground hover:text-foreground'
               onClick={onCollapse}
             >
-              <ChevronsRight className='h-5 w-5'/>
+              <ChevronsRight className='h-5 w-5' />
             </Button>
           )}
 
-          <Blur className='absolute top-0 left-0 right-0 h-full -z-1'/>
+          <Blur className='absolute top-0 left-0 right-0 h-full -z-1' />
         </header>
 
         <ScrollArea className='h-[calc(100vh-45px)]' viewportRef={scrollRef}>
@@ -636,32 +580,18 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
                   {/* Regular message content */}
                   {typeof message.content == 'string' &&
                     (message.role !== 'tool' ? (
-                      <MessageRegular
-                        message={message}
-                        content={message.content}
-                      />
-                    ) : message.tool_call_id &&
-                    mergedToolCallIds.current.includes(
-                      message.tool_call_id
-                    ) ? (
+                      <MessageRegular message={message} content={message.content} />
+                    ) : message.tool_call_id && mergedToolCallIds.current.includes(message.tool_call_id) ? (
                       <></>
                     ) : (
-                      <ToolCallContent
-                        expandingToolCalls={expandingToolCalls}
-                        message={message}
-                      />
+                      <ToolCallContent expandingToolCalls={expandingToolCalls} message={message} />
                     ))}
 
                   {/* 混合内容消息的文本部分 - 显示在聊天框内 */}
                   {Array.isArray(message.content) && (
                     <>
-                      <MixedContentImages
-                        contents={message.content}
-                      />
-                      <MixedContentText
-                        message={message}
-                        contents={message.content}
-                      />
+                      <MixedContentImages contents={message.content} />
+                      <MixedContentText message={message} contents={message.content} />
                     </>
                   )}
 
@@ -676,19 +606,12 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
                           isExpanded={expandingToolCalls.includes(toolCall.id)}
                           onToggleExpand={() => {
                             if (expandingToolCalls.includes(toolCall.id)) {
-                              setExpandingToolCalls((prev) =>
-                                prev.filter((id) => id !== toolCall.id)
-                              )
+                              setExpandingToolCalls((prev) => prev.filter((id) => id !== toolCall.id))
                             } else {
-                              setExpandingToolCalls((prev) => [
-                                ...prev,
-                                toolCall.id,
-                              ])
+                              setExpandingToolCalls((prev) => [...prev, toolCall.id])
                             }
                           }}
-                          requiresConfirmation={pendingToolConfirmations.includes(
-                            toolCall.id
-                          )}
+                          requiresConfirmation={pendingToolConfirmations.includes(toolCall.id)}
                           onConfirm={() => {
                             // 发送确认事件到后端
                             fetch('/api/tool_confirmation', {
@@ -722,28 +645,26 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
                     })}
                 </div>
               ))}
-              {pending && <ChatSpinner pending={pending}/>}
-              {pending && sessionId && (
-                <ToolcallProgressUpdate sessionId={sessionId}/>
-              )}
+              {pending && <ChatSpinner pending={pending} />}
+              {pending && sessionId && <ToolcallProgressUpdate sessionId={sessionId} />}
             </div>
           ) : (
             <motion.div className='flex flex-col h-full p-4 items-start justify-start pt-16 select-none'>
               <motion.span
-                initial={{opacity: 0, y: 10}}
-                animate={{opacity: 1, y: 0}}
-                transition={{duration: 0.5}}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
                 className='text-muted-foreground text-3xl'
               >
-                <ShinyText text='Hello, Designer!'/>
+                <ShinyText text='Hello, Designer!' />
               </motion.span>
               <motion.span
-                initial={{opacity: 0, y: 10}}
-                animate={{opacity: 1, y: 0}}
-                transition={{duration: 0.6}}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
                 className='text-muted-foreground text-2xl'
               >
-                <ShinyText text='How can I help you today?'/>
+                <ShinyText text='How can I help you today?' />
               </motion.span>
             </motion.div>
           )}

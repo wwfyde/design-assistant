@@ -5,7 +5,6 @@ import CanvasMenu from '@/components/canvas/menu'
 import CanvasPopbarWrapper from '@/components/canvas/pop-bar'
 // VideoCanvasOverlay removed - using native Excalidraw embeddable elements instead
 import ChatInterface from '@/components/chat/Chat'
-import { ImperativePanelHandle } from 'react-resizable-panels'
 import { Button } from '@/components/ui/button'
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable'
 import { CanvasProvider } from '@/contexts/canvas'
@@ -13,6 +12,7 @@ import { Session } from '@/types/types'
 import { createFileRoute, useParams, useSearch } from '@tanstack/react-router'
 import { Loader2, MessageSquare } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import { ImperativePanelHandle } from 'react-resizable-panels'
 
 export const Route = createFileRoute('/canvas/$id')({
   component: Canvas,
@@ -81,17 +81,8 @@ function Canvas() {
   return (
     <CanvasProvider>
       <div className='flex flex-col w-screen h-screen relative'>
-        <CanvasHeader
-          canvasName={canvasName}
-          canvasId={id}
-          onNameChange={setCanvasName}
-          onNameSave={handleNameSave}
-        />
-        <ResizablePanelGroup
-          direction='horizontal'
-          className='w-screen h-screen'
-          autoSaveId='jaaz-chat-panel'
-        >
+        <CanvasHeader canvasName={canvasName} canvasId={id} onNameChange={setCanvasName} onNameSave={handleNameSave} />
+        <ResizablePanelGroup direction='horizontal' className='w-screen h-screen' autoSaveId='jaaz-chat-panel'>
           <ResizablePanel className='relative' defaultSize={75}>
             <div className='w-full h-full'>
               {isLoading ? (

@@ -1,19 +1,14 @@
 import CommonDialogContent from '@/components/common/DialogContent'
 import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { Combobox } from '@/components/ui/combobox'
+import { Dialog, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Combobox } from '@/components/ui/combobox'
 import { LLMConfig } from '@/types/types'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import AddModelsList from './AddModelsList'
 import { toast } from 'sonner'
+import AddModelsList from './AddModelsList'
 
 interface AddProviderDialogProps {
   open: boolean
@@ -132,21 +127,14 @@ const PROVIDER_OPTIONS = [
   },
 ]
 
-export default function AddProviderDialog({
-  open,
-  onOpenChange,
-  onSave,
-}: AddProviderDialogProps) {
+export default function AddProviderDialog({ open, onOpenChange, onSave }: AddProviderDialogProps) {
   const { t } = useTranslation()
   const [providerName, setProviderName] = useState('')
   const [apiUrl, setApiUrl] = useState('')
   const [apiKey, setApiKey] = useState('')
-  const [models, setModels] = useState<
-    Record<string, { type?: 'text' | 'image' | 'video' }>
-  >({})
+  const [models, setModels] = useState<Record<string, { type?: 'text' | 'image' | 'video' }>>({})
 
-  const isMediaOnlyProvider =
-    PROVIDER_OPTIONS.find((p) => p.value === providerName)?.mediaOnly ?? false
+  const isMediaOnlyProvider = PROVIDER_OPTIONS.find((p) => p.value === providerName)?.mediaOnly ?? false
 
   // Handle data change when provider is selected
   const handleProviderDataChange = (data: any) => {
@@ -160,10 +148,7 @@ export default function AddProviderDialog({
     if (!providerName.trim() || !apiUrl.trim()) {
       return
     }
-    if (
-      !PROVIDER_OPTIONS.find((p) => p.value === providerName)?.mediaOnly &&
-      Object.keys(models).length === 0
-    ) {
+    if (!PROVIDER_OPTIONS.find((p) => p.value === providerName)?.mediaOnly && Object.keys(models).length === 0) {
       toast.error(t('settings:provider.noModelsSelected'))
       return
     }
@@ -204,18 +189,16 @@ export default function AddProviderDialog({
         <DialogHeader>
           <DialogTitle>
             {t('settings:provider.addProvider')}
-            {isMediaOnlyProvider && <span className="ml-3">🎨 🎥</span>}
+            {isMediaOnlyProvider && <span className='ml-3'>🎨 🎥</span>}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
+        <div className='space-y-4 py-4'>
           {/* Provider Name */}
-          <div className="space-y-2">
-            <Label htmlFor="provider-name">
-              {t('settings:provider.providerName')}
-            </Label>
+          <div className='space-y-2'>
+            <Label htmlFor='provider-name'>{t('settings:provider.providerName')}</Label>
             <Combobox
-              id="provider-name"
+              id='provider-name'
               value={providerName}
               onChange={setProviderName}
               onDataChange={handleProviderDataChange}
@@ -225,10 +208,10 @@ export default function AddProviderDialog({
           </div>
 
           {/* API URL */}
-          <div className="space-y-2">
-            <Label htmlFor="api-url">{t('settings:provider.apiUrl')}</Label>
+          <div className='space-y-2'>
+            <Label htmlFor='api-url'>{t('settings:provider.apiUrl')}</Label>
             <Input
-              id="api-url"
+              id='api-url'
               placeholder={t('settings:provider.apiUrlPlaceholder')}
               value={apiUrl}
               onChange={(e) => setApiUrl(e.target.value)}
@@ -236,11 +219,11 @@ export default function AddProviderDialog({
           </div>
 
           {/* API Key */}
-          <div className="space-y-2">
-            <Label htmlFor="api-key">{t('settings:provider.apiKey')}</Label>
+          <div className='space-y-2'>
+            <Label htmlFor='api-key'>{t('settings:provider.apiKey')}</Label>
             <Input
-              id="api-key"
-              type="password"
+              id='api-key'
+              type='password'
               placeholder={t('settings:provider.apiKeyPlaceholder')}
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
@@ -249,22 +232,15 @@ export default function AddProviderDialog({
 
           {/* Models */}
           {!isMediaOnlyProvider && (
-            <AddModelsList
-              models={models}
-              onChange={setModels}
-              label={t('settings:models.title')}
-            />
+            <AddModelsList models={models} onChange={setModels} label={t('settings:models.title')} />
           )}
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={handleCancel}>
+          <Button variant='outline' onClick={handleCancel}>
             {t('settings:provider.cancel')}
           </Button>
-          <Button
-            onClick={handleSave}
-            disabled={!providerName.trim() || !apiUrl.trim()}
-          >
+          <Button onClick={handleSave} disabled={!providerName.trim() || !apiUrl.trim()}>
             {t('settings:provider.save')}
           </Button>
         </DialogFooter>

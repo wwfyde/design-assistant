@@ -8,19 +8,9 @@ export const ConfigsContext = createContext<{
   refreshModels: () => void
 } | null>(null)
 
-export const ConfigsProvider = ({
-  children,
-}: {
-  children: React.ReactNode
-}) => {
+export const ConfigsProvider = ({ children }: { children: React.ReactNode }) => {
   const configsStore = useConfigsStore()
-  const {
-    setTextModels,
-    setTextModel,
-    setSelectedTools,
-    setAllTools,
-    setShowLoginDialog,
-  } = configsStore
+  const { setTextModels, setTextModel, setSelectedTools, setAllTools, setShowLoginDialog } = configsStore
 
   // 存储上一次的 allTools 值，用于检测新添加的工具，并自动选中
   const previousAllToolsRef = useRef<ModelInfo[]>([])
@@ -44,13 +34,8 @@ export const ConfigsProvider = ({
 
     // 设置选择的文本模型
     const textModel = localStorage.getItem('text_model')
-    if (
-      textModel &&
-      llmModels.find((m) => m.provider + ':' + m.model === textModel)
-    ) {
-      setTextModel(
-        llmModels.find((m) => m.provider + ':' + m.model === textModel)
-      )
+    if (textModel && llmModels.find((m) => m.provider + ':' + m.model === textModel)) {
+      setTextModel(llmModels.find((m) => m.provider + ':' + m.model === textModel))
     } else {
       setTextModel(llmModels.find((m) => m.type === 'text'))
     }
@@ -64,9 +49,7 @@ export const ConfigsProvider = ({
       try {
         const disabledToolIds: string[] = JSON.parse(disabledToolsJson)
         // filter out disabled tools
-        currentSelectedTools = toolList.filter(
-          (t) => !disabledToolIds.includes(t.id)
-        )
+        currentSelectedTools = toolList.filter((t) => !disabledToolIds.includes(t.id))
       } catch (error) {
         console.error(error)
       }
@@ -78,19 +61,10 @@ export const ConfigsProvider = ({
     if (llmModels.length === 0 || toolList.length === 0) {
       setShowLoginDialog(true)
     }
-  }, [
-    modelList,
-    setSelectedTools,
-    setTextModel,
-    setTextModels,
-    setAllTools,
-    setShowLoginDialog,
-  ])
+  }, [modelList, setSelectedTools, setTextModel, setTextModels, setAllTools, setShowLoginDialog])
 
   return (
-    <ConfigsContext.Provider
-      value={{ configsStore: useConfigsStore, refreshModels }}
-    >
+    <ConfigsContext.Provider value={{ configsStore: useConfigsStore, refreshModels }}>
       {children}
     </ConfigsContext.Provider>
   )

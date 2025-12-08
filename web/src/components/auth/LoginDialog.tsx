@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button } from '../ui/button'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog'
-import { startDeviceAuth, pollDeviceAuth, saveAuthData } from '../../api/auth'
+import { pollDeviceAuth, saveAuthData, startDeviceAuth } from '../../api/auth'
 import { updateJaazApiKey } from '../../api/config'
 import { useAuth } from '../../contexts/AuthContext'
 import { useConfigs, useRefreshModels } from '../../contexts/configs'
+import { Button } from '../ui/button'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog'
 
 export function LoginDialog() {
   const [authMessage, setAuthMessage] = useState('')
@@ -69,7 +69,6 @@ export function LoginDialog() {
           }
 
           setTimeout(() => setShowLoginDialog(false), 1500)
-
         } else if (result.status === 'expired') {
           // Authorization expired
           setAuthMessage(t('common:auth.authExpiredMessage'))
@@ -77,7 +76,6 @@ export function LoginDialog() {
             clearInterval(pollingIntervalRef.current)
             pollingIntervalRef.current = null
           }
-
         } else if (result.status === 'error') {
           // Error occurred
           setAuthMessage(result.message || t('common:auth.authErrorMessage'))
@@ -85,7 +83,6 @@ export function LoginDialog() {
             clearInterval(pollingIntervalRef.current)
             pollingIntervalRef.current = null
           }
-
         } else {
           // Still pending, continue polling
           setAuthMessage(t('common:auth.waitingForBrowser'))
@@ -114,7 +111,6 @@ export function LoginDialog() {
 
       // Start polling for authorization status
       startPolling(result.code)
-
     } catch (error) {
       console.error('登录请求失败:', error)
       setAuthMessage(t('common:auth.loginRequestFailed'))
@@ -137,20 +133,13 @@ export function LoginDialog() {
           <DialogTitle>{t('common:auth.loginToJaaz')}</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            {t('common:auth.loginDescription')}
-          </p>
+        <div className='space-y-4'>
+          <p className='text-sm text-muted-foreground'>{t('common:auth.loginDescription')}</p>
 
-          <div className="flex gap-2">
-            <Button
-              onClick={handleLogin}
-              disabled={!!authMessage}
-              className="flex-1"
-            >
+          <div className='flex gap-2'>
+            <Button onClick={handleLogin} disabled={!!authMessage} className='flex-1'>
               {authMessage || t('common:auth.startLogin')}
             </Button>
-
           </div>
         </div>
       </DialogContent>

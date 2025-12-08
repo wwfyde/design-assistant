@@ -1,5 +1,4 @@
-import { Message, Model } from '@/types/types'
-import { ToolInfo } from './model'
+import { Message } from '@/types/types'
 
 export const sendMagicGenerate = async (payload: {
   sessionId: string
@@ -24,8 +23,8 @@ export const sendMagicGenerate = async (payload: {
 }
 
 export const cancelMagicGenerate = async (sessionId: string) => {
-    const response = await fetch(`/api/magic/cancel/${sessionId}`, {
-        method: 'POST',
-    })
-    return await response.json()
+  const response = await fetch(`/api/magic/cancel/${sessionId}`, {
+    method: 'POST',
+  })
+  return await response.json()
 }

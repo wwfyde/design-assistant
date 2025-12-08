@@ -1,9 +1,5 @@
 import { Button } from '@/components/ui/button'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
@@ -16,12 +12,7 @@ type CanvasMenuButtonProps = {
   onClick?: () => void
 }
 
-const CanvasMenuButton = ({
-  type,
-  active,
-  activeTool,
-  onClick,
-}: CanvasMenuButtonProps) => {
+const CanvasMenuButton = ({ type, active, activeTool, onClick }: CanvasMenuButtonProps) => {
   const { t } = useTranslation()
   const isActive = activeTool === type || active
 
@@ -29,12 +20,9 @@ const CanvasMenuButton = ({
     <Tooltip>
       <TooltipTrigger asChild>
         <Button
-          variant="ghost"
-          size="icon"
-          className={cn(
-            'p-2 rounded-md cursor-pointer hover:bg-primary/5',
-            isActive && 'bg-primary/10'
-          )}
+          variant='ghost'
+          size='icon'
+          className={cn('p-2 rounded-md cursor-pointer hover:bg-primary/5', isActive && 'bg-primary/10')}
           onMouseDown={(e) => {
             e.preventDefault()
             onClick?.()

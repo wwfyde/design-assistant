@@ -45,20 +45,15 @@ const CanvasViewMenu = () => {
     <div
       className={cn(
         'absolute top-2 right-2 flex items-center gap-1 rounded-lg p-1 z-20 transition-all duration-300 select-none text-primary/70',
-        'hover:bg-primary-foreground/55 hover:backdrop-blur-lg hover:text-primary'
+        'hover:bg-primary-foreground/55 hover:backdrop-blur-lg hover:text-primary',
       )}
     >
-      <Button
-        className="size-8"
-        variant="ghost"
-        size="icon"
-        onClick={() => handleZoomChange(currentZoom - 10)}
-      >
+      <Button className='size-8' variant='ghost' size='icon' onClick={() => handleZoomChange(currentZoom - 10)}>
         <Minus />
       </Button>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <span className="text-sm w-10 text-center">{currentZoom}%</span>
+          <span className='text-sm w-10 text-center'>{currentZoom}%</span>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
           {[10, 50, 100, 150, 200].map((zoom) => (
@@ -67,17 +62,10 @@ const CanvasViewMenu = () => {
             </DropdownMenuItem>
           ))}
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={handleZoomFit}>
-            {t('canvas:tool.zoomFit')}
-          </DropdownMenuItem>
+          <DropdownMenuItem onClick={handleZoomFit}>{t('canvas:tool.zoomFit')}</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      <Button
-        className="size-8"
-        variant="ghost"
-        size="icon"
-        onClick={() => handleZoomChange(currentZoom + 10)}
-      >
+      <Button className='size-8' variant='ghost' size='icon' onClick={() => handleZoomChange(currentZoom + 10)}>
         <Plus />
       </Button>
     </div>

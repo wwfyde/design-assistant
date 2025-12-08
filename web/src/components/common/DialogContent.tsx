@@ -1,6 +1,6 @@
-import {cn} from '@/lib/utils'
+import { cn } from '@/lib/utils'
 import * as Dialog from '@radix-ui/react-dialog'
-import {AnimatePresence, motion} from 'motion/react'
+import { AnimatePresence, motion } from 'motion/react'
 
 type CommonDialogProps = {
   open: boolean
@@ -10,11 +10,11 @@ type CommonDialogProps = {
 }
 
 const CommonDialogContent: React.FC<CommonDialogProps> = ({
-                                                            open,
-                                                            children,
-                                                            className,
-                                                            transformPerspective = 500,
-                                                          }) => {
+  open,
+  children,
+  className,
+  transformPerspective = 500,
+}) => {
   const openState = {
     opacity: 1,
     filter: 'blur(0px)',
@@ -54,23 +54,23 @@ const CommonDialogContent: React.FC<CommonDialogProps> = ({
         <Dialog.Portal forceMount>
           <Dialog.Overlay asChild>
             <motion.div
-              className="fixed inset-0 z-45 bg-black/50 backdrop-blur-lg"
-              initial={{opacity: 0}}
-              animate={{opacity: 1}}
-              exit={{opacity: 0}}
+              className='fixed inset-0 z-45 bg-black/50 backdrop-blur-lg'
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
             />
           </Dialog.Overlay>
           <Dialog.Content asChild>
-            <div className="fixed inset-0 flex items-center justify-center z-50">
+            <div className='fixed inset-0 flex items-center justify-center z-50'>
               <motion.div
                 className={cn(
                   'grid rounded-lg p-4 min-w-[300px] w-full max-w-lg gap-4 border bg-background shadow-lg sm:rounded-lg',
-                  className
+                  className,
                 )}
                 initial={initialStyles}
                 animate={openState}
                 exit={exitState}
-                style={{transformPerspective}}
+                style={{ transformPerspective }}
               >
                 {children}
               </motion.div>

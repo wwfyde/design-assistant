@@ -1,5 +1,5 @@
-import { CanvasData, Message, Session } from '@/types/types'
 import { ToolInfo } from '@/api/model'
+import { CanvasData, Message, Session } from '@/types/types'
 
 export type ListCanvasesResponse = {
   id: string
@@ -36,9 +36,7 @@ export async function createCanvas(data: {
   return await response.json()
 }
 
-export async function getCanvas(
-  id: string
-): Promise<{ data: CanvasData; name: string; sessions: Session[] }> {
+export async function getCanvas(id: string): Promise<{ data: CanvasData; name: string; sessions: Session[] }> {
   const response = await fetch(`/api/canvas/${id}`)
   return await response.json()
 }
@@ -48,7 +46,7 @@ export async function saveCanvas(
   payload: {
     data: CanvasData
     thumbnail: string
-  }
+  },
 ): Promise<void> {
   const response = await fetch(`/api/canvas/${id}/save`, {
     method: 'POST',

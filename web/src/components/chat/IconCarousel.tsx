@@ -9,12 +9,7 @@ type IconCarouselProps = {
   time?: number
 }
 
-const IconCarousel: React.FC<IconCarouselProps> = ({
-  icons,
-  className,
-  time = 2000,
-  iconClassName,
-}) => {
+const IconCarousel: React.FC<IconCarouselProps> = ({ icons, className, time = 2000, iconClassName }) => {
   const [index, setIndex] = useState(0)
 
   useEffect(() => {
@@ -25,11 +20,8 @@ const IconCarousel: React.FC<IconCarouselProps> = ({
   }, [icons.length, time])
 
   return (
-    <div
-      className={cn('flex items-center justify-start gap-2', className)}
-      style={{ minHeight: 40 }}
-    >
-      <AnimatePresence mode="wait">
+    <div className={cn('flex items-center justify-start gap-2', className)} style={{ minHeight: 40 }}>
+      <AnimatePresence mode='wait'>
         <motion.div
           key={index}
           initial={{ opacity: 0, scale: 0.85 }}

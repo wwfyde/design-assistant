@@ -1,3 +1,14 @@
+import { ToolInfo } from '@/api/model'
+import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import {
   Select,
   SelectContent,
@@ -7,36 +18,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuCheckboxItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-  DropdownMenuLabel,
-  DropdownMenuGroup,
-} from '@/components/ui/dropdown-menu'
-import { Button } from '@/components/ui/button'
+import { PROVIDER_NAME_MAPPING } from '@/constants'
 import { useConfigs } from '@/contexts/configs'
 import { ChevronDown } from 'lucide-react'
-import { PROVIDER_NAME_MAPPING } from '@/constants'
-import { ModelInfo, ToolInfo } from '@/api/model'
 import { useState } from 'react'
-import { Switch } from '../ui/switch'
 import { useTranslation } from 'react-i18next'
+import { Switch } from '../ui/switch'
 
 const ModelSelector: React.FC = () => {
-  const {
-    textModel,
-    setTextModel,
-    textModels,
-    selectedTools,
-    setSelectedTools,
-    allTools,
-  } = useConfigs()
-  const selectedToolKeys = selectedTools.map(
-    (tool) => tool.provider + ':' + tool.id
-  )
+  const { textModel, setTextModel, textModels, selectedTools, setSelectedTools, allTools } = useConfigs()
+  const selectedToolKeys = selectedTools.map((tool) => tool.provider + ':' + tool.id)
   // single select mode
   const [singleMode, setSingleMode] = useState(false)
   // Add state to control dropdown open state
@@ -60,17 +51,13 @@ const ModelSelector: React.FC = () => {
         newSelected = [...selectedTools, tool]
       }
     } else {
-      newSelected = selectedTools.filter(
-        (t) => t.provider + ':' + t.id !== modelKey
-      )
+      newSelected = selectedTools.filter((t) => t.provider + ':' + t.id !== modelKey)
     }
 
     setSelectedTools(newSelected)
     localStorage.setItem(
       'disabled_tool_ids',
-      JSON.stringify(
-        allTools.filter((t) => !newSelected.includes(t)).map((t) => t.id)
-      )
+      JSON.stringify(allTools.filter((t) => !newSelected.includes(t)).map((t) => t.id)),
     )
   }
 
@@ -111,13 +98,11 @@ const ModelSelector: React.FC = () => {
         value={textModel?.provider + ':' + textModel?.model}
         onValueChange={(value) => {
           localStorage.setItem('text_model', value)
-          setTextModel(
-            textModels?.find((m) => m.provider + ':' + m.model == value)
-          )
+          setTextModel(textModels?.find((m) => m.provider + ':' + m.model == value))
         }}
       >
-        <SelectTrigger className="w-fit max-w-[100px] bg-background" size="sm">
-          <SelectValue placeholder="Theme" />
+        <SelectTrigger className='w-fit max-w-[100px] bg-background' size='sm'>
+          <SelectValue placeholder='Theme' />
         </SelectTrigger>
         <SelectContent>
           {Object.entries(groupedLLMs).map(([provider, models]) => {
@@ -125,10 +110,7 @@ const ModelSelector: React.FC = () => {
               <SelectGroup key={provider}>
                 <SelectLabel>{provider}</SelectLabel>
                 {models.map((model) => (
-                  <SelectItem
-                    key={model.provider + ':' + model.model}
-                    value={model.provider + ':' + model.model}
-                  >
+                  <SelectItem key={model.provider + ':' + model.model} value={model.provider + ':' + model.model}>
                     {model.model}
                   </SelectItem>
                 ))}
@@ -143,24 +125,20 @@ const ModelSelector: React.FC = () => {
         <DropdownMenuTrigger asChild>
           <Button
             size={'sm'}
-            variant="outline"
-            className="w-fit max-w-[40%] bg-background justify-between overflow-hidden"
+            variant='outline'
+            className='w-fit max-w-[40%] bg-background justify-between overflow-hidden'
           >
             <span>🎨</span>
-            <span className="bg-primary text-primary-foreground rounded-full text-[0.7rem] w-[1.5rem]">
+            <span className='bg-primary text-primary-foreground rounded-full text-[0.7rem] w-[1.5rem]'>
               {getSelectedImageModelsText()}
             </span>
-            <ChevronDown className="h-4 w-4" />
+            <ChevronDown className='h-4 w-4' />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-100">
-          <div className="flex items-center gap-1 px-2 mt-1 justify-end text-sm text-muted-foreground">
+        <DropdownMenuContent className='w-100'>
+          <div className='flex items-center gap-1 px-2 mt-1 justify-end text-sm text-muted-foreground'>
             <span>{t('chat:single_select_mode', 'Single Mode')}</span>
-            <Switch
-              checked={singleMode}
-              size="sm"
-              onCheckedChange={setSingleMode}
-            />
+            <Switch checked={singleMode} size='sm' onCheckedChange={setSingleMode} />
           </div>
           {Object.entries(groupedTools).map(([provider, models]) => {
             const getProviderDisplayName = (provider: string) => {
@@ -173,11 +151,11 @@ const ModelSelector: React.FC = () => {
             return (
               <DropdownMenuGroup key={provider}>
                 <DropdownMenuLabel>
-                  <div className="flex items-center gap-2 text-muted-foreground">
+                  <div className='flex items-center gap-2 text-muted-foreground'>
                     <img
                       src={getProviderDisplayName(provider).icon}
                       alt={getProviderDisplayName(provider).name}
-                      className="w-4 h-4 rounded-full"
+                      className='w-4 h-4 rounded-full'
                     />
                     {getProviderDisplayName(provider).name}
                   </div>
@@ -188,9 +166,7 @@ const ModelSelector: React.FC = () => {
                     <DropdownMenuCheckboxItem
                       key={modelKey}
                       checked={selectedToolKeys.includes(modelKey)}
-                      onCheckedChange={(checked) =>
-                        handleImageModelToggle(modelKey, checked)
-                      }
+                      onCheckedChange={(checked) => handleImageModelToggle(modelKey, checked)}
                       onSelect={(e) => {
                         // Only prevent default in multi-select mode
                         if (!singleMode) {

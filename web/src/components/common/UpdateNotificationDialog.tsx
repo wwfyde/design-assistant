@@ -1,10 +1,5 @@
 import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { Dialog, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { useConfigs } from '@/contexts/configs'
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -58,9 +53,7 @@ const UpdateNotificationDialog = () => {
     if (process.env.NODE_ENV === 'development') {
       // @ts-expect-error - Adding test function to window for development
       window.testUpdateDialog = handleTestUpdateDialog
-      console.log(
-        '🔧 Development mode: Use window.testUpdateDialog() to test update dialog'
-      )
+      console.log('🔧 Development mode: Use window.testUpdateDialog() to test update dialog')
     }
   }, [])
 
@@ -82,7 +75,7 @@ const UpdateNotificationDialog = () => {
     (open: boolean) => {
       setShowUpdateDialog(open)
     },
-    [setShowUpdateDialog]
+    [setShowUpdateDialog],
   )
 
   if (!updateInfo) return null
@@ -94,25 +87,17 @@ const UpdateNotificationDialog = () => {
           <DialogTitle>{t('common:update.title')}</DialogTitle>
         </DialogHeader>
 
-        <div className="text-sm text-muted-foreground">
-          <p>
-            {t('common:update.description', { version: updateInfo.version })}
-          </p>
-          <p className="mt-2">{t('common:update.installNote')}</p>
+        <div className='text-sm text-muted-foreground'>
+          <p>{t('common:update.description', { version: updateInfo.version })}</p>
+          <p className='mt-2'>{t('common:update.installNote')}</p>
         </div>
 
         <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={handleClose}
-            disabled={isInstalling}
-          >
+          <Button variant='outline' onClick={handleClose} disabled={isInstalling}>
             {t('common:update.laterButton')}
           </Button>
           <Button onClick={handleInstallUpdate} disabled={isInstalling}>
-            {isInstalling
-              ? t('common:update.installing')
-              : t('common:update.installButton')}
+            {isInstalling ? t('common:update.installing') : t('common:update.installButton')}
           </Button>
         </DialogFooter>
       </CommonDialogContent>

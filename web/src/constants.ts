@@ -1,8 +1,7 @@
-import type {ToolCallFunctionName} from '@/types/types'
+import type { ToolCallFunctionName } from '@/types/types'
 
 // API Configuration
-export const BASE_API_URL =
-  import.meta.env.VITE_JAAZ_BASE_API_URL || 'https://jaaz.app'
+export const BASE_API_URL = import.meta.env.VITE_JAAZ_BASE_API_URL || 'https://jaaz.app'
 
 export const PROVIDER_NAME_MAPPING: {
   [key: string]: { name: string; icon: string }
@@ -17,7 +16,7 @@ export const PROVIDER_NAME_MAPPING: {
   },
   openai: {
     name: 'OpenAI',
-    icon: '/models/chatgpt.svg'
+    icon: '/models/chatgpt.svg',
   },
   replicate: {
     name: 'Replicate',
@@ -75,14 +74,13 @@ export const PROVIDER_NAME_MAPPING: {
 }
 
 // Tool call name mapping
-export const TOOL_CALL_NAME_MAPPING: { [key in ToolCallFunctionName]: string } =
-  {
-    generate_image: 'Generate Image',
-    prompt_user_multi_choice: 'Prompt Multi-Choice',
-    prompt_user_single_choice: 'Prompt Single-Choice',
-    write_plan: 'Write Plan',
-    finish: 'Finish',
-  }
+export const TOOL_CALL_NAME_MAPPING: { [key in ToolCallFunctionName]: string } = {
+  generate_image: 'Generate Image',
+  prompt_user_multi_choice: 'Prompt Multi-Choice',
+  prompt_user_single_choice: 'Prompt Single-Choice',
+  write_plan: 'Write Plan',
+  finish: 'Finish',
+}
 
 export const LOGO_URL = 'https://jaaz.app/favicon.ico'
 

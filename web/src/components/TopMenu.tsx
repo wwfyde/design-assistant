@@ -1,73 +1,59 @@
-import {useConfigs} from '@/contexts/configs'
-import {Button} from '@/components/ui/button'
-import {ChevronLeft, ImageIcon, SettingsIcon} from 'lucide-react'
-import {motion} from 'motion/react'
-import {useTranslation} from 'react-i18next'
-import {useNavigate} from '@tanstack/react-router'
 import ThemeButton from '@/components/theme/ThemeButton'
+import { Button } from '@/components/ui/button'
+import { useConfigs } from '@/contexts/configs'
+import { cn } from '@/lib/utils'
+import { useNavigate } from '@tanstack/react-router'
+import { ChevronLeft, ImageIcon, SettingsIcon } from 'lucide-react'
+import { motion } from 'motion/react'
+import { useTranslation } from 'react-i18next'
 import LanguageSwitcher from './common/LanguageSwitcher'
-import {cn} from '@/lib/utils'
 
-export default function TopMenu({
-                                  middle,
-                                  right,
-                                }: {
-  middle?: React.ReactNode
-  right?: React.ReactNode
-}) {
-  const {t} = useTranslation()
+export default function TopMenu({ middle, right }: { middle?: React.ReactNode; right?: React.ReactNode }) {
+  const { t } = useTranslation()
 
   const navigate = useNavigate()
-  const {setShowSettingsDialog} = useConfigs()
+  const { setShowSettingsDialog } = useConfigs()
 
   return (
     <motion.div
-      className="sticky top-0 z-0 flex w-full h-8 bg-background px-4 justify-between items-center select-none border-b border-border, hidden"
-      initial={{opacity: 0, y: -10}}
-      animate={{opacity: 1, y: 0}}
-      transition={{duration: 0.3}}
+      className='sticky top-0 z-0 flex w-full h-8 bg-background px-4 justify-between items-center select-none border-b border-border, hidden'
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
     >
-      <div className="flex items-center gap-8">
-        <motion.div
-          className="flex items-center gap-2 cursor-pointer group"
-          onClick={() => navigate({to: '/'})}
-        >
+      <div className='flex items-center gap-8'>
+        <motion.div className='flex items-center gap-2 cursor-pointer group' onClick={() => navigate({ to: '/' })}>
           {window.location.pathname !== '/' && (
-            <ChevronLeft className="size-5 group-hover:-translate-x-0.5 transition-transform duration-300"/>
+            <ChevronLeft className='size-5 group-hover:-translate-x-0.5 transition-transform duration-300' />
           )}
-          <img src='/logo.png' alt="logo" className="size-5" draggable={false}/>
-          <motion.div className="flex relative overflow-hidden items-start h-7 text-xl font-bold">
-            <motion.span className="flex items-center" layout>
+          <img src='/logo.png' alt='logo' className='size-5' draggable={false} />
+          <motion.div className='flex relative overflow-hidden items-start h-7 text-xl font-bold'>
+            <motion.span className='flex items-center' layout>
               {window.location.pathname === '/' ? 'AiMark' : t('canvas:back')}
             </motion.span>
           </motion.div>
         </motion.div>
         <Button
           variant={window.location.pathname === '/assets' ? 'default' : 'ghost'}
-          size="sm"
+          size='sm'
           className={cn('flex items-center font-bold rounded-none hidden')}
-          onClick={() => navigate({to: '/assets'})}
+          onClick={() => navigate({ to: '/assets' })}
         >
-          <ImageIcon className="size-4"/>
+          <ImageIcon className='size-4' />
           {t('canvas:assets', 'Library')}
         </Button>
       </div>
 
-      <div className="flex items-center gap-2">{middle}</div>
+      <div className='flex items-center gap-2'>{middle}</div>
 
-      <div className="flex items-center gap-2">
+      <div className='flex items-center gap-2'>
         {right}
         {/* <AgentSettings /> */}
-        <Button
-          size={'sm'}
-          variant="ghost"
-          className={cn('hidden')}
-          onClick={() => setShowSettingsDialog(true)}
-        >
-          <SettingsIcon size={30}/>
+        <Button size={'sm'} variant='ghost' className={cn('hidden')} onClick={() => setShowSettingsDialog(true)}>
+          <SettingsIcon size={30} />
         </Button>
-        <LanguageSwitcher/>
-        <ThemeButton/>
+        <LanguageSwitcher />
+        <ThemeButton />
         {/*<UserMenu />*/}
       </div>
     </motion.div>

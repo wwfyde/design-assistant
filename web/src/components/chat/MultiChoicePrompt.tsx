@@ -28,21 +28,21 @@ export default function MultiChoicePrompt() {
   ]
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex items-center gap-2 justify-between">
-        <div className="flex items-center gap-2">
+    <div className='flex flex-col gap-2'>
+      <div className='flex items-center gap-2 justify-between'>
+        <div className='flex items-center gap-2'>
           <Checkbox />
           <label>Select all</label>
         </div>
         <Button size={'sm'} variant={'outline'}>
-          <SparkleIcon className="w-4 h-4" />
+          <SparkleIcon className='w-4 h-4' />
           Generate Reply 🤖 (10)
         </Button>
       </div>
       {data.map((item) => (
-        <div key={item} className="flex items-center gap-2">
+        <div key={item} className='flex items-center gap-2'>
           <Checkbox />
-          <Card className="w-full px-3 py-3">
+          <Card className='w-full px-3 py-3'>
             <Markdown>{item}</Markdown>
           </Card>
         </div>

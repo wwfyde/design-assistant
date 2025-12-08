@@ -1,6 +1,6 @@
-import React, {useEffect, useRef, useState} from 'react'
-import {VideoPreview} from '@/components/ui/video-player'
-import {cn} from '@/lib/utils'
+import { VideoPreview } from '@/components/ui/video-player'
+import { cn } from '@/lib/utils'
+import React, { useEffect, useRef, useState } from 'react'
 
 interface VideoElementProps {
   src: string
@@ -19,20 +19,20 @@ interface VideoElementProps {
 }
 
 export const VideoElement: React.FC<VideoElementProps> = ({
-                                                            src,
-                                                            poster,
-                                                            duration,
-                                                            autoPlay = false,
-                                                            loop = false,
-                                                            muted = true, // Default muted for canvas elements
-                                                            className,
-                                                            width = 320,
-                                                            height = 180,
-                                                            isPreview = false,
-                                                            onClick,
-                                                            onTimeUpdate,
-                                                            onEnded,
-                                                          }) => {
+  src,
+  poster,
+  duration,
+  autoPlay = false,
+  loop = false,
+  muted = true, // Default muted for canvas elements
+  className,
+  width = 320,
+  height = 180,
+  isPreview = false,
+  onClick,
+  onTimeUpdate,
+  onEnded,
+}) => {
   const [isPlaying, setIsPlaying] = useState(false)
   const [showFullPlayer, setShowFullPlayer] = useState(false)
   const [isPaused, setIsPaused] = useState(false) // 跟踪是否被用户暂停
@@ -141,26 +141,17 @@ export const VideoElement: React.FC<VideoElementProps> = ({
         poster={poster}
         loop={loop}
         muted={muted}
-        className="w-full h-full object-cover"
-        style={{width, height, pointerEvents: 'none'}}
+        className='w-full h-full object-cover'
+        style={{ width, height, pointerEvents: 'none' }}
         playsInline
       />
 
       {/* 暂停按钮覆盖层 */}
       {isPaused && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/5">
-          <div className="bg-black/60 rounded-full p-3 flex items-center justify-center">
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              className="text-white"
-            >
-              <polygon
-                points="9,6 9,18 21,12"
-                fill="currentColor"
-              />
+        <div className='absolute inset-0 flex items-center justify-center bg-black/5'>
+          <div className='bg-black/60 rounded-full p-3 flex items-center justify-center'>
+            <svg width='24' height='24' viewBox='0 0 24 24' fill='none' className='text-white'>
+              <polygon points='9,6 9,18 21,12' fill='currentColor' />
             </svg>
           </div>
         </div>
@@ -168,9 +159,7 @@ export const VideoElement: React.FC<VideoElementProps> = ({
 
       {/* Video info overlay */}
       {duration && (
-        <div className="absolute top-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
-          {duration}s
-        </div>
+        <div className='absolute top-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded'>{duration}s</div>
       )}
     </div>
   )
@@ -190,21 +179,7 @@ export const CanvasVideoElement: React.FC<{
   onDelete?: () => void
   onResize?: (direction: string, e: React.MouseEvent) => void
   onPaste?: (videoData: any) => void
-}> = ({
-        elementId,
-        src,
-        x,
-        y,
-        width,
-        height,
-        duration,
-        isSelected = false,
-        onSelect,
-        onDelete,
-        onResize,
-        onPaste,
-
-      }) => {
+}> = ({ elementId, src, x, y, width, height, duration, isSelected = false, onSelect, onDelete, onResize, onPaste }) => {
   // Focus the element when selected to ensure keyboard events work
   useEffect(() => {
     if (isSelected) {
@@ -220,10 +195,7 @@ export const CanvasVideoElement: React.FC<{
 
   return (
     <div
-      className={cn(
-        'relative w-full h-full cursor-pointer transition-all',
-        isSelected && 'ring-2 ring-blue-500'
-      )}
+      className={cn('relative w-full h-full cursor-pointer transition-all', isSelected && 'ring-2 ring-blue-500')}
       tabIndex={0}
       data-video-id={elementId}
       onClick={(e) => {
@@ -239,17 +211,15 @@ export const CanvasVideoElement: React.FC<{
             x: rect.left,
             y: rect.top,
             right: rect.right,
-            bottom: rect.bottom
+            bottom: rect.bottom,
           },
           dimensions: {
             width: rect.width,
-            height: rect.height
+            height: rect.height,
           },
         }
 
         console.log('📍 Element position and size info:', elementInfo)
-
-
       }}
       onKeyDown={(e) => {
         if (!isSelected) return
@@ -341,39 +311,37 @@ export const CanvasVideoElement: React.FC<{
         <>
           {/* Four corner resize handles */}
           <div
-            className="absolute -top-1 -left-1 w-3 h-3 bg-blue-500 border border-white rounded-sm cursor-nw-resize z-20"
+            className='absolute -top-1 -left-1 w-3 h-3 bg-blue-500 border border-white rounded-sm cursor-nw-resize z-20'
             onMouseDown={(e) => {
               e.stopPropagation()
               onResize?.('nw', e)
             }}
-            title="Resize"
+            title='Resize'
           />
           <div
-            className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 border border-white rounded-sm cursor-ne-resize z-20"
+            className='absolute -top-1 -right-1 w-3 h-3 bg-blue-500 border border-white rounded-sm cursor-ne-resize z-20'
             onMouseDown={(e) => {
               e.stopPropagation()
               onResize?.('ne', e)
             }}
-            title="Resize"
+            title='Resize'
           />
           <div
-            className="absolute -bottom-1 -left-1 w-3 h-3 bg-blue-500 border border-white rounded-sm cursor-sw-resize z-20"
+            className='absolute -bottom-1 -left-1 w-3 h-3 bg-blue-500 border border-white rounded-sm cursor-sw-resize z-20'
             onMouseDown={(e) => {
               e.stopPropagation()
               onResize?.('sw', e)
             }}
-            title="Resize"
+            title='Resize'
           />
           <div
-            className="absolute -bottom-1 -right-1 w-3 h-3 bg-blue-500 border border-white rounded-sm cursor-se-resize z-20"
+            className='absolute -bottom-1 -right-1 w-3 h-3 bg-blue-500 border border-white rounded-sm cursor-se-resize z-20'
             onMouseDown={(e) => {
               e.stopPropagation()
               onResize?.('se', e)
             }}
-            title="Resize"
+            title='Resize'
           />
-
-
         </>
       )}
     </div>

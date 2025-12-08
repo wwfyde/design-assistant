@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button'
 import { useCanvas } from '@/contexts/canvas'
-import { memo, useState, useEffect } from 'react'
+import { memo, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import ReactMarkdown, { Components } from 'react-markdown'
 import { PhotoView } from 'react-photo-view'
@@ -29,9 +29,7 @@ const NonMemoizedMarkdown: React.FC<MarkdownProps> = ({ children }) => {
     const openTags = (cleanedContent.match(/<think>/g) || []).length
     const closeTags = (cleanedContent.match(/<\/think>/g) || []).length
     const fixedContent =
-      openTags > closeTags
-        ? cleanedContent + '</think>'.repeat(openTags - closeTags)
-        : cleanedContent
+      openTags > closeTags ? cleanedContent + '</think>'.repeat(openTags - closeTags) : cleanedContent
 
     const thinkRegex = /<think>([\s\S]*?)<\/think>/g
     const parts = []
@@ -99,7 +97,7 @@ const NonMemoizedMarkdown: React.FC<MarkdownProps> = ({ children }) => {
             style={{
               wordBreak: 'break-all',
               whiteSpace: 'pre-wrap',
-              wordWrap: 'break-word'
+              wordWrap: 'break-word',
             }}
           >
             {children}
@@ -117,92 +115,84 @@ const NonMemoizedMarkdown: React.FC<MarkdownProps> = ({ children }) => {
 
     ol: ({ node, children, ...props }) => {
       return (
-        <ol className="list-decimal list-inside ml-1" {...props}>
+        <ol className='list-decimal list-inside ml-1' {...props}>
           {children}
         </ol>
       )
     },
     li: ({ node, children, ...props }) => {
       return (
-        <li className="py-1 [&>p]:inline [&>p]:m-0" {...props}>
+        <li className='py-1 [&>p]:inline [&>p]:m-0' {...props}>
           {children}
         </li>
       )
     },
     ul: ({ node, children, ...props }) => {
       return (
-        <ul className="list-disc list-inside ml-1" {...props}>
+        <ul className='list-disc list-inside ml-1' {...props}>
           {children}
         </ul>
       )
     },
     strong: ({ node, children, ...props }) => {
       return (
-        <span className="font-bold" {...props}>
+        <span className='font-bold' {...props}>
           {children}
         </span>
       )
     },
     a: ({ node, children, ...props }) => {
       return (
-        <a
-          className="text-blue-500 hover:underline break-all"
-          target="_blank"
-          rel="noreferrer"
-          {...props}
-        >
+        <a className='text-blue-500 hover:underline break-all' target='_blank' rel='noreferrer' {...props}>
           {children}
         </a>
       )
     },
     h1: ({ node, children, ...props }) => {
       return (
-        <h1 className="text-3xl font-semibold mt-6 mb-2" {...props}>
+        <h1 className='text-3xl font-semibold mt-6 mb-2' {...props}>
           {children}
         </h1>
       )
     },
     h2: ({ node, children, ...props }) => {
       return (
-        <h2 className="text-2xl font-semibold mt-6 mb-2" {...props}>
+        <h2 className='text-2xl font-semibold mt-6 mb-2' {...props}>
           {children}
         </h2>
       )
     },
     h3: ({ node, children, ...props }) => {
       return (
-        <h3 className="text-xl font-semibold mt-6 mb-2" {...props}>
+        <h3 className='text-xl font-semibold mt-6 mb-2' {...props}>
           {children}
         </h3>
       )
     },
     h4: ({ node, children, ...props }) => {
       return (
-        <h4 className="text-lg font-semibold mt-6 mb-2" {...props}>
+        <h4 className='text-lg font-semibold mt-6 mb-2' {...props}>
           {children}
         </h4>
       )
     },
     h5: ({ node, children, ...props }) => {
       return (
-        <h5 className="text-base font-semibold mt-6 mb-2" {...props}>
+        <h5 className='text-base font-semibold mt-6 mb-2' {...props}>
           {children}
         </h5>
       )
     },
     h6: ({ node, children, ...props }) => {
       return (
-        <h6 className="text-sm font-semibold mt-6 mb-2" {...props}>
+        <h6 className='text-sm font-semibold mt-6 mb-2' {...props}>
           {children}
         </h6>
       )
     },
     blockquote: ({ node, children, ...props }) => {
       return (
-        <blockquote
-          className="border-l-3 border-b-accent-foreground pl-4 py-2"
-          {...props}
-        >
+        <blockquote className='border-l-3 border-b-accent-foreground pl-4 py-2' {...props}>
           {children}
         </blockquote>
       )
@@ -215,11 +205,11 @@ const NonMemoizedMarkdown: React.FC<MarkdownProps> = ({ children }) => {
 
       if (isVideo) {
         return (
-          <span className="group block relative overflow-hidden rounded-md my-2 last:mb-4">
+          <span className='group block relative overflow-hidden rounded-md my-2 last:mb-4'>
             <video
-              className="w-full max-w-full h-auto rounded-md cursor-pointer group-hover:scale-105 transition-transform duration-300"
+              className='w-full max-w-full h-auto rounded-md cursor-pointer group-hover:scale-105 transition-transform duration-300'
               controls
-              preload="metadata"
+              preload='metadata'
               src={props.src}
               {...(props.alt && { title: props.alt })}
             >
@@ -228,8 +218,8 @@ const NonMemoizedMarkdown: React.FC<MarkdownProps> = ({ children }) => {
 
             {id && (
               <Button
-                variant="secondary"
-                className="group-hover:opacity-100 opacity-0 absolute top-2 right-2 z-10"
+                variant='secondary'
+                className='group-hover:opacity-100 opacity-0 absolute top-2 right-2 z-10'
                 onClick={(e) => {
                   e.stopPropagation()
                   handleImagePositioning(id)
@@ -244,16 +234,13 @@ const NonMemoizedMarkdown: React.FC<MarkdownProps> = ({ children }) => {
 
       return (
         <PhotoView src={props.src}>
-          <span className="group block relative overflow-hidden rounded-md my-2 last:mb-4">
-            <img
-              className="cursor-pointer group-hover:scale-105 transition-transform duration-300"
-              {...props}
-            />
+          <span className='group block relative overflow-hidden rounded-md my-2 last:mb-4'>
+            <img className='cursor-pointer group-hover:scale-105 transition-transform duration-300' {...props} />
 
             {id && (
               <Button
-                variant="secondary"
-                className="group-hover:opacity-100 opacity-0 absolute top-2 right-2 z-10"
+                variant='secondary'
+                className='group-hover:opacity-100 opacity-0 absolute top-2 right-2 z-10'
                 onClick={(e) => {
                   e.stopPropagation()
                   handleImagePositioning(id)
@@ -269,20 +256,15 @@ const NonMemoizedMarkdown: React.FC<MarkdownProps> = ({ children }) => {
     video: ({ node, children, ...props }) => {
       const id = filesArray.find((file) => props.src?.includes(file.url))?.id
       return (
-        <span className="group block relative overflow-hidden rounded-md my-2 last:mb-4">
-          <video
-            className="w-full max-w-full h-auto rounded-md"
-            controls
-            preload="metadata"
-            {...props}
-          >
+        <span className='group block relative overflow-hidden rounded-md my-2 last:mb-4'>
+          <video className='w-full max-w-full h-auto rounded-md' controls preload='metadata' {...props}>
             Your browser does not support the video tag.
           </video>
 
           {id && (
             <Button
-              variant="secondary"
-              className="group-hover:opacity-100 opacity-0 absolute top-2 right-2 z-10"
+              variant='secondary'
+              className='group-hover:opacity-100 opacity-0 absolute top-2 right-2 z-10'
               onClick={(e) => {
                 e.stopPropagation()
                 handleImagePositioning(id)
@@ -298,7 +280,7 @@ const NonMemoizedMarkdown: React.FC<MarkdownProps> = ({ children }) => {
   // Special handling if content contains think tags
   if (children.includes('<think>')) {
     return (
-      <div className="space-y-3 flex flex-col w-full max-w-full">
+      <div className='space-y-3 flex flex-col w-full max-w-full'>
         {parts.map((part, index) =>
           part.type === 'think' ? (
             <TextFoldTag
@@ -306,25 +288,19 @@ const NonMemoizedMarkdown: React.FC<MarkdownProps> = ({ children }) => {
               isExpanded={isThinkExpanded}
               onToggleExpand={() => setIsThinkExpanded(!isThinkExpanded)}
             >
-              <div className="prose prose-sm dark:prose-invert max-w-none">
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm]}
-                  components={components}
-                >
+              <div className='prose prose-sm dark:prose-invert max-w-none'>
+                <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
                   {part.content}
                 </ReactMarkdown>
               </div>
             </TextFoldTag>
           ) : (
-            <div key={index} className="w-full max-w-full">
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
-                components={components}
-              >
+            <div key={index} className='w-full max-w-full'>
+              <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
                 {part.content}
               </ReactMarkdown>
             </div>
-          )
+          ),
         )}
       </div>
     )
@@ -337,7 +313,4 @@ const NonMemoizedMarkdown: React.FC<MarkdownProps> = ({ children }) => {
   )
 }
 
-export const Markdown = memo(
-  NonMemoizedMarkdown,
-  (prevProps, nextProps) => prevProps.children === nextProps.children
-)
+export const Markdown = memo(NonMemoizedMarkdown, (prevProps, nextProps) => prevProps.children === nextProps.children)

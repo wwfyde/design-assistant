@@ -1,4 +1,4 @@
-import { ReactNode, Dispatch, SetStateAction } from 'react'
+import { Dispatch, ReactNode, SetStateAction } from 'react'
 
 // Types
 export interface Session {
@@ -31,13 +31,7 @@ export interface ChatInterfaceProps {
 
 export interface ButtonProps {
   children: ReactNode
-  variant?:
-    | 'default'
-    | 'destructive'
-    | 'outline'
-    | 'secondary'
-    | 'ghost'
-    | 'link'
+  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link'
   size?: 'default' | 'xs' | 'sm' | 'lg' | 'icon'
   className?: string
   onClick?: () => void

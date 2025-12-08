@@ -10,9 +10,7 @@ export async function getConfig(): Promise<{ [key: string]: LLMConfig }> {
   return await response.json()
 }
 
-export async function updateConfig(config: {
-  [key: string]: LLMConfig
-}): Promise<{ status: string; message: string }> {
+export async function updateConfig(config: { [key: string]: LLMConfig }): Promise<{ status: string; message: string }> {
   const response = await fetch('/api/config', {
     method: 'POST',
     headers: {

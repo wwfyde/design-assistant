@@ -1,7 +1,7 @@
 import { compressImageFile } from '@/utils/imageUtils'
 
 export async function uploadImage(
-  file: File
+  file: File,
 ): Promise<{ file_id: string; width: number; height: number; url: string }> {
   // Compress image before upload
   const compressedFile = await compressImageFile(file)
@@ -16,7 +16,7 @@ export async function uploadImage(
 }
 
 export async function uploadImageFromUrl(
-  url: string
+  url: string,
 ): Promise<{ file_id: string; width: number; height: number; url: string }> {
   const response = await fetch('/api/upload_image_from_url', {
     method: 'POST',

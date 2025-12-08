@@ -16,8 +16,7 @@ function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
     reader.onload = () => resolve(reader.result as string)
-    reader.onerror = () =>
-      reject(new Error(`Failed to read file: ${file.name}`))
+    reader.onerror = () => reject(new Error(`Failed to read file: ${file.name}`))
     reader.readAsDataURL(file)
   })
 }
@@ -100,24 +99,19 @@ export async function compressImageFile(file: File): Promise<File> {
     return file
   }
 
-  console.log(
-    `Compressing large image: ${file.name} (${Math.round(fileSizeKB)}KB)`
-  )
+  console.log(`Compressing large image: ${file.name} (${Math.round(fileSizeKB)}KB)`)
 
   try {
     const compressedDataURL = await compressLargeImage(file)
     const compressedFile = dataURLToFile(compressedDataURL, file.name)
 
     console.log(
-      `Image compressed: ${file.name} (${Math.round(fileSizeKB)}KB → ${Math.round(compressedFile.size / 1024)}KB)`
+      `Image compressed: ${file.name} (${Math.round(fileSizeKB)}KB → ${Math.round(compressedFile.size / 1024)}KB)`,
     )
 
     return compressedFile
   } catch (error) {
-    console.warn(
-      `Failed to compress image ${file.name}, using original:`,
-      error
-    )
+    console.warn(`Failed to compress image ${file.name}, using original:`, error)
     return file
   }
 }
@@ -125,9 +119,7 @@ export async function compressImageFile(file: File): Promise<File> {
 /**
  * Process image files - compress only if larger than 2MB
  */
-export async function processImageFiles(
-  files: File[]
-): Promise<ProcessedImage[]> {
+export async function processImageFiles(files: File[]): Promise<ProcessedImage[]> {
   const results = await Promise.allSettled(
     files.map(async (file) => {
       // Check file size (2MB = 2048KB)
@@ -136,9 +128,7 @@ export async function processImageFiles(
       let url: string
       if (fileSizeKB > 2048) {
         // Large file - compress it
-        console.log(
-          `[Silent] Compressing large image: ${file.name} (${Math.round(fileSizeKB)}KB)`
-        )
+        console.log(`[Silent] Compressing large image: ${file.name} (${Math.round(fileSizeKB)}KB)`)
         url = await compressLargeImage(file)
       } else {
         // Small file - use as is
@@ -149,7 +139,7 @@ export async function processImageFiles(
         url,
         filename: file.name,
       }
-    })
+    }),
   )
 
   // Extract successful results

@@ -26,22 +26,13 @@ interface PngMetadata {
  * 从ArrayBuffer中读取4字节big-endian整数
  */
 function readUint32BE(buffer: Uint8Array, offset: number): number {
-  return (
-    (buffer[offset] << 24) |
-    (buffer[offset + 1] << 16) |
-    (buffer[offset + 2] << 8) |
-    buffer[offset + 3]
-  )
+  return (buffer[offset] << 24) | (buffer[offset + 1] << 16) | (buffer[offset + 2] << 8) | buffer[offset + 3]
 }
 
 /**
  * 从ArrayBuffer中读取字符串
  */
-function readString(
-  buffer: Uint8Array,
-  offset: number,
-  length: number
-): string {
+function readString(buffer: Uint8Array, offset: number, length: number): string {
   return new TextDecoder('utf-8').decode(buffer.slice(offset, offset + length))
 }
 
@@ -232,9 +223,7 @@ async function readPNGHeaderAndMetadata(filePath: string): Promise<Uint8Array> {
 
           if (type === 'IDAT') {
             foundIDAT = true
-            console.log(
-              `Found IDAT at offset ${parseOffset}, stopping progressive read`
-            )
+            console.log(`Found IDAT at offset ${parseOffset}, stopping progressive read`)
             break
           }
 
@@ -242,13 +231,8 @@ async function readPNGHeaderAndMetadata(filePath: string): Promise<Uint8Array> {
         }
 
         // 如果找到了IDAT或者已经有有效的chunks，可以停止读取
-        if (
-          foundIDAT ||
-          (hasValidChunks && parseOffset >= totalBuffer.length - 8)
-        ) {
-          console.log(
-            `Progressive read complete. Total read: ${totalBuffer.length} bytes`
-          )
+        if (foundIDAT || (hasValidChunks && parseOffset >= totalBuffer.length - 8)) {
+          console.log(`Progressive read complete. Total read: ${totalBuffer.length} bytes`)
           break
         }
       }

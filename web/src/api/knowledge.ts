@@ -55,9 +55,7 @@ export interface ApiResponse {
  * @param params 查询参数
  * @returns Promise<KnowledgeListResponse>
  */
-export async function getKnowledgeList(
-  params: KnowledgeListParams = {}
-): Promise<KnowledgeListResponse> {
+export async function getKnowledgeList(params: KnowledgeListParams = {}): Promise<KnowledgeListResponse> {
   const { pageSize = 10, pageNumber = 1, search } = params
 
   // 构建查询参数
@@ -71,9 +69,7 @@ export async function getKnowledgeList(
   }
 
   try {
-    const response = await authenticatedFetch(
-      `${BASE_API_URL}/api/knowledge/list?${queryParams.toString()}`
-    )
+    const response = await authenticatedFetch(`${BASE_API_URL}/api/knowledge/list?${queryParams.toString()}`)
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
@@ -83,9 +79,7 @@ export async function getKnowledgeList(
     return data
   } catch (error) {
     console.error('Failed to get knowledge list:', error)
-    throw new Error(
-      error instanceof Error ? error.message : 'Failed to get knowledge list'
-    )
+    throw new Error(error instanceof Error ? error.message : 'Failed to get knowledge list')
   }
 }
 
@@ -96,9 +90,7 @@ export async function getKnowledgeList(
  */
 export async function getKnowledgeById(id: string): Promise<KnowledgeBase> {
   try {
-    const response = await authenticatedFetch(
-      `${BASE_API_URL}/api/knowledge/${id}`
-    )
+    const response = await authenticatedFetch(`${BASE_API_URL}/api/knowledge/${id}`)
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
@@ -108,9 +100,7 @@ export async function getKnowledgeById(id: string): Promise<KnowledgeBase> {
     return data.data
   } catch (error) {
     console.error('Failed to get knowledge by id:', error)
-    throw new Error(
-      error instanceof Error ? error.message : 'Failed to get knowledge base'
-    )
+    throw new Error(error instanceof Error ? error.message : 'Failed to get knowledge base')
   }
 }
 
@@ -127,13 +117,10 @@ export async function createKnowledge(knowledgeData: {
   content?: string
 }): Promise<ApiResponse> {
   try {
-    const response = await authenticatedFetch(
-      `${BASE_API_URL}/api/knowledge/create`,
-      {
-        method: 'POST',
-        body: JSON.stringify(knowledgeData),
-      }
-    )
+    const response = await authenticatedFetch(`${BASE_API_URL}/api/knowledge/create`, {
+      method: 'POST',
+      body: JSON.stringify(knowledgeData),
+    })
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
@@ -142,9 +129,7 @@ export async function createKnowledge(knowledgeData: {
     return await response.json()
   } catch (error) {
     console.error('Failed to create knowledge:', error)
-    throw new Error(
-      error instanceof Error ? error.message : 'Failed to create knowledge base'
-    )
+    throw new Error(error instanceof Error ? error.message : 'Failed to create knowledge base')
   }
 }
 
@@ -162,16 +147,13 @@ export async function updateKnowledge(
     cover: string
     is_public: boolean
     content: string
-  }>
+  }>,
 ): Promise<ApiResponse> {
   try {
-    const response = await authenticatedFetch(
-      `${BASE_API_URL}/api/knowledge/${id}`,
-      {
-        method: 'PUT',
-        body: JSON.stringify(knowledgeData),
-      }
-    )
+    const response = await authenticatedFetch(`${BASE_API_URL}/api/knowledge/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(knowledgeData),
+    })
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
@@ -180,9 +162,7 @@ export async function updateKnowledge(
     return await response.json()
   } catch (error) {
     console.error('Failed to update knowledge:', error)
-    throw new Error(
-      error instanceof Error ? error.message : 'Failed to update knowledge base'
-    )
+    throw new Error(error instanceof Error ? error.message : 'Failed to update knowledge base')
   }
 }
 
@@ -193,12 +173,9 @@ export async function updateKnowledge(
  */
 export async function deleteKnowledge(id: string): Promise<ApiResponse> {
   try {
-    const response = await authenticatedFetch(
-      `${BASE_API_URL}/api/knowledge/${id}`,
-      {
-        method: 'DELETE',
-      }
-    )
+    const response = await authenticatedFetch(`${BASE_API_URL}/api/knowledge/${id}`, {
+      method: 'DELETE',
+    })
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
@@ -207,9 +184,7 @@ export async function deleteKnowledge(id: string): Promise<ApiResponse> {
     return await response.json()
   } catch (error) {
     console.error('Failed to delete knowledge:', error)
-    throw new Error(
-      error instanceof Error ? error.message : 'Failed to delete knowledge base'
-    )
+    throw new Error(error instanceof Error ? error.message : 'Failed to delete knowledge base')
   }
 }
 
@@ -218,9 +193,7 @@ export async function deleteKnowledge(id: string): Promise<ApiResponse> {
  * @param knowledgeData 完整的知识库数据数组
  * @returns Promise<ApiResponse>
  */
-export async function saveEnabledKnowledgeDataToSettings(
-  knowledgeData: KnowledgeBase[]
-): Promise<ApiResponse> {
+export async function saveEnabledKnowledgeDataToSettings(knowledgeData: KnowledgeBase[]): Promise<ApiResponse> {
   try {
     // 调用本地服务器API，不需要BASE_API_URL和认证
     const response = await fetch('/api/settings', {
@@ -240,8 +213,6 @@ export async function saveEnabledKnowledgeDataToSettings(
     return await response.json()
   } catch (error) {
     console.error('Failed to save knowledge data to settings:', error)
-    throw new Error(
-      error instanceof Error ? error.message : 'Failed to save knowledge data'
-    )
+    throw new Error(error instanceof Error ? error.message : 'Failed to save knowledge data')
   }
 }

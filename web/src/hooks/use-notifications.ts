@@ -16,11 +16,8 @@ export function useNotifications() {
     unreadCount: notificationManager.getUnreadCount(),
     markAsRead: notificationManager.markAsRead.bind(notificationManager),
     markAllAsRead: notificationManager.markAllAsRead.bind(notificationManager),
-    clearNotifications:
-      notificationManager.clearNotifications.bind(notificationManager),
-    getCanvasNotifications:
-      notificationManager.getCanvasNotifications.bind(notificationManager),
-    getSessionNotifications:
-      notificationManager.getSessionNotifications.bind(notificationManager),
+    clearNotifications: notificationManager.clearNotifications.bind(notificationManager),
+    getCanvasNotifications: notificationManager.getCanvasNotifications.bind(notificationManager),
+    getSessionNotifications: notificationManager.getSessionNotifications.bind(notificationManager),
   }
 }
