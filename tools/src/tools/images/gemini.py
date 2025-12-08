@@ -151,5 +151,5 @@ def magic_generate_with_gemini(
 
 if __name__ == "__main__":
     # magic_generate_with_gemini(image_url="unknown.png")
-    result = image_create_with_gemini("将图片改成写实风格", "img.png", "2:3")
+    result = image_create_with_gemini("将图片改成写实风格", image_urls="img.png", aspect_ratio="2:3")
     print(result)
