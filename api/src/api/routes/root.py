@@ -19,34 +19,29 @@ router = APIRouter()
 async def get_models() -> list[ModelInfo]:
     return [
         ModelInfo(
-            provider="openai",
-            model="gpt-4.1-mini",
-            url="https://api.openai.com/v1",
-            type="text",
+            provider="openai", model="gpt-4.1-mini", url="https://api.openai.com/v1", type="text", display_name="GPT"
         ),
-        ModelInfo(
-            provider="ark",
-            model="seed-1.6",
-            url="https://api.openai.com/v1",
-            type="text",
-        ),
+        ModelInfo(provider="ark", model="seed-1.6", url="https://api.openai.com/v1", type="text", display_name="豆包"),
         ModelInfo(
             provider="deepseek",
             model="deepseek-v3.2",
             url="https://deepseek.com",
             type="text",
+            display_name="DeepSeek",
         ),
         # ModelInfo(
         #     provider="gemini",
         #     model="gemini-3-pro-preview",
         #     url="https://api.openai.com/v1",
         #     type="text",
+        #     display_name="Gemini",
         # ),
         ModelInfo(
             provider="dashscope",
             model="qwen-plus",
             url="https://api.openai.com/v1",
             type="text",
+            display_name="千问",
         ),
     ]
 
@@ -71,7 +66,7 @@ async def list_tools() -> list[ToolInfo]:
             provider="gemini",
             id="image_create_with_gemini",
             type="image",
-            display_name="Gemini 3 Pro(Nano Banana)",
+            display_name="Nano Banana",
         ),
         # ToolInfo(
         #     provider="openai",
@@ -103,9 +98,7 @@ async def list_chat_sessions(
 
 
 @router.get("/chat_session/{session_id}")
-async def get_chat_session(
-    session_id: str, chat_service: ChatService = Depends(get_chat_service)
-):
+async def get_chat_session(session_id: str, chat_service: ChatService = Depends(get_chat_service)):
     """
     获取指定会话的聊天历史记录
 
