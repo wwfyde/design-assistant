@@ -52,6 +52,7 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
+    "ipython>=9.8.0",
     "pip>=25.3",
     "ruff>=0.14.8",
     "uv-build>=0.9.7",
@@ -69,3 +70,6 @@ line-length = 120
 
 [tool.ruff.lint.isort]
 known-first-party = ["api", "lib", "tools", "langgraph-tools", "agents"]
+
+[tool.ty.environment]
+#root = ["api", "tools", "lib", "agents", "langgraph-tools"]

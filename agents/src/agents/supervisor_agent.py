@@ -7,7 +7,6 @@ from api.core.StreamProcessor import StreamProcessor
 from api.domain.model import ModelInfo
 from api.domain.tool import ToolInfo
 from api.services.websocket import send_to_websocket
-
 from lib import settings
 
 supervisor_prompt = """You are a supervisor managing two agents"""
@@ -83,7 +82,7 @@ async def langgraph_supervisor_agent(
     canvas_id: str,
     session_id: str,
     *,
-    tool_list: list[ToolInfo | dict],
+    tool_list: list[ToolInfo],
     text_model: ModelInfo,
 ) -> None:
     """多智能体处理函数

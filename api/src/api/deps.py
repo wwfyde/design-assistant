@@ -148,7 +148,7 @@ async def handle_chat(data: ChatRequest, chat_service: ChatService) -> None:
     if len(messages) == 1:
         # create new session
         prompt = messages[0].get("content", [])
-        title = prompt[0].get("text", "")[:200] if prompt else ""
+        title = prompt[0].get("text", "").split("\n")[0][:200] if prompt else ""
         # print(f"{prompt=}, {title=}")
         # TODO: Better way to determin when to create new chat session.
         await chat_service.create_chat_session(

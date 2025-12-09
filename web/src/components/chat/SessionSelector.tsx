@@ -30,7 +30,7 @@ const SessionSelector: React.FC<SessionSelectorProps> = ({ session, sessionList,
             ?.filter((session) => session.id && session.id.trim() !== '') // Fix error of A ‹Select.Item /> must have a value prop that is not an empty string.
             ?.map((session) => (
               <SelectItem key={session.id} value={session.id}>
-                {session.id}
+                {session.title}
               </SelectItem>
             ))}
         </SelectContent>
