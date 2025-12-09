@@ -65,11 +65,7 @@ class InMemoryCanvasRepo(CanvasRepo):
         print(canvas)
         print(self.store.canvas)
         if canvas:
-            sessions = [
-                item
-                for item in self.store.chat_session.values()
-                if item.canvas_id == id
-            ]
+            sessions = [item for item in self.store.chat_session.values() if item.canvas_id == id]
 
             data = {
                 "data": canvas.data,
@@ -93,9 +89,7 @@ class InMemoryCanvasRepo(CanvasRepo):
             self.store.canvas.pop(id)
         return True
 
-    async def save_canvas_data(
-        self, id: str | UUID, data: str, thumbnail: str
-    ) -> Canvas | None:
+    async def save_canvas_data(self, id: str | UUID, data: str, thumbnail: str) -> Canvas | None:
         async with self.store.lock:
             raw = await self.get_canvas_by_id(id)
             if raw:
@@ -121,9 +115,7 @@ class PostgresCanvasRepo(CanvasRepo):
         self.session = session
 
     async def create_canvas(self, canvas: CanvasCreate) -> Canvas:
-        messages = json.dumps(
-            canvas.messages, sort_keys=True, ensure_ascii=False, separators=(",", ":")
-        )
+        messages = json.dumps(canvas.messages, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
         canvas_db = CanvasModel(
             id=canvas.canvas_id,
             name=canvas.name,
@@ -152,9 +144,7 @@ class PostgresCanvasRepo(CanvasRepo):
             stmt = select(ChatSessionModel).where(ChatSessionModel.canvas_id == str(id))
             result = self.session.execute(stmt)
             chat_sessions = result.scalars().all()
-            sessions = [
-                ChatSession.model_validate(session) for session in chat_sessions
-            ]
+            sessions = [ChatSession.model_validate(session) for session in chat_sessions]
 
             data = {
                 "data": canvas.data,
@@ -179,9 +169,7 @@ class PostgresCanvasRepo(CanvasRepo):
         self.session.commit()
         return True
 
-    async def save_canvas_data(
-        self, id: str | UUID, data: str, thumbnail: str
-    ) -> Canvas | None:
+    async def save_canvas_data(self, id: str | UUID, data: str, thumbnail: str) -> Canvas | None:
         stmt = select(CanvasModel).where(CanvasModel.id == str(id))
         result = self.session.execute(stmt)
         canvas_db = result.scalar_one_or_none()
@@ -204,11 +192,7 @@ class PostgresCanvasRepo(CanvasRepo):
         result = self.session.execute(stmt)
         canvas_db = result.scalar_one_or_none()
         if canvas_db:
-            stmt = (
-                update(CanvasModel)
-                .where(CanvasModel.id == str(id))
-                .values(name=name, updated_at=get_current_date())
-            )
+            stmt = update(CanvasModel).where(CanvasModel.id == str(id)).values(name=name, updated_at=get_current_date())
             self.session.execute(stmt)
             self.session.commit()
             self.session.refresh(canvas_db)
@@ -285,9 +269,7 @@ async def find_next_best_element_position(canvas_data, max_num_per_row=4, spacin
     elements = canvas_data.get("elements", [])
 
     media_elements = [
-        e
-        for e in elements
-        if e.get("type") in ["image", "embeddable", "video"] and not e.get("isDeleted")
+        e for e in elements if e.get("type") in ["image", "embeddable", "video"] and not e.get("isDeleted")
     ]
 
     if not media_elements:
@@ -303,11 +285,7 @@ async def find_next_best_element_position(canvas_data, max_num_per_row=4, spacin
         placed = False
         for row in rows:
             # Check if the element vertically overlaps with any element in the row
-            if any(
-                max(y, r.get("y", 0))
-                < min(y + height, r.get("y", 0) + r.get("height", 0))
-                for r in row
-            ):
+            if any(max(y, r.get("y", 0)) < min(y + height, r.get("y", 0) + r.get("height", 0)) for r in row):
                 row.append(element)
                 placed = True
                 break
@@ -326,9 +304,7 @@ async def find_next_best_element_position(canvas_data, max_num_per_row=4, spacin
     if len(last_row) < max_num_per_row:
         # Add to the last row
         rightmost_element = last_row[-1]
-        new_x = (
-            rightmost_element.get("x", 0) + rightmost_element.get("width", 0) + spacing
-        )
+        new_x = rightmost_element.get("x", 0) + rightmost_element.get("width", 0) + spacing
         # Align with the top of the last row for consistency
         new_y = min(e.get("y", 0) for e in last_row)
     else:

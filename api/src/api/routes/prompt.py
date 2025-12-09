@@ -8,9 +8,7 @@ router = APIRouter()
 
 
 @router.get("")
-async def get_prompts(
-    offset: int = 1, limit: int = 10, asession: AsyncSession = Depends(get_db_async)
-):
+async def get_prompts(offset: int = 1, limit: int = 10, asession: AsyncSession = Depends(get_db_async)):
     stmt = select(PromptModel).offset(offset).limit(limit).order_by(PromptModel.id)
 
     result = await asession.execute(stmt)

@@ -115,7 +115,10 @@ def create_app(lifespan: Callable = lifespan):
 
         return {"message": f"Hello, {s}!", "data": f"hello, {s}!"}
 
-    app.include_router(router, prefix="/api", )
+    app.include_router(
+        router,
+        prefix="/api",
+    )
 
     # registering logfire
     # import logfire
@@ -166,12 +169,8 @@ socket_app = socketio.ASGIApp(sio, other_asgi_app=app, socketio_path="/socket.io
 def main():
     print("api imported!")
     _bypass = {"127.0.0.1", "localhost", "::1"}
-    current = set(os.environ.get("no_proxy", "").split(",")) | set(
-        os.environ.get("NO_PROXY", "").split(",")
-    )
-    os.environ["no_proxy"] = os.environ["NO_PROXY"] = ",".join(
-        sorted(_bypass | current - {""})
-    )
+    current = set(os.environ.get("no_proxy", "").split(",")) | set(os.environ.get("NO_PROXY", "").split(","))
+    os.environ["no_proxy"] = os.environ["NO_PROXY"] = ",".join(sorted(_bypass | current - {""}))
     # os.environ["HTTP_PROXY"] = "http://127.0.0.1:7890"
     # os.environ["HTTPS_PROXY"] = "http://127.0.0.1:7890"
     run(app="main:socket_app", reload=True, port=8013, loop="asyncio")

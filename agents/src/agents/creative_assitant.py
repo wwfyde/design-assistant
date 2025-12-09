@@ -26,9 +26,7 @@ class CreativeAssistantState(AgentState):
 class ResponseFormat(BaseModel):
     content: str
     title: Optional[str] = Field(None, title="标题", description="标题")
-    images: Optional[list[str]] = Field(
-        None, title="生成的图片url", description="生成的图片URL列表"
-    )
+    images: Optional[list[str]] = Field(None, title="生成的图片url", description="生成的图片URL列表")
     # preferences: Optional[dict]
     # tags: list[str]
     # with_emoji: bool = Field(
@@ -347,9 +345,7 @@ openai_model = ChatOpenAI(
     # base_url=settings.providers.ark.base_url,
     use_responses_api=False,
     http_client=httpx.Client(proxy=settings.proxy_url or "http://127.0.0.1:7890"),
-    http_async_client=httpx.AsyncClient(
-        proxy=settings.proxy_url or "http://127.0.0.1:7890"
-    ),
+    http_async_client=httpx.AsyncClient(proxy=settings.proxy_url or "http://127.0.0.1:7890"),
 )
 
 
@@ -393,16 +389,12 @@ if __name__ == "__main__":
     )
     print(resp["messages"][-1].content)
     resp = creative_assistant.invoke(
-        input=CreativeAssistantState(
-            messages=HumanMessage("你支持哪些分辨率"), aspect_ratio="1:1"
-        ),
+        input=CreativeAssistantState(messages=HumanMessage("你支持哪些分辨率"), aspect_ratio="1:1"),
         config={"configurable": {"thread_id": "2"}},
     )
     print(resp["messages"][-1].content)
     resp = creative_assistant.invoke(
-        input=CreativeAssistantState(
-            messages=HumanMessage("帮我生成一碗牛肉面, 分辨率3:4"), aspect_ratio="1:1"
-        ),
+        input=CreativeAssistantState(messages=HumanMessage("帮我生成一碗牛肉面, 分辨率3:4"), aspect_ratio="1:1"),
         config={"configurable": {"thread_id": "2"}},
     )
     print(resp["messages"][-3].content)

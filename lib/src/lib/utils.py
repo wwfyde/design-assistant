@@ -18,20 +18,11 @@ def get_current_date(
     iso_str = dt.isoformat(timespec=timespec).replace("+00:00", "Z")
     return iso_str
     if utc:
-        return (
-            datetime.now()
-            .astimezone(tz=timezone.utc)
-            .isoformat(timespec=timespec)
-            .replace("+00:00", "Z")
-        )
-    return (
-        datetime.now().astimezone().isoformat(timespec=timespec).replace("+00:00", "Z")
-    )
+        return datetime.now().astimezone(tz=timezone.utc).isoformat(timespec=timespec).replace("+00:00", "Z")
+    return datetime.now().astimezone().isoformat(timespec=timespec).replace("+00:00", "Z")
 
 
-def generate_file_id(
-    mode: Literal["uuid", "timestamp", "hash", "urlsafe"] = "uuid", prefix: str = "img_"
-) -> str:
+def generate_file_id(mode: Literal["uuid", "timestamp", "hash", "urlsafe"] = "uuid", prefix: str = "img_") -> str:
     """
     生成带有 img_ 前缀的 image file id
 

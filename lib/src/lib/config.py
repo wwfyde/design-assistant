@@ -87,9 +87,7 @@ class SolutionConfig(BaseModel):
 class Settings(BaseSettings):
     app_name: str = "ai-tools"
     project_name: str = "AiMark Design Agent"
-    repo_type: Literal["in-memory", "postgres", "mongodb", "mysql", "redis"] = (
-        "in-memory"
-    )
+    repo_type: Literal["in-memory", "postgres", "mongodb", "mysql", "redis"] = "in-memory"
     api_port: int = 8013
     api_key_header: str = "fastapi"
     httpx_timeout: int = 60

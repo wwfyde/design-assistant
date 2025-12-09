@@ -14,9 +14,7 @@ class Chat(Base):
     name = mapped_column(String, index=True, nullable=False)
 
     created_at = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
-    )
+    updated_at = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
 
 class ChatSession(Base):
@@ -31,9 +29,7 @@ class ChatSession(Base):
     messages: Mapped[str | None] = mapped_column(String, nullable=True)
     completed = mapped_column(Boolean, default=False)
     created_at = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
-    )
+    updated_at = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
 
 class ChatMessage(Base):
@@ -44,9 +40,7 @@ class ChatMessage(Base):
         default=uuid.uuid7,
         server_default=text("uuidv7()"),  # noqa F821
     )
-    lc_id: Mapped[str] = mapped_column(
-        String, nullable=True, comment="langchain run id", unique=True, index=True
-    )
+    lc_id: Mapped[str] = mapped_column(String, nullable=True, comment="langchain run id", unique=True, index=True)
     chat_id: Mapped[str | None] = mapped_column(String, nullable=True)
     session_id: Mapped[str | None] = mapped_column(String, nullable=True)
     role: Mapped[str | None] = mapped_column(String, nullable=True)
@@ -54,6 +48,4 @@ class ChatMessage(Base):
     content: Mapped[str | None] = mapped_column(String, nullable=True)
 
     created_at = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
-    )
+    updated_at = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

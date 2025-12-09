@@ -87,9 +87,7 @@ class StreamProcessor:
 
         # 发送所有消息到前端
         # print("发送: ", oai_messages)
-        await self.websocket_service(
-            self.session_id, {"type": "all_messages", "messages": oai_messages}
-        )
+        await self.websocket_service(self.session_id, {"type": "all_messages", "messages": oai_messages})
 
         # 保存新消息到数据库
         async with async_session() as asession:
@@ -97,19 +95,13 @@ class StreamProcessor:
                 if settings.repo_type == "in-memory":
                     chat_service = ChatService(InMemoryChatRepo(memory_store))
                 elif settings.repo_type == "postgres":
-                    chat_service = ChatService(
-                        PostgresChatRepo(session=session, asession=asession)
-                    )
+                    chat_service = ChatService(PostgresChatRepo(session=session, asession=asession))
                 else:
                     chat_service = ChatService(InMemoryChatRepo(memory_store))
 
                 # 获取最近保存消息的lc_id
                 last_saved_index = next(
-                    (
-                        i
-                        for i in range(len(oai_messages) - 1, -1, -1)
-                        if oai_messages[i]["role"] == "user"
-                    ),
+                    (i for i in range(len(oai_messages) - 1, -1, -1) if oai_messages[i]["role"] == "user"),
                     None,
                 )
 
@@ -122,9 +114,7 @@ class StreamProcessor:
                         self.session_id,
                         oai_message.get("role", "user"),  # message.role or "user",
                         json.dumps(oai_message, ensure_ascii=False),
-                        message_id=message.id
-                        if not message.id.startswith("lc_run--")
-                        else None,
+                        message_id=message.id if not message.id.startswith("lc_run--") else None,
                         lc_id=message.id,
                         # getattr(all_messages[i], "id", None) if i < len(all_messages) else None,  # langchain生成的id 不规范, 或者替换lc_run---
                     )
@@ -149,9 +139,7 @@ class StreamProcessor:
                 )
             elif content:
                 # 发送文本内容
-                await self.websocket_service(
-                    self.session_id, {"type": "delta", "text": content}
-                )
+                await self.websocket_service(self.session_id, {"type": "delta", "text": content})
             elif (
                 hasattr(ai_message_chunk, "tool_calls")
                 and ai_message_chunk.tool_calls
@@ -189,9 +177,7 @@ class StreamProcessor:
             # 检查是否需要确认
             if tool_name in TOOLS_REQUIRING_CONFIRMATION:
                 # 对于需要确认的工具，不在这里发送事件，让工具函数自己处理
-                print(
-                    f"🔄 Tool {tool_name} requires confirmation, skipping StreamProcessor event"
-                )
+                print(f"🔄 Tool {tool_name} requires confirmation, skipping StreamProcessor event")
                 continue
             else:
                 await self.websocket_service(

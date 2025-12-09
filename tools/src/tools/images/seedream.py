@@ -29,9 +29,7 @@ def image_create_with_seedream(
     # seed: int | None = tool_parameters.get("seed", -1)
     # TODO: 考虑使用字符串逗号隔开, 还是list
     if aspect_ratio:
-        width, height = [
-            int(item) for item in aspect_ratio.replace(":", "×").split("×")
-        ]
+        width, height = [int(item) for item in aspect_ratio.replace(":", "×").split("×")]
         size = "2K"
         base = 2
         match size:
@@ -115,9 +113,7 @@ def image_create_with_seedream(
         "size": f"{width}x{height}",
         "stream": use_stream,
         # 优化prompt
-        "optimize_prompt_options": {
-            "mode": "standard"
-        },  # support standard and fast mode
+        "optimize_prompt_options": {"mode": "standard"},  # support standard and fast mode
         # "seed": seed or -1,
         "watermark": False,
     }
@@ -129,9 +125,7 @@ def image_create_with_seedream(
     try:
         if use_stream:
             with httpx.Client() as client:
-                with client.stream(
-                    "POST", base_url, json=data, headers=headers, timeout=180
-                ) as response:
+                with client.stream("POST", base_url, json=data, headers=headers, timeout=180) as response:
                     for line in response.iter_lines():
                         if line:
                             # print(line)

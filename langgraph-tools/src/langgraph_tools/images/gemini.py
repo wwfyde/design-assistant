@@ -57,9 +57,7 @@ def image_create_with_gemini(
     )
 
 
-def magic_generate_with_gemini(
-    *, prompt: str | None = None, image_url: str
-) -> list[dict]:
+def magic_generate_with_gemini(*, prompt: str | None = None, image_url: str) -> list[dict]:
     if not prompt:
         prompt = "理解图片上的视觉指令并生图"
 
@@ -83,9 +81,7 @@ def magic_generate_with_gemini(
             image_bytes = part.inline_data.data
             ext = part.inline_data.mime_type.split("/")[-1].replace("jpeg", "jpg")
             filename = f"{str(uuid.uuid4())}.{ext}"
-            url = upload_image(
-                filename, data=image_bytes, prefix="creative", rename=False
-            )
+            url = upload_image(filename, data=image_bytes, prefix="creative", rename=False)
 
             image = Image.open(BytesIO(part.inline_data.data))
             width, height = image.size

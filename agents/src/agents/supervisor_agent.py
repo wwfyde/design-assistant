@@ -59,9 +59,7 @@ def _fix_chat_history(messages: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
 
             # 记录修复信息
             if removed_calls:
-                print(
-                    f"🔧 修复消息历史：移除了 {len(removed_calls)} 个不完整的工具调用: {removed_calls}"
-                )
+                print(f"🔧 修复消息历史：移除了 {len(removed_calls)} 个不完整的工具调用: {removed_calls}")
 
             # 更新消息
             if valid_tool_calls:
@@ -139,9 +137,7 @@ async def langgraph_supervisor_agent(
             from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 
             async with AsyncPostgresSaver.from_conn_string(db_uri) as checkpointer:
-                agent = build_creative_assistant(
-                    text_model, tools=tool_list, checkpointer=checkpointer
-                )
+                agent = build_creative_assistant(text_model, tools=tool_list, checkpointer=checkpointer)
                 # 6. 流处理
                 processor = StreamProcessor(session_id, send_to_websocket)  # type: ignore
                 await processor.process_stream(
@@ -150,9 +146,7 @@ async def langgraph_supervisor_agent(
                     context,
                 )
         else:
-            agent = build_creative_assistant(
-                text_model, tools=tool_list, checkpointer=memory_checkpointer
-            )
+            agent = build_creative_assistant(text_model, tools=tool_list, checkpointer=memory_checkpointer)
             # 6. 流处理
             processor = StreamProcessor(session_id, send_to_websocket)  # type: ignore
             await processor.process_stream(
@@ -172,6 +166,4 @@ async def _handle_error(error: Exception, session_id: str) -> None:
     print(f"Full traceback:\n{tb_str}")
     traceback.print_exc()
 
-    await send_to_websocket(
-        session_id, cast(Dict[str, Any], {"type": "error", "error": str(error)})
-    )
+    await send_to_websocket(session_id, cast(Dict[str, Any], {"type": "error", "error": str(error)}))

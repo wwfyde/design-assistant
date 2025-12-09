@@ -33,9 +33,7 @@ async def create_jaaz_response(
             print(f"❌ Jaaz service configuration error: {e}")
             return {
                 "role": "assistant",
-                "content": [
-                    {"type": "text", "text": "✨ Cloud API Key not configured"}
-                ],
+                "content": [{"type": "text", "text": "✨ Cloud API Key not configured"}],
             }
 
         # 调用 Jaaz 服务生成魔法图像
@@ -52,9 +50,7 @@ async def create_jaaz_response(
             print(f"❌ Magic generation error: {error_msg}")
             return {
                 "role": "assistant",
-                "content": [
-                    {"type": "text", "text": f"✨ Magic Generation Error: {error_msg}"}
-                ],
+                "content": [{"type": "text", "text": f"✨ Magic Generation Error: {error_msg}"}],
             }
 
         # 检查是否有结果 URL
@@ -93,9 +89,7 @@ async def create_jaaz_response(
                 filename = f"{file_id}.{extension}"
 
                 # 保存图片到画布
-                image_url = await save_image_to_canvas(
-                    session_id, canvas_id, filename, mime_type, width, height
-                )
+                image_url = await save_image_to_canvas(session_id, canvas_id, filename, mime_type, width, height)
                 print(f"✨ 图片已保存到画布: {filename}")
             except Exception as e:
                 print(f"❌ 保存图片到画布失败: {e}")
@@ -117,7 +111,5 @@ async def create_jaaz_response(
             print(f"❌ 创建魔法回复时出错: {e}")
             return {
                 "role": "assistant",
-                "content": [
-                    {"type": "text", "text": f"✨ Magic Generation Error: {str(e)}"}
-                ],
+                "content": [{"type": "text", "text": f"✨ Magic Generation Error: {str(e)}"}],
             }

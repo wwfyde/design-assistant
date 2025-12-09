@@ -13,6 +13,7 @@ class Message(BaseModel):
     role: str
     content: dict[str, Any] | str
 
+
 class ChatRequest(BaseModel):
     messages: list[dict[str, Any]]
     session_id: str

@@ -47,9 +47,7 @@ async def generate_rednote(
     response = agent.invoke(
         input,
         config=RunnableConfig(configurable={"thread_id": body.conversation_id}),
-        context=RednoteContext(
-            user_id=body.user_id, conversation_id=body.conversation_id
-        ),
+        context=RednoteContext(user_id=body.user_id, conversation_id=body.conversation_id),
     )
     print(response["messages"][-1].content)
     return response

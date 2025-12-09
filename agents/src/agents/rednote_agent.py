@@ -26,9 +26,7 @@ class RednoteState(AgentState):
 class ResponseFormat(BaseModel):
     content: str
     title: Optional[str] = Field(None, title="标题", description="标题")
-    images: Optional[list[str]] = Field(
-        None, title="生成的图片url", description="生成的图片URL列表"
-    )
+    images: Optional[list[str]] = Field(None, title="生成的图片url", description="生成的图片URL列表")
     # preferences: Optional[dict]
     # tags: list[str]
     # with_emoji: bool = Field(

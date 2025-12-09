@@ -20,9 +20,7 @@ def rembg_with_url(image_url: str) -> str | None:
         input = i.read()
         output = remove(input, force_return_bytes=True)
         filename = str(uuid.uuid7())
-        url = upload_image(
-            f"{filename}.png", output, prefix="tmp", rename=False, domain=None
-        )
+        url = upload_image(f"{filename}.png", output, prefix="tmp", rename=False, domain=None)
 
         return url
 

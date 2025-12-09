@@ -17,17 +17,13 @@ def add_connection(socket_id: str, user_info: dict = None):
     active_connections[socket_id] = user_info or {}
     print("激活的连接: ", active_connections)
 
-    print(
-        f"New connection added: {socket_id}, total connections: {len(active_connections)}"
-    )
+    print(f"New connection added: {socket_id}, total connections: {len(active_connections)}")
 
 
 def remove_connection(socket_id: str):
     if socket_id in active_connections:
         del active_connections[socket_id]
-        print(
-            f"Connection removed: {socket_id}, total connections: {len(active_connections)}"
-        )
+        print(f"Connection removed: {socket_id}, total connections: {len(active_connections)}")
 
 
 def get_all_socket_ids():

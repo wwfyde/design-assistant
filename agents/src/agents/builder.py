@@ -36,9 +36,7 @@ async def create_multi_agent(
         openai_api_key=openai_model_config.api_key,
     )
 
-    return create_agent(
-        model, tools, context_schema=context, system_prompt=system_prompt
-    )
+    return create_agent(model, tools, context_schema=context, system_prompt=system_prompt)
     pass
 
 

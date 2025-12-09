@@ -44,9 +44,7 @@ def get_text_model(model: ModelInfo) -> ChatOpenAI:
         temperature=provider.temperature or 0,
         # max_tokens=max_tokens, # TODO: 暂时注释掉有问题的参数
         http_client=httpx.Client(proxy=settings.proxy_url or "http://127.0.0.1:7890"),
-        http_async_client=httpx.AsyncClient(
-            proxy=settings.proxy_url or "http://127.0.0.1:7890"
-        ),
+        http_async_client=httpx.AsyncClient(proxy=settings.proxy_url or "http://127.0.0.1:7890"),
     )
 
 

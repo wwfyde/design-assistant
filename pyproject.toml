@@ -53,6 +53,7 @@ build-backend = "uv_build"
 [dependency-groups]
 dev = [
     "pip>=25.3",
+    "ruff>=0.14.8",
     "uv-build>=0.9.7",
 ]
 

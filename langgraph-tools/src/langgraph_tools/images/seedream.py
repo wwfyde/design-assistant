@@ -31,9 +31,7 @@ def image_create_with_seedream(
     image_urls: list[str] | str | None = None,
     aspect_ratio: str | None = None,
 ) -> str:
-    return image_create_with_seedream_tool(
-        image_urls=image_urls, prompt=prompt, aspect_ratio=aspect_ratio
-    )
+    return image_create_with_seedream_tool(image_urls=image_urls, prompt=prompt, aspect_ratio=aspect_ratio)
 
 
 if __name__ == "__main__":

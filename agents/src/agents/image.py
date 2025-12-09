@@ -21,7 +21,5 @@ supervisor_agent = create_agent(
 messages = [HumanMessage(content="帮我创建一张日出风景图, 宽高比3:4")]
 
 
-resp = supervisor_agent.invoke(
-    HumanMessage(content="帮我创建一张日出风景图, 宽高比3:4")
-)
+resp = supervisor_agent.invoke(HumanMessage(content="帮我创建一张日出风景图, 宽高比3:4"))
 print(resp)

@@ -157,9 +157,7 @@ async def open_folder_in_explorer(request: Request):
             # Linux
             subprocess.run(["xdg-open", folder_path], check=True)
         else:
-            raise HTTPException(
-                status_code=500, detail=f"Unsupported operating system: {system}"
-            )
+            raise HTTPException(status_code=500, detail=f"Unsupported operating system: {system}")
 
         return {"success": True, "message": "Folder opened in system explorer"}
 
@@ -245,9 +243,7 @@ async def browse_filesystem(path: str = ""):
 
         return {
             "current_path": path,
-            "parent_path": os.path.dirname(path)
-            if path != os.path.dirname(path)
-            else None,
+            "parent_path": os.path.dirname(path) if path != os.path.dirname(path) else None,
             "items": items,
         }
 
@@ -425,18 +421,14 @@ async def serve_file(file_path: str):
         # 检查文件类型
         file_type = get_file_type(file_path)
         if file_type not in ["image", "video"]:
-            raise HTTPException(
-                status_code=400, detail="File type not supported for preview"
-            )
+            raise HTTPException(status_code=400, detail="File type not supported for preview")
 
         # 获取MIME类型
         mime_type, _ = mimetypes.guess_type(file_path)
         if not mime_type:
             mime_type = "application/octet-stream"
 
-        return FileResponse(
-            file_path, media_type=mime_type, filename=os.path.basename(file_path)
-        )
+        return FileResponse(file_path, media_type=mime_type, filename=os.path.basename(file_path))
 
     except Exception as e:
         traceback.print_exc()
@@ -470,8 +462,7 @@ async def get_file_info(file_path: str):
             "ctime": stat.st_ctime,
             "is_directory": os.path.isdir(file_path),
             "is_media": file_type in ["image", "video"],
-            "mime_type": mimetypes.guess_type(file_path)[0]
-            or "application/octet-stream",
+            "mime_type": mimetypes.guess_type(file_path)[0] or "application/octet-stream",
         }
 
     except Exception as e:

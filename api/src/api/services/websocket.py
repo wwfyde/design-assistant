@@ -5,9 +5,7 @@ from typing import Any, Dict
 from api.states import get_all_socket_ids, sio
 
 
-async def broadcast_session_update(
-    session_id: str, canvas_id: str | None, event: Dict[str, Any]
-):
+async def broadcast_session_update(session_id: str, canvas_id: str | None, event: Dict[str, Any]):
     socket_ids = get_all_socket_ids()
     # print(f"{socket_ids=}")
     if socket_ids:

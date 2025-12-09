@@ -9,9 +9,7 @@ router = APIRouter()
 
 @router.post("/chat")
 # @router.post("/magic/chat")
-async def chat(
-    chat: ChatRequest, chat_service: ChatService = Depends(get_chat_service)
-):
+async def chat(chat: ChatRequest, chat_service: ChatService = Depends(get_chat_service)):
     await handle_chat(chat, chat_service)
     return {"status": "done"}
 

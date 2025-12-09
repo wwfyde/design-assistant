@@ -38,9 +38,7 @@ async def create_canvas(
 
 
 @router.get("/{id}")
-async def get_canvas(
-    id: str, canvas_service: CanvasService = Depends(get_canvas_service)
-):
+async def get_canvas(id: str, canvas_service: CanvasService = Depends(get_canvas_service)):
     canvas = await canvas_service.get_canvas_data(id)
     return canvas
 
