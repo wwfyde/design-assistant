@@ -1,12 +1,13 @@
+import json
 import math
 from io import BytesIO
 
 import httpx
 import uuid_utils as uuid
-from lib.image import upload_image
 from PIL import Image
 
 from lib import settings
+from lib.image import upload_image
 
 
 def image_create_with_seedream(
@@ -159,12 +160,16 @@ def image_create_with_seedream(
                             "url": image_url,
                             "size": image.get("size", f"{width}x{height}"),
                             "mine_type": f"image/{img_format}",
+                            "content": f"![images][{image_url}]",
                         }
                     )
-                markdown_str = "\n".join(
-                    [f"![images]({image['url']})" for image in uploaded_urls]
-                )
+                # markdown_str = "\n".join(
+                #     [f"![images]({image['url']})" for image in uploaded_urls]
+                # )
+                if len(uploaded_urls) == 1:
+                    return json.dumps(uploaded_urls[0], ensure_ascii=False)
 
+                return json.dumps(uploaded_urls, ensure_ascii=False)
                 return f"{markdown_str}\n图像生成完成, 共生成{len(uploaded_urls)}张图像, 图像信息:{uploaded_urls}"
             else:
                 error = response.json().get("error", {}).get("message", "未知错误")

@@ -1,3 +1,4 @@
+import json
 import math
 from io import BytesIO
 
@@ -28,9 +29,7 @@ def image_create_with_seedream4_5(
     # seed: int | None = tool_parameters.get("seed", -1)
     # TODO: 考虑使用字符串逗号隔开, 还是list
     if aspect_ratio:
-        width, height = [
-            int(item) for item in aspect_ratio.replace(":", "×").split("×")
-        ]
+        width, height = [int(item) for item in aspect_ratio.replace(":", "×").split("×")]
         size = "2K"
         base = 2
         match size:
@@ -114,9 +113,7 @@ def image_create_with_seedream4_5(
         "size": f"{width}x{height}",
         "stream": use_stream,
         # 优化prompt
-        "optimize_prompt_options": {
-            "mode": "standard"
-        },  # support standard and fast mode
+        "optimize_prompt_options": {"mode": "standard"},  # support standard and fast mode
         # "seed": seed or -1,
         "watermark": False,
     }
@@ -128,9 +125,7 @@ def image_create_with_seedream4_5(
     try:
         if use_stream:
             with httpx.Client() as client:
-                with client.stream(
-                    "POST", base_url, json=data, headers=headers, timeout=180
-                ) as response:
+                with client.stream("POST", base_url, json=data, headers=headers, timeout=180) as response:
                     for line in response.iter_lines():
                         if line:
                             # print(line)
@@ -159,12 +154,16 @@ def image_create_with_seedream4_5(
                             "url": image_url,
                             "size": image.get("size", f"{width}x{height}"),
                             "mine_type": f"image/{img_format}",
+                            "content": f"![images][{image_url}]",
                         }
                     )
-                markdown_str = "\n".join(
-                    [f"![images]({image['url']})" for image in uploaded_urls]
-                )
+                # markdown_str = "\n".join(
+                #     [f"![images]({image['url']})" for image in uploaded_urls]
+                # )
+                if len(uploaded_urls) == 1:
+                    return json.dumps(uploaded_urls[0], ensure_ascii=False)
 
+                return json.dumps(uploaded_urls, ensure_ascii=False)
                 return f"{markdown_str}\n图像生成完成, 共生成{len(uploaded_urls)}张图像, 图像信息:{uploaded_urls}"
             else:
                 error = response.json().get("error", {}).get("message", "未知错误")
@@ -175,7 +174,5 @@ def image_create_with_seedream4_5(
 
 
 if __name__ == "__main__":
-    resp = image_create_with_seedream4_5(
-        prompt="生成一只可爱的猫咪", aspect_ratio="3:4"
-    )
+    resp = image_create_with_seedream4_5(prompt="生成一只可爱的猫咪", aspect_ratio="3:4")
     print(resp)
