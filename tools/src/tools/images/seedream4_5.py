@@ -154,7 +154,7 @@ def image_create_with_seedream4_5(
                             "url": image_url,
                             "size": image.get("size", f"{width}x{height}"),
                             "mine_type": f"image/{img_format}",
-                            "content": f"![images][{image_url}]",
+                            "content": f"![images]({image_url})",
                         }
                     )
                 # markdown_str = "\n".join(
