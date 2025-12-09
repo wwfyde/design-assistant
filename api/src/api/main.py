@@ -115,7 +115,7 @@ def create_app(lifespan: Callable = lifespan):
 
         return {"message": f"Hello, {s}!", "data": f"hello, {s}!"}
 
-    app.include_router(router, prefix="/api",)
+    app.include_router(router, prefix="/api", )
 
     # registering logfire
     # import logfire
@@ -125,32 +125,32 @@ def create_app(lifespan: Callable = lifespan):
     # logfire.info(f"{app.__doc__}")
 
     # 绑定静态文件
-    static_dir = settings.static_dir
-
-    if static_dir.exists():
-        app.mount("/", StaticFiles(directory=static_dir, html=True), name="frontend")
-        # app.mount("/as", StaticFiles(directory=static_dir), name="frontend")
-
-    @app.get("/")
-    # async def serve_react_app(full_path: str):
-    async def serve_react_app():
-        # 如果是 API 请求，不处理
-        # if full_path.startswith("api"):
-        #     raise HTTPException(status_code=404, detail="Not Found")
-        #
-        # # 尝试直接返回文件（针对 favicon.ico 等根目录文件）
-        # file_path = static_dir / full_path
-        # if file_path.exists() and file_path.is_file():
-        #     return FileResponse(file_path)
-
-        # SPA fallback
-        response = FileResponse(static_dir / "index.html")
-        response.headers["Cache-Control"] = (
-            "no-store, no-cache, must-revalidate, max-age=0"
-        )
-        response.headers["Pragma"] = "no-cache"
-        response.headers["Expires"] = "0"
-        return response
+    # static_dir = settings.static_dir
+    #
+    # if static_dir.exists():
+    #     app.mount("/", StaticFiles(directory=static_dir, html=True), name="frontend")
+    #     # app.mount("/as", StaticFiles(directory=static_dir), name="frontend")
+    #
+    # @app.get("/")
+    # # async def serve_react_app(full_path: str):
+    # async def serve_react_app():
+    #     # 如果是 API 请求，不处理
+    #     # if full_path.startswith("api"):
+    #     #     raise HTTPException(status_code=404, detail="Not Found")
+    #     #
+    #     # # 尝试直接返回文件（针对 favicon.ico 等根目录文件）
+    #     # file_path = static_dir / full_path
+    #     # if file_path.exists() and file_path.is_file():
+    #     #     return FileResponse(file_path)
+    #
+    #     # SPA fallback
+    #     response = FileResponse(static_dir / "index.html")
+    #     response.headers["Cache-Control"] = (
+    #         "no-store, no-cache, must-revalidate, max-age=0"
+    #     )
+    #     response.headers["Pragma"] = "no-cache"
+    #     response.headers["Expires"] = "0"
+    #     return response
 
     return app
 
