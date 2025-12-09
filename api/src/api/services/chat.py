@@ -4,6 +4,11 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, List
 
 import uuid_utils as uuid
+from sqlalchemy import Insert, delete, func, select, update
+from sqlalchemy.dialects.postgresql import insert
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session
+
 from api.core.memory import AppStore
 from api.domain.chat import Chat, ChatMessage, ChatSession
 from api.models import (
@@ -19,10 +24,6 @@ from api.schemas.chat import ChatCreate, MagicCreate, SessionCreate
 from api.services.stream import add_stream_task, remove_stream_task
 from api.services.websocket import broadcast_session_update, send_to_websocket
 from lib.image import parse_data_url
-from sqlalchemy import Insert, delete, func, select, update
-from sqlalchemy.dialects.postgresql import insert
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Session
 from tools.images.gemini import magic_generate_with_gemini
 
 
@@ -99,11 +100,7 @@ class InMemoryChatRepo(ChatRepo):
     async def get_chat_history(self, session_id: str) -> list[dict]:
         messages = []
 
-        matched_messages = [
-            message
-            for message in self.chat_message.values()
-            if message.session_id == session_id
-        ]
+        matched_messages = [message for message in self.chat_message.values() if message.session_id == session_id]
         messages_raw = sorted(matched_messages, key=lambda m: str(m.created_at))
         for chat_message in messages_raw:
             if chat_message.message:
@@ -125,11 +122,7 @@ class InMemoryChatRepo(ChatRepo):
         return False
 
     async def get_sessions(self, canvas_id: str) -> list[ChatSession]:
-        return [
-            session
-            for session in self.chat_session.values()
-            if session.canvas_id == canvas_id
-        ]
+        return [session for session in self.chat_session.values() if session.canvas_id == canvas_id]
         pass
 
     async def create_chat_session(self, session_create: SessionCreate) -> ChatSession:
@@ -147,9 +140,7 @@ class InMemoryChatRepo(ChatRepo):
         lc_id: str = None,
     ):
         id = message_id or str(uuid.uuid4())
-        chat_message = ChatMessage(
-            id=id, session_id=session_id, role=role, message=message, lc_id=lc_id
-        )
+        chat_message = ChatMessage(id=id, session_id=session_id, role=role, message=message, lc_id=lc_id)
         self.chat_message[id] = chat_message
 
         return chat_message
@@ -172,11 +163,7 @@ class PostgresChatRepo(ChatRepo):
         pass
 
     async def get_chat_history(self, session_id: str) -> list[dict]:
-        stmt = (
-            select(ChatMessageModel)
-            .where(ChatMessageModel.session_id == session_id)
-            .order_by(ChatMessageModel.id)
-        )
+        stmt = select(ChatMessageModel).where(ChatMessageModel.session_id == session_id).order_by(ChatMessageModel.id)
         result = self.session.execute(stmt)
         rows: list[ChatMessageModel] = result.scalars().all()
         messages = [json.loads(row.message) for row in rows]
@@ -211,6 +198,7 @@ class PostgresChatRepo(ChatRepo):
 
     async def create_chat_session(self, session_create: SessionCreate) -> ChatSession:
         session_db = self.session.get(ChatSessionModel, session_create.id)
+
         if session_db:
             update_stmt = (
                 update(ChatSessionModel)
@@ -220,9 +208,7 @@ class PostgresChatRepo(ChatRepo):
             self.session.execute(update_stmt)
         else:
             session_create.session_id = session_create.id
-            session_db = ChatSessionModel(
-                **session_create.model_dump(exclude_unset=True)
-            )
+            session_db = ChatSessionModel(**session_create.model_dump(exclude_unset=True))
             self.session.add(session_db)
         self.session.commit()
         self.session.refresh(session_db)
@@ -277,18 +263,14 @@ class PostgresChatRepo(ChatRepo):
             self.session.refresh(existing_message)
             return ChatMessage.model_validate(existing_message)
         else:
-            chat_message_db = ChatMessageModel(
-                id=id, session_id=session_id, role=role, message=message
-            )
+            chat_message_db = ChatMessageModel(id=id, session_id=session_id, role=role, message=message)
             self.session.add(chat_message_db)
             self.session.commit()
             self.session.refresh(chat_message_db)
             session = ChatMessage.model_validate(chat_message_db)
             return session
 
-    async def create_message_async(
-        self, session_id: str, role: str, message: str, message_id: str = None
-    ):
+    async def create_message_async(self, session_id: str, role: str, message: str, message_id: str = None):
         id = message_id or str(uuid.uuid7())
 
         # Check if message exists
@@ -304,9 +286,7 @@ class PostgresChatRepo(ChatRepo):
             await self.asession.refresh(existing_message)
             return ChatMessage.model_validate(existing_message)
         else:
-            chat_message_db = ChatMessageModel(
-                id=id, session_id=session_id, role=role, message=message
-            )
+            chat_message_db = ChatMessageModel(id=id, session_id=session_id, role=role, message=message)
             self.asession.add(chat_message_db)
             await self.asession.commit()
             await self.asession.refresh(chat_message_db)
@@ -341,9 +321,7 @@ class ChatService:
     ):
         """Save a chat message"""
 
-        return self.repo.create_message(
-            session_id, role, message, message_id, lc_id=lc_id
-        )
+        return self.repo.create_message(session_id, role, message, message_id, lc_id=lc_id)
 
     def get_latest_chat_message(self):
         return self.repo.get_latest_chat_message()
@@ -356,14 +334,10 @@ class ChatService:
         """List all chat sessions"""
         return await self.repo.get_sessions(canvas_id)
 
-    async def create_message_async(
-        self, session_id: str, role: str, message: str, message_id: str = None
-    ):
+    async def create_message_async(self, session_id: str, role: str, message: str, message_id: str = None):
         """Save a chat message"""
 
-        return await self.repo.create_message_async(
-            session_id, role, message, message_id
-        )
+        return await self.repo.create_message_async(session_id, role, message, message_id)
 
 
 # services/magic_service.py
@@ -506,9 +480,7 @@ async def magic_generation(magic: MagicCreate, chat_service: ChatService):
     except Exception as exc:
         ai_response = {
             "role": "assistant",
-            "content": [
-                {"type": "text", "text": f"✨ Magic Generation Error: {str(exc)}"}
-            ],
+            "content": [{"type": "text", "text": f"✨ Magic Generation Error: {str(exc)}"}],
         }
     message_id = str(uuid.uuid7())
     chat_service.create_message(
@@ -521,6 +493,4 @@ async def magic_generation(magic: MagicCreate, chat_service: ChatService):
 
     # Send messages to frontend immediately
     all_messages = magic.messages + [ai_response]
-    await send_to_websocket(
-        magic.session_id, {"type": "all_messages", "messages": all_messages}
-    )
+    await send_to_websocket(magic.session_id, {"type": "all_messages", "messages": all_messages})
