@@ -46,6 +46,7 @@ export interface HuabanBoard {
     title: string;
     updated_at: number;
     pin_count: number;
+    pins?: HuabanPin[];
     cover: {
         file: {
             key: string;
@@ -71,6 +72,27 @@ export const getHuabanCollectionItems = async (collectionId: number): Promise<Hu
 
     if (!response.ok) {
         throw new Error(`Failed to fetch collection items: ${response.status} ${response.statusText}`);
+    }
+
+    return response.json();
+}
+
+export interface HuabanBoardDetailResponse {
+    pins: HuabanPin[];
+    board: HuabanBoard;
+}
+
+export const getHuabanBoardDetail = async (boardId: number): Promise<HuabanBoardDetailResponse> => {
+    const fields = encodeURIComponent('pins:PIN|board:BOARD_DETAIL|check');
+    const response = await fetch(`/huaban-api/v3/boards/${boardId}/pins?limit=40&sort=seq&fields=${fields}`, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+        }
+    });
+
+    if (!response.ok) {
+        throw new Error(`Failed to fetch board details: ${response.status} ${response.statusText}`);
     }
 
     return response.json();

@@ -35,6 +35,10 @@ export const HuabanList = () => {
     const formatTimeAgo = (timestamp: number) => {
         const diff = Date.now() - timestamp * 1000;
         const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const months = Math.floor(diff / (1000 * 60 * 60 * 24 * 30));
+        const years = Math.floor(diff / (1000 * 60 * 60 * 24 * 365));
+        if (years > 0) return `${years}年前`;
+        if (months > 0) return `${months}月前`;
         if (days > 0) return `${days}天前`;
         const hours = Math.floor(diff / (1000 * 60 * 60));
         if (hours > 0) return `${hours}小时前`;
@@ -72,21 +76,56 @@ export const HuabanList = () => {
                                     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                                         {boards.map((board) => (
                                             <div key={board.board_id} className="group cursor-pointer">
-                                                <div className="aspect-[4/3] rounded-lg overflow-hidden bg-muted mb-2 relative">
-                                                    {board.cover?.file?.key ? (
-                                                        <img
-                                                            src={`/huaban-img/${board.cover.file.key}_fw240`}
-                                                            alt={board.title}
-                                                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                                                            onError={(e) => {
-                                                                (e.target as HTMLImageElement).src = `https://gd-hbimg.huaban.com/${board.cover.file.key}`
-                                                            }}
-                                                        />
-                                                    ) : (
-                                                        <div className="w-full h-full flex items-center justify-center text-muted-foreground bg-secondary">
-                                                            No Cover
+                                                <div className="aspect-[3/2] rounded-lg overflow-hidden bg-muted mb-2 relative">
+                                                    <div className="grid grid-cols-3 gap-0.5 h-full w-full">
+                                                        {/* Left Large Cover */}
+                                                        <div className="col-span-2 h-full relative bg-gray-200 dark:bg-gray-700">
+                                                            {board.cover?.file?.key ? (
+                                                                <img
+                                                                    src={`/huaban-img/${board.cover.file.key}_sq235`}
+                                                                    alt={board.title}
+                                                                    className="w-full h-full object-cover"
+                                                                    onError={(e) => {
+                                                                        (e.target as HTMLImageElement).src = `https://gd-hbimg.huaban.com/${board.cover.file.key}_sq235`
+                                                                    }}
+                                                                />
+                                                            ) : (
+                                                                <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                                                                    No Cover
+                                                                </div>
+                                                            )}
                                                         </div>
-                                                    )}
+
+                                                        {/* Right Stacked Pins */}
+                                                        <div className="col-span-1 flex flex-col gap-0.5 h-full">
+                                                            {/* Top Pin */}
+                                                            <div className="relative w-full h-full flex-1 bg-gray-200 dark:bg-gray-700">
+                                                                {board.pins?.[0]?.file?.key && (
+                                                                    <img
+                                                                        src={`/huaban-img/${board.pins[0].file.key}_sq235`}
+                                                                        alt=""
+                                                                        className="w-full h-full object-cover"
+                                                                        onError={(e) => {
+                                                                            (e.target as HTMLImageElement).src = `https://gd-hbimg.huaban.com/${board.pins![0].file.key}_sq235`
+                                                                        }}
+                                                                    />
+                                                                )}
+                                                            </div>
+                                                            {/* Bottom Pin */}
+                                                            <div className="relative w-full h-full flex-1 bg-gray-200 dark:bg-gray-700">
+                                                                {board.pins?.[1]?.file?.key && (
+                                                                    <img
+                                                                        src={`/huaban-img/${board.pins[1].file.key}_sq235`}
+                                                                        alt=""
+                                                                        className="w-full h-full object-cover"
+                                                                        onError={(e) => {
+                                                                            (e.target as HTMLImageElement).src = `https://gd-hbimg.huaban.com/${board.pins![1].file.key}_sq235`
+                                                                        }}
+                                                                    />
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                                 <div className="flex items-center justify-between gap-2 mt-2">
                                                     <div className="font-medium truncate text-sm flex-1" title={board.title}>{board.title}</div>
