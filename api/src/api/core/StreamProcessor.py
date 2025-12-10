@@ -53,6 +53,10 @@ class StreamProcessor:
         async for chunk in supervisor.astream(
             {"messages": messages},
             config=context,
+            context={
+                "canvas_id": context.get("canvas_id", None),
+                "session_id": context.get("session_id", None),
+            },
             stream_mode=["messages", "custom", "values"],
         ):
             # print(chunk)

@@ -8,6 +8,7 @@ from PIL import Image
 
 from lib import settings
 from lib.image import upload_image
+from tools.types import ImageInfo, ImageToolResponse
 
 
 def image_create_with_seedream4_5(
@@ -15,7 +16,7 @@ def image_create_with_seedream4_5(
     prompt: str,
     image_urls: list[str] | str | None = None,
     aspect_ratio: str | None = None,
-) -> str:
+) -> ImageToolResponse:
     """
 
     Args:
@@ -130,7 +131,7 @@ def image_create_with_seedream4_5(
                         if line:
                             # print(line)
                             pass
-            return ""
+            return ImageToolResponse(content="暂不支持该参数 use_stream ", success=False)
         else:
             response = httpx.post(base_url, headers=headers, json=data, timeout=360)
             if response.status_code == 200:
@@ -143,34 +144,38 @@ def image_create_with_seedream4_5(
 
                     content = response.content
                     pil = Image.open(BytesIO(content))
-                    img_format = pil.format.lower().replace("jpeg", "jpg") or "png"
-                    filename = f"{str(uuid.uuid7())}.{img_format}"
-                    image_url = upload_image(filename, data=content, prefix="seedream")
+                    img_format = pil.format.lower() or "png"
+                    id = str(uuid.uuid7())
+                    filename = f"{id}.{img_format.replace('jpeg', 'jpg')}"
+                    image_url = upload_image(filename, data=content, prefix="creative/seedream", rename=False)
                     # metadata = {"mime_type": f"image/{img_format}"}
 
                     uploaded_urls.append(
-                        {
-                            "index": index + 1,
-                            "url": image_url,
-                            "size": image.get("size", f"{width}x{height}"),
-                            "mine_type": f"image/{img_format}",
-                            "content": f"![images]({image_url})",
-                        }
+                        ImageInfo(
+                            url=image_url,
+                            width=width,
+                            height=height,
+                            id=id,
+                            filename=filename,
+                            mime_type=f"image/{img_format}",  # noqa
+                            content=f"![images]({image_url})",
+                        )
                     )
                 # markdown_str = "\n".join(
                 #     [f"![images]({image['url']})" for image in uploaded_urls]
                 # )
-                if len(uploaded_urls) == 1:
-                    return json.dumps(uploaded_urls[0], ensure_ascii=False)
-
+                return ImageToolResponse(
+                    content=f"图像生成完成, 共生成{len(uploaded_urls)}张图像, 图像信息:{uploaded_urls}",
+                    success=True,
+                    images=uploaded_urls,
+                )
                 return json.dumps(uploaded_urls, ensure_ascii=False)
-                return f"{markdown_str}\n图像生成完成, 共生成{len(uploaded_urls)}张图像, 图像信息:{uploaded_urls}"
             else:
                 error = response.json().get("error", {}).get("message", "未知错误")
-                return f"图像生成失败, 错误信息: {error}"
+                return ImageToolResponse(content=f"图像生成失败, 错误信息: {error}", success=False)
 
     except Exception as exc:
-        return f"工具调用失败, 无生成图像, 错误提示: {exc}"
+        return ImageToolResponse(content=f"工具调用失败, 无生成图像, 错误提示: {exc}", success=False)
 
 
 if __name__ == "__main__":

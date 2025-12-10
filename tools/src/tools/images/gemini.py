@@ -1,14 +1,16 @@
-import uuid
+import io
 from io import BytesIO
 from typing import Literal
 
 import requests
+import uuid_utils as uuid
+from PIL import Image
 from google import genai
 from google.genai import types
-from PIL import Image
 
 from lib import settings, upload_image
 from lib.image import parse_data_url_to_bytes
+from tools.types import ImageInfo, ImageToolResponse
 
 api_key = settings.providers.gemini.api_key
 
@@ -25,7 +27,7 @@ def image_create_with_gemini(
     image_urls: str | list | None = None,
     aspect_ratio: Literal["1:1", "2:3", "3:2", "3:4", "4:3", "9:16", "16:9", "21:9"] | None = None,
     image_size: Literal["1K", "2K", "4K"] | None = "2K",
-):
+) -> ImageToolResponse:
     if isinstance(image_urls, str):
         image_list = [i.strip() for i in image_urls.replace("，", ",").split(",") if i.strip()]
     elif image_urls is None:
@@ -76,24 +78,36 @@ def image_create_with_gemini(
                 ),
             ),
         )
-        image_parts = [
-            (part.inline_data.data, part.inline_data.mime_type)
-            for part in response.candidates[0].content.parts
-            if part.inline_data
-        ]
-        if image_parts:
-            content, mime_type = image_parts[0]
+        image_parts = [part for part in response.parts if part.inline_data]
+        images = []
+        for image_part in image_parts:
+            image_bytes = image_part.inline_data.data
+            mime_type = image_part.inline_data.mime_type
             extension = mime_type.split("/")[-1].replace("jpeg", "jpg")
             # print(f"Image format: {format}")
-            image_url = upload_image(f"{str(uuid.uuid4())}.{extension}", content)
+            id = str(uuid.uuid7())
+            filename = f"{id}.{extension}"
+            image_url = upload_image(filename, image_bytes, rename=False)
+            pil_image = Image.open(io.BytesIO(image_bytes))
+            width, height = pil_image.size
+            images.append(
+                ImageInfo(
+                    id=id,
+                    url=image_url,
+                    mime_type=mime_type,  # noqa
+                    filename=filename,
+                    width=width,
+                    height=height,
+                )
+            )
 
-            return f"![image]({image_url})"
-
-        else:
-            return None
-
+        return ImageToolResponse(
+            content="\n".join([f"![image]({image.url})" for image in images]),
+            success=True,
+            images=images,
+        )
     except Exception as e:
-        return f"工具调用失败, 错误提示: {e}"
+        return ImageToolResponse(content=f"工具调用失败, 错误提示: {e}", success=False)
 
 
 def magic_generate_with_gemini(*, prompt: str | None = None, image_url: str) -> list[dict]:
@@ -121,7 +135,7 @@ def magic_generate_with_gemini(*, prompt: str | None = None, image_url: str) -> 
             image_bytes = part.inline_data.data
             ext = part.inline_data.mime_type.split("/")[-1].replace("jpeg", "jpg")
             filename = f"{str(uuid.uuid4())}.{ext}"
-            url = upload_image(filename, data=image_bytes, prefix="creative", rename=False)
+            url = upload_image(filename, data=image_bytes, prefix="creative/gemini", rename=False)
 
             image = Image.open(BytesIO(part.inline_data.data))
             width, height = image.size

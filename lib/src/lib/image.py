@@ -10,7 +10,7 @@ def upload_image(
     filename: str,
     data: str | bytes,
     prefix: str = "tmp",
-    rename: bool = True,
+    rename: bool = False,
     domain: str = None,
 ) -> str | None:
     """

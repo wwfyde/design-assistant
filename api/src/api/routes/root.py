@@ -2,10 +2,10 @@ from fastapi import APIRouter
 from fastapi.params import Depends
 
 from api.deps import get_chat_service
+from api.domain.tool import ToolInfo
 
 # services
 from api.domain.model import ModelInfo
-from api.domain.tool import ToolInfo
 from api.services.chat import ChatService
 
 # from services.config_service import config_service
@@ -74,12 +74,12 @@ async def list_tools() -> list[ToolInfo]:
         #     type="image",
         #     display_name="GPT-1",
         # ),
-        # ToolInfo(
-        #     provider="qwen",
-        #     id="gpt1",
-        #     type="image",
-        #     display_name="千问Image",
-        # ),
+        ToolInfo(
+            provider="qwen",
+            id="image_create_with_qwen",
+            type="image",
+            display_name="千问Image",
+        ),
         # ToolInfo(
         #     provider="flux",
         #     id="gpt3",

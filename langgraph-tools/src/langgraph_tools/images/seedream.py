@@ -1,10 +1,13 @@
 from typing import Optional
 
+from pydantic import Field, BaseModel
+from langgraph.prebuilt import ToolRuntime
 from langchain_core.tools import tool
-from pydantic import BaseModel, Field
+
 from tools.images.seedream import (
     image_create_with_seedream as image_create_with_seedream_tool,
 )
+from api.services.websocket import broadcast_session_update
 
 
 class SeedreamArgs(BaseModel):
@@ -26,12 +29,29 @@ class SeedreamArgs(BaseModel):
     description="Image Creation, Generate or Edit Image with ByteDance Seedream model using  prompt , image_urls, aspect_ratio. image_urls may be local file, input it with filename(img_xx.png). Response multiple images. Use this model for: 1. adding or removing elements, 2. Inpainting (Semantic masking), 3. Style transfer, 4. Generate images. Supports output multiple images.",
     args_schema=SeedreamArgs,
 )
-def image_create_with_seedream(
+async def image_create_with_seedream(
+    runtime: ToolRuntime,
     prompt: str,
     image_urls: list[str] | str | None = None,
     aspect_ratio: str | None = None,
 ) -> str:
-    return image_create_with_seedream_tool(image_urls=image_urls, prompt=prompt, aspect_ratio=aspect_ratio)
+
+    image_tool_response = image_create_with_seedream_tool(
+        image_urls=image_urls, prompt=prompt, aspect_ratio=aspect_ratio
+    )
+    if image_tool_response.images:
+        for image in image_tool_response.images:
+            await broadcast_session_update(
+                runtime.context.session_id,
+                runtime.context.canvas_id,
+                {
+                    "type": "image_generated",
+                    "element": "",
+                    "file": "",
+                    "image_url": image.url,
+                },
+            )
+    return image_tool_response.content
 
 
 if __name__ == "__main__":
