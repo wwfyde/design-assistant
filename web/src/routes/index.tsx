@@ -59,7 +59,8 @@ function Home() {
 
   return (
     // <div className='flex flex-col h-screen'>
-    <div className='flex flex-col h-[calc(100vh-56px)]'>
+    // <div className='flex flex-col h-[calc(100vh-56px)]'>
+    <div className='flex flex-col h-screen'>
       <ScrollArea className='flex-1'>
         <TopMenu />
 
