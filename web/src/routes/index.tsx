@@ -62,15 +62,12 @@ function Home() {
     // <div className='flex flex-col h-[calc(100vh-56px)]'>
     <div className='flex flex-col h-screen'>
       <ScrollArea className='flex-1'>
-        <TopMenu />
-
-        <div className='h-[60px]'></div>
         <PromptList />
         <CanvasList />
       </ScrollArea>
       <div className='w-full flex flex-col items-center justify-center p-4 bg-background sticky bottom-0 z-50'>
         <ChatTextarea
-          className='w-full max-w-3xl max-h-60'
+          className='w-full max-w-4xl max-h-60'
           messages={[]}
           onSendMessages={(messages, configs) => {
             createCanvasMutation({

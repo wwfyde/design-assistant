@@ -28,7 +28,7 @@ export function PromptList() {
   }
 
   return (
-    <section className='w-full max-w-5xl mx-auto py-8 md:py-10 px-4'>
+    <section className='w-full mx-auto py-8 md:py-4 px-4'>
       <motion.div
         className='text-2xl font-bold my-2'
         initial={{ opacity: 0, y: 10 }}
@@ -37,7 +37,7 @@ export function PromptList() {
       >
         Prompt库
       </motion.div>
-      <div className='columns-1 sm:columns-2 md:columns-4 gap-8 space-y-8'>
+      <div className='columns-1 sm:columns-2 md:columns-6 gap-4 space-y-4'>
         {data.pages.map((page) =>
           page.map((prompt) => (
             <div key={prompt.id} className='break-inside-avoid'>
