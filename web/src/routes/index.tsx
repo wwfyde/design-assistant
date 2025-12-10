@@ -2,8 +2,10 @@ import { createCanvas } from '@/api/canvas'
 import TopMenu from '@/components/TopMenu'
 import ChatTextarea from '@/components/chat/ChatTextarea'
 import CanvasList from '@/components/home/CanvasList'
+import { HuabanList } from '@/components/home/HuabanList'
 import { PromptList } from '@/components/home/PromptList'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { DEFAULT_SYSTEM_PROMPT } from '@/constants'
 import { useConfigs } from '@/contexts/configs'
 import { eventBus } from '@/lib/event'
@@ -58,14 +60,36 @@ function Home() {
   }, [])
 
   return (
-    // <div className='flex flex-col h-screen'>
-    // <div className='flex flex-col h-[calc(100vh-56px)]'>
     <div className='flex flex-col h-screen'>
-      <ScrollArea className='flex-1'>
-        <PromptList />
-        <CanvasList />
-      </ScrollArea>
-      <div className='w-full flex flex-col items-center justify-center p-4 bg-background sticky bottom-0 z-50'>
+      <Tabs defaultValue="prompt" className="flex flex-col flex-1 overflow-hidden">
+        <div className="px-4 pt-2 shrink-0">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="prompt">Prompt库</TabsTrigger>
+            <TabsTrigger value="huaban">花瓣库</TabsTrigger>
+            <TabsTrigger value="history">历史记录</TabsTrigger>
+          </TabsList>
+        </div>
+
+        <TabsContent value="prompt" className="flex-1 overflow-hidden mt-2 border-none p-0 outline-none data-[state=inactive]:hidden">
+          <ScrollArea className='h-full'>
+            <PromptList />
+          </ScrollArea>
+        </TabsContent>
+
+        <TabsContent value="huaban" className="flex-1 overflow-hidden mt-2 border-none p-0 outline-none data-[state=inactive]:hidden">
+          <ScrollArea className='h-full'>
+            <HuabanList />
+          </ScrollArea>
+        </TabsContent>
+
+        <TabsContent value="history" className="flex-1 overflow-hidden mt-2 border-none p-0 outline-none data-[state=inactive]:hidden">
+          <ScrollArea className='h-full'>
+            <CanvasList />
+          </ScrollArea>
+        </TabsContent>
+      </Tabs>
+
+      <div className='w-full flex flex-col items-center justify-center p-4 bg-background sticky bottom-0 z-50 mt-auto'>
         <ChatTextarea
           className='w-full max-w-4xl max-h-60'
           messages={[]}

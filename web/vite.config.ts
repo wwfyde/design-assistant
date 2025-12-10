@@ -1,13 +1,13 @@
 import tailwindcss from '@tailwindcss/vite'
-import {TanStackRouterVite} from '@tanstack/router-plugin/vite'
+import { TanStackRouterVite } from '@tanstack/router-plugin/vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
-import {defineConfig, UserConfig} from 'vite'
+import { defineConfig, UserConfig } from 'vite'
 
 const PORT = 8013
 
 // https://vite.dev/config/
-export default defineConfig(({mode}) => {
+export default defineConfig(({ mode }) => {
   const isLibMode = mode === 'lib'
 
   // Base configuration that applies to all environments
@@ -101,6 +101,23 @@ export default defineConfig(({mode}) => {
       '/ws': {
         target: `ws://127.0.0.1:${PORT}`,
         ws: true,
+      },
+      '/huaban-api': {
+        target: 'https://huaban.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/huaban-api/, ''),
+        headers: {
+          'Referer': 'https://huaban.com/',
+          'Origin': 'https://huaban.com/'
+        }
+      },
+      '/huaban-img': {
+        target: 'https://gd-hbimg-edge.huabanimg.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/huaban-img/, ''),
+        headers: {
+          'Referer': 'https://huaban.com/',
+        }
       },
     }
   }
