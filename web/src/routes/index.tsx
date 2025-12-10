@@ -59,38 +59,32 @@ function Home() {
 
   return (
     // <div className='flex flex-col h-screen'>
-    <div className='flex flex-col min-h-full'>
-      <ScrollArea className='h-full'>
+    <div className='flex flex-col h-screen'>
+      <ScrollArea className='flex-1'>
         <TopMenu />
 
-        <div className='relative flex flex-col items-center justify-center h-fit min-h-[calc(100vh-460px)] pt-[60px] select-none'>
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-            <h1 className='text-5xl font-bold mb-2 mt-8 text-center hidden'>{t('home:title')}</h1>
-          </motion.div>
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-            <p className='text-xl text-gray-500 mb-8 text-center hidden'>{t('home:subtitle')}</p>
-          </motion.div>
-
-          <ChatTextarea
-            className='w-full max-w-xl max-h-60'
-            messages={[]}
-            onSendMessages={(messages, configs) => {
-              createCanvasMutation({
-                name: t('home:newCanvas'),
-                canvas_id: nanoid(),
-                messages: messages,
-                session_id: nanoid(),
-                text_model: configs.textModel,
-                tool_list: configs.toolList,
-                system_prompt: localStorage.getItem('system_prompt') || DEFAULT_SYSTEM_PROMPT,
-              })
-            }}
-            pending={isPending}
-          />
-        </div>
+        <div className='h-[60px]'></div>
         <PromptList />
         <CanvasList />
       </ScrollArea>
+      <div className='w-full flex flex-col items-center justify-center p-4 bg-background sticky bottom-0 z-50'>
+        <ChatTextarea
+          className='w-full max-w-3xl max-h-60'
+          messages={[]}
+          onSendMessages={(messages, configs) => {
+            createCanvasMutation({
+              name: t('home:newCanvas'),
+              canvas_id: nanoid(),
+              messages: messages,
+              session_id: nanoid(),
+              text_model: configs.textModel,
+              tool_list: configs.toolList,
+              system_prompt: localStorage.getItem('system_prompt') || DEFAULT_SYSTEM_PROMPT,
+            })
+          }}
+          pending={isPending}
+        />
+      </div>
     </div>
   )
 }
