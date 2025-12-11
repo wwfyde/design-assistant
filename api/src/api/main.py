@@ -1,40 +1,41 @@
-import logging
 import os
-from contextlib import asynccontextmanager
+import logging
 from time import sleep
 from typing import Callable
+from contextlib import asynccontextmanager
 
 import socketio
-from fastapi import FastAPI, Header, Request
-from fastapi.exceptions import HTTPException
-from fastapi.openapi.docs import get_swagger_ui_html
-from fastapi.staticfiles import StaticFiles
-from starlette.middleware.cors import CORSMiddleware
-from starlette.responses import FileResponse
+from fastapi import Header, FastAPI, Request
 from uvicorn import run
+from fastapi.exceptions import HTTPException
+from fastapi.staticfiles import StaticFiles
+from starlette.responses import FileResponse
+from fastapi.openapi.docs import get_swagger_ui_html
+from starlette.middleware.cors import CORSMiddleware
 
-from api.routes import router
-from api.services.websocket import broadcast_init_done
-from api.states import sio
 from lib import settings
+from api.routes import router
+from api.states import sio
+from api.lifespan import lifespan
+from api.services.websocket import broadcast_init_done
 
 root_path = os.getenv("ROOT_PATH", "") or settings.api_prefix
 
 
-async def initialize():
-    print("Initializing config_service")
-    print("Initializing broadcast_init_done")
-    await broadcast_init_done()
-
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    print("开机")
-    logging.info("startup")
-    print(f"当前数据仓储类型: {settings.repo_type=}")
-    # init broadcast service
-    await initialize()
-    yield
+# async def initialize():
+#     print("Initializing config_service")
+#     print("Initializing broadcast_init_done")
+#     await broadcast_init_done()
+#
+#
+# @asynccontextmanager
+# async def lifespan(app: FastAPI):
+#     print("开机")
+#     logging.info("startup")
+#     print(f"当前数据仓储类型: {settings.repo_type=}")
+#     # init broadcast service
+#     await initialize()
+#     yield
 
 
 async def verify_custom_token(token: str = Header(None)):
@@ -56,7 +57,7 @@ def create_app(lifespan: Callable = lifespan):
 
     app = FastAPI(
         title=settings.project_name,
-        # root_path=root_path,  # 这种写法不对
+        root_path=root_path,  # 这种写法不对
         # openapi_url="/openapi.json",
         lifespan=lifespan,
         openapi_tags=[],
@@ -110,8 +111,6 @@ def create_app(lifespan: Callable = lifespan):
     @app.get("/demo")
     async def hello(request: Request):
         s: str = "世界"
-
-        print(request.app.state.demo)
 
         return {"message": f"Hello, {s}!", "data": f"hello, {s}!"}
 

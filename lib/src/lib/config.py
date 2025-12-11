@@ -1,14 +1,14 @@
 import uuid
+from typing import Any, Type, Tuple, Literal
 from pathlib import Path
-from typing import Any, Literal, Tuple, Type
 
 import httpx
-from pydantic import BaseModel, ConfigDict, Field, SecretStr, computed_field
+from pydantic import Field, BaseModel, SecretStr, ConfigDict, computed_field
 from pydantic_settings import (
     BaseSettings,
-    PydanticBaseSettingsSource,
     SettingsConfigDict,
     TomlConfigSettingsSource,
+    PydanticBaseSettingsSource,
 )
 
 
@@ -50,6 +50,17 @@ class AliyunOssConfig(BaseModel):
     bucket_name: str
     domain: str
     path_prefix: str = "midjourney_simple_api"
+
+
+class NacosConfig(BaseModel):
+    namespace_id: str
+    service_name: str
+    server_address: str
+    ip: str
+    port: int
+    username: str
+    password: str
+    group_name: str
 
 
 class LLMConfig(BaseModel):
@@ -98,7 +109,8 @@ class Settings(BaseSettings):
     temp_dir: Path = base_dir.joinpath("temp")
     static_dir: Path = base_dir.joinpath("web", "dist")
     oss: AliyunOssConfig | None = None
-    api_prefix: str | None = ""
+    nacos: NacosConfig | None = None
+    api_prefix: str | None = "/llmapi"
     proxy_url: str | None = "http://127.0.0.1:7890"
     redis: RedisConfig | None = None
     redis_expire_time: int = 60 * 60 * 24 * 30

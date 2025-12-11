@@ -14,11 +14,11 @@ export default defineConfig(({ mode }) => {
   const config: UserConfig = {
     plugins: [
       !isLibMode &&
-      TanStackRouterVite({
-        target: 'react',
-        autoCodeSplitting: true,
-        generatedRouteTree: 'src/route-tree.gen.ts',
-      }),
+        TanStackRouterVite({
+          target: 'react',
+          autoCodeSplitting: true,
+          generatedRouteTree: 'src/route-tree.gen.ts',
+        }),
       react(),
       tailwindcss(),
     ].filter(Boolean),
@@ -89,7 +89,7 @@ export default defineConfig(({ mode }) => {
         target: `http://127.0.0.1:${PORT}`,
         changeOrigin: true,
         // Uncomment the following if you want to remove the /api prefix when forwarding to Flask
-        // rewrite: (path) => path.replace(/^\/api/, '')
+        rewrite: (path) => path.replace(/^\/api/, '/llmapi/api'),
       },
       // Proxy Socket.IO connections
       '/socket.io': {
@@ -107,17 +107,17 @@ export default defineConfig(({ mode }) => {
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/huaban-api/, ''),
         headers: {
-          'Referer': 'https://huaban.com/',
-          'Origin': 'https://huaban.com/'
-        }
+          Referer: 'https://huaban.com/',
+          Origin: 'https://huaban.com/',
+        },
       },
       '/huaban-img': {
         target: 'https://gd-hbimg-edge.huabanimg.com',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/huaban-img/, ''),
         headers: {
-          'Referer': 'https://huaban.com/',
-        }
+          Referer: 'https://huaban.com/',
+        },
       },
     }
   }
