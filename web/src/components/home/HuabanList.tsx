@@ -1,10 +1,106 @@
-import { getHuabanCollectionItems, getHuabanCollections, HuabanCollection } from '@/api/huaban'
-import { useQuery } from '@tanstack/react-query'
+import { getHuabanCollectionItems, getHuabanCollections, getHuabanBoardDetail, HuabanCollection, HuabanBoardDetailResponse } from '@/api/huaban'
+import { useQuery, useInfiniteQuery } from '@tanstack/react-query'
 import { clsx } from 'clsx'
 import { useState } from 'react'
+import { ArrowLeft } from 'lucide-react'
+
+const BoardDetailView = ({ boardId, onBack }: { boardId: number, onBack: () => void }) => {
+    const {
+        data,
+        isLoading,
+        error,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage
+    } = useInfiniteQuery<HuabanBoardDetailResponse>({
+        queryKey: ['huaban-board-detail', boardId],
+        queryFn: ({ pageParam }) => getHuabanBoardDetail(boardId, pageParam as number | undefined),
+        initialPageParam: undefined,
+        getNextPageParam: (lastPage) => {
+            try {
+                const pins = lastPage?.pins;
+                if (!pins || !Array.isArray(pins) || pins.length === 0) return undefined;
+                return pins[pins.length - 1]?.pin_id;
+            } catch (e) {
+                console.error("getNextPageParam error:", e);
+                return undefined;
+            }
+        },
+        staleTime: 60000,
+    })
+
+
+    if (isLoading) return <div className="p-4">加载中...</div>
+    if (error) return <div className="p-4 text-red-500">Error: {(error as Error).message}</div>
+    if (!data) return <div className="p-4">No data found</div>
+
+    const board = data?.pages?.[0]?.board;
+    const allPins = data?.pages?.flatMap(page => (page?.pins && Array.isArray(page.pins)) ? page.pins : []) || [];
+
+    return (
+        <div className="flex flex-col h-full">
+            <div className="sticky top-0 z-10 bg-background/85 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 py-1 border-b flex items-center gap-2">
+                <button
+                    onClick={onBack}
+                    className="p-1.5 -ml-1.5 hover:bg-secondary rounded-full transition-colors"
+                    title="Back to Collections"
+                >
+                    <ArrowLeft size={18} />
+                </button>
+                <div className="flex flex-col">
+                    <h6 className="text-base font-semibold text-foreground">{board?.title}</h6>
+                    <span className="text-[10px] text-muted-foreground">{board?.pin_count || 0} 采集</span>
+                </div>
+            </div>
+
+            <div className="p-4">
+                <div className="columns-2 md:columns-3 lg:columns-4 xl:columns-6 gap-4 space-y-4">
+                    {allPins.map((pin) => (
+                        <div
+                            key={pin.pin_id}
+                            className="break-inside-avoid relative rounded-lg overflow-hidden bg-secondary mb-4 group hover:shadow-lg transition-all duration-300"
+                            style={{ aspectRatio: `${pin.file.width} / ${pin.file.height}` }}
+                        >
+                            <img
+                                src={`/huaban-img/${pin.file.key}_fw240webp`}
+                                srcSet={`/huaban-img/${pin.file.key}_fw240webp 1x, /huaban-img/${pin.file.key}_fw480webp 2x`}
+                                alt={pin.raw_text}
+                                className="w-full h-full object-cover"
+                                loading="lazy"
+                                onError={(e) => {
+                                    (e.target as HTMLImageElement).src = `https://gd-hbimg.huaban.com/${pin.file.key}_fw240webp`
+                                }}
+                            />
+                            {pin.raw_text && (
+                                <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/60 to-transparent text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                    <p className="truncate">{pin.raw_text}</p>
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                </div>
+
+                <div className="flex items-center justify-center w-full mt-4 pb-8">
+                    {hasNextPage ? (
+                        <button
+                            onClick={() => fetchNextPage()}
+                            disabled={isFetchingNextPage}
+                            className="px-6 py-2 bg-secondary hover:bg-secondary/80 rounded-full text-sm transition-colors cursor-pointer"
+                        >
+                            {isFetchingNextPage ? '加载中...' : '加载更多'}
+                        </button>
+                    ) : (
+                        allPins.length > 0 && <div className="text-sm text-muted-foreground">没有更多信息啦!</div>
+                    )}
+                </div>
+            </div>
+        </div>
+    )
+}
 
 export const HuabanList = () => {
-    const [selectedBoardId, setSelectedBoardId] = useState<number | null>(null)
+    const [selectedBoardId, setSelectedBoardId] = useState<number | null>(null) // Collection ID
+    const [viewBoardId, setViewBoardId] = useState<number | null>(null) // Board Detail ID
 
     const { data, isLoading, error } = useQuery({
         queryKey: ['huaban-collections'],
@@ -15,7 +111,6 @@ export const HuabanList = () => {
     const collections = data?.collections || []
     const activeBoardId = selectedBoardId ?? collections[0]?.collection_id
 
-
     const {
         data: pinsData,
         isLoading: pinsLoading,
@@ -24,13 +119,11 @@ export const HuabanList = () => {
     } = useQuery({
         queryKey: ['huaban-pins', activeBoardId],
         queryFn: () => getHuabanCollectionItems(activeBoardId as number),
-        enabled: !!activeBoardId,
+        enabled: !!activeBoardId && !viewBoardId, // Disable queries if viewing detail
         staleTime: 60000,
     })
 
-
     const boards = pinsData?.user.boards || []
-
 
     const formatTimeAgo = (timestamp: number) => {
         const diff = Date.now() - timestamp * 1000;
@@ -43,7 +136,11 @@ export const HuabanList = () => {
         const hours = Math.floor(diff / (1000 * 60 * 60));
         if (hours > 0) return `${hours}小时前`;
         const minutes = Math.floor(diff / (1000 * 60));
-        return `${minutes}分钟前`;
+        return minutes > 0 ? `${minutes}分钟前` : '刚刚';
+    }
+
+    if (viewBoardId) {
+        return <BoardDetailView boardId={viewBoardId} onBack={() => setViewBoardId(null)} />
     }
 
     return (
@@ -75,7 +172,7 @@ export const HuabanList = () => {
                                 {boards.length > 0 && (
                                     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
                                         {boards.map((board) => (
-                                            <div key={board.board_id} className="group cursor-pointer">
+                                            <div key={board.board_id} className="group cursor-pointer" onClick={() => setViewBoardId(board.board_id)}>
                                                 <div className="aspect-[3/2] rounded-lg overflow-hidden bg-muted mb-2 relative">
                                                     <div className="grid grid-cols-3 gap-0.5 h-full w-full">
                                                         {/* Left Large Cover */}
@@ -83,6 +180,7 @@ export const HuabanList = () => {
                                                             {board.cover?.file?.key ? (
                                                                 <img
                                                                     src={`/huaban-img/${board.cover.file.key}_sq235`}
+                                                                    srcSet={`/huaban-img/${board.cover.file.key}_sq235 1x, /huaban-img/${board.cover.file.key}_sq235 2x`}
                                                                     alt={board.title}
                                                                     className="w-full h-full object-cover"
                                                                     onError={(e) => {

@@ -61,11 +61,11 @@ function Home() {
 
   return (
     <div className='flex flex-col h-screen'>
-      <Tabs defaultValue="prompt" className="flex flex-col flex-1 overflow-hidden">
+      <Tabs defaultValue="huaban" className="flex flex-col flex-1 overflow-hidden">
         <div className="px-4 pt-2 shrink-0">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="prompt">Prompt库</TabsTrigger>
             <TabsTrigger value="huaban">花瓣库</TabsTrigger>
+            <TabsTrigger value="prompt">Prompt库</TabsTrigger>
             <TabsTrigger value="history">历史记录</TabsTrigger>
           </TabsList>
         </div>

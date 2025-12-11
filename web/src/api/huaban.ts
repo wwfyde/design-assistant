@@ -82,9 +82,14 @@ export interface HuabanBoardDetailResponse {
     board: HuabanBoard;
 }
 
-export const getHuabanBoardDetail = async (boardId: number): Promise<HuabanBoardDetailResponse> => {
+export const getHuabanBoardDetail = async (boardId: number, max?: number): Promise<HuabanBoardDetailResponse> => {
     const fields = encodeURIComponent('pins:PIN|board:BOARD_DETAIL|check');
-    const response = await fetch(`/huaban-api/v3/boards/${boardId}/pins?limit=40&sort=seq&fields=${fields}`, {
+    let url = `/huaban-api/v3/boards/${boardId}/pins?limit=40&sort=seq&fields=${fields}`;
+    if (max) {
+        url += `&max=${max}`;
+    }
+
+    const response = await fetch(url, {
         method: 'GET',
         headers: {
             'Accept': 'application/json',
