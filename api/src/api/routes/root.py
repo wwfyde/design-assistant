@@ -22,13 +22,13 @@ async def get_models() -> list[ModelInfo]:
             provider="openai", model="gpt-4.1-mini", url="https://api.openai.com/v1", type="text", display_name="GPT"
         ),
         ModelInfo(provider="ark", model="seed-1.6", url="https://api.openai.com/v1", type="text", display_name="豆包"),
-        ModelInfo(
-            provider="deepseek",
-            model="deepseek-v3.2",
-            url="https://deepseek.com",
-            type="text",
-            display_name="DeepSeek",
-        ),
+        # ModelInfo(
+        #     provider="deepseek",
+        #     model="deepseek-v3.2",
+        #     url="https://deepseek.com",
+        #     type="text",
+        #     display_name="DeepSeek",
+        # ),
         # ModelInfo(
         #     provider="gemini",
         #     model="gemini-3-pro-preview",
