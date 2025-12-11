@@ -2,16 +2,16 @@ import json
 from abc import ABC, abstractmethod
 from uuid import UUID
 
-from api.core.memory import AppStore
-from api.domain.canvas import Canvas
-from api.domain.chat import ChatSession
-from api.models import ChatSession as ChatSessionModel
-from api.models.canvas import Canvas as CanvasModel
-from api.schemas.canvas import CanvasCreate
 from sqlalchemy import delete, select, update
 from sqlalchemy.orm import Session
 
 from lib import get_current_date
+from api.models import ChatSession as ChatSessionModel
+from api.core.memory import AppStore
+from api.domain.chat import ChatSession
+from api.domain.canvas import Canvas
+from api.models.canvas import Canvas as CanvasModel
+from api.schemas.canvas import CanvasCreate
 
 
 class CanvasRepo(ABC):
@@ -155,13 +155,13 @@ class PostgresCanvasRepo(CanvasRepo):
         return None
 
     async def get_canvases(self) -> list[Canvas] | None:
-        stmt = select(CanvasModel).order_by(CanvasModel.id)
+        stmt = select(CanvasModel).order_by(CanvasModel.created_at.desc()).limit(20)
         result = self.session.execute(stmt)
         canvas_models = result.scalars().all()
         if not canvas_models:
             return None
         canvases = [Canvas.model_validate(canvas) for canvas in canvas_models]
-        return canvases
+        return canvases[:10]
 
     async def delete_canvas(self, id: str | UUID) -> bool:
         stmt = delete(CanvasModel).where(CanvasModel.id == str(id))
