@@ -1,8 +1,141 @@
-import { getHuabanCollectionItems, getHuabanCollections, getHuabanBoardDetail, HuabanCollection, HuabanBoardDetailResponse } from '@/api/huaban'
+import { getHuabanCollectionItems, getHuabanCollections, getHuabanBoardDetail, HuabanCollection, HuabanBoardDetailResponse, HuabanPin } from '@/api/huaban'
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
 import { useQuery, useInfiniteQuery } from '@tanstack/react-query'
 import { clsx } from 'clsx'
 import { useState } from 'react'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Image as ImageIcon, Sparkles } from 'lucide-react'
+import { eventBus } from '@/lib/event'
+
+const PinItem = ({ pin }: { pin: HuabanPin }) => {
+    const [isOpen, setIsOpen] = useState(false)
+    const [copyState, setCopyState] = useState<string | null>(null)
+
+    const handleCopy = (text: string, pId: number) => {
+        console.log('pId', pId)
+        navigator.clipboard.writeText(text)
+        setCopyState('copied')
+        setTimeout(() => setCopyState(null), 2000)
+    }
+
+    const handleUsePrompt = (text: string, pId: number) => {
+        console.log('pId', pId)
+        eventBus.emit('Chat::SetPrompt', { prompt: text })
+        eventBus.emit('Chat::ScrollToTop')
+        setIsOpen(false)
+    }
+
+    const handleUseImage = (url: string, pId: number, text?: string) => {
+        console.log('pId', pId)
+        eventBus.emit('Chat::Clear')
+        eventBus.emit('Chat::AddImageFromUrl', { url })
+        if (text) {
+            eventBus.emit('Chat::SetPrompt', { prompt: text })
+        }
+        eventBus.emit('Chat::ScrollToTop')
+        setIsOpen(false)
+    }
+
+    const imageUrl = `https://gd-hbimg.huaban.com/${pin.file.key}_fw658`
+
+    return (
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <div
+                className="break-inside-avoid relative rounded-lg overflow-hidden bg-secondary mb-4 group hover:shadow-lg transition-all duration-300"
+                style={{ aspectRatio: `${pin.file.width} / ${pin.file.height}` }}
+            >
+                <img
+                    src={`/huaban-img/${pin.file.key}_fw240webp`}
+                    srcSet={`/huaban-img/${pin.file.key}_fw240webp 1x, /huaban-img/${pin.file.key}_fw480webp 2x`}
+                    alt={pin.raw_text}
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    loading="lazy"
+                    onError={(e) => {
+                        (e.target as HTMLImageElement).src = `https://gd-hbimg.huaban.com/${pin.file.key}_fw240webp`
+                    }}
+                />
+
+                <div className='absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center'>
+                    <DialogTrigger asChild>
+                        <Button
+                            variant='secondary'
+                            className='rounded-full px-6 font-semibold bg-white text-black hover:bg-white/90 shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-all duration-300'
+                        >
+                            View Details
+                        </Button>
+                    </DialogTrigger>
+                </div>
+
+                {pin.raw_text && (
+                    <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/60 to-transparent text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                        <p className="truncate">{pin.raw_text}</p>
+                    </div>
+                )}
+            </div>
+
+            <DialogContent className='max-w-5xl p-0 overflow-hidden gap-0 sm:rounded-3xl border-none bg-background'>
+                <div className='grid md:grid-cols-2 h-[80vh] md:h-[600px] m-1'>
+                    <div className='h-full bg-muted relative overflow-hidden flex items-center justify-center p-4 bg-black/5'>
+                        <img
+                            src={`/huaban-img/${pin.file.key}_fw658`}
+                            onError={(e) => {
+                                (e.target as HTMLImageElement).src = imageUrl
+                            }}
+                            alt={pin.raw_text}
+                            className='w-full h-full object-contain'
+                        />
+                    </div>
+                    <div className='flex flex-col h-full overflow-hidden'>
+                        <div className='p-8 md:p-10 flex-1 overflow-y-auto'>
+                            <div className='mb-8'>
+                                <DialogTitle className='text-xl font-bold mb-6 leading-relaxed line-clamp-2'>{pin.raw_text || 'No Title'}</DialogTitle>
+
+                                <div className='flex flex-col gap-4'>
+                                    <div className='flex items-center justify-between'>
+                                        <span className='text-xs font-bold text-muted-foreground tracking-wider uppercase'>
+                                            Actions
+                                        </span>
+                                        <div className='flex gap-2 flex-wrap justify-end'>
+                                            <Button
+                                                variant='outline'
+                                                size='sm'
+                                                className='h-8 rounded-full text-xs px-3 gap-1.5 hover:bg-primary hover:text-primary-foreground transition-colors'
+                                                onClick={() => handleUsePrompt(pin.raw_text, pin.pin_id)}
+                                            >
+                                                <Sparkles className='w-3.5 h-3.5' />
+                                                做同款
+                                            </Button>
+                                            <Button
+                                                variant='outline'
+                                                size='sm'
+                                                className='h-8 rounded-full text-xs px-3 gap-1.5 hover:bg-primary hover:text-primary-foreground transition-colors'
+                                                onClick={() => handleUseImage(imageUrl, pin.pin_id, pin.raw_text)}
+                                            >
+                                                <ImageIcon className='w-3.5 h-3.5' />
+                                                参考作图
+                                            </Button>
+                                            <Button
+                                                variant='outline'
+                                                size='sm'
+                                                className='h-8 rounded-full text-xs px-4'
+                                                onClick={() => handleCopy(pin.raw_text, pin.pin_id)}
+                                            >
+                                                {copyState === 'copied' ? 'Copied!' : 'Copy'}
+                                            </Button>
+                                        </div>
+                                    </div>
+                                    <div className='text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap bg-muted/50 p-4 rounded-lg border'>
+                                        {pin.raw_text || 'No description available'}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </DialogContent>
+        </Dialog>
+    )
+}
 
 const BoardDetailView = ({ boardId, onBack }: { boardId: number, onBack: () => void }) => {
     const {
@@ -28,7 +161,6 @@ const BoardDetailView = ({ boardId, onBack }: { boardId: number, onBack: () => v
         },
         staleTime: 60000,
     })
-
 
     if (isLoading) return <div className="p-4">加载中...</div>
     if (error) return <div className="p-4 text-red-500">Error: {(error as Error).message}</div>
@@ -56,27 +188,7 @@ const BoardDetailView = ({ boardId, onBack }: { boardId: number, onBack: () => v
             <div className="p-4">
                 <div className="columns-2 md:columns-3 lg:columns-4 xl:columns-6 gap-4 space-y-4">
                     {allPins.map((pin) => (
-                        <div
-                            key={pin.pin_id}
-                            className="break-inside-avoid relative rounded-lg overflow-hidden bg-secondary mb-4 group hover:shadow-lg transition-all duration-300"
-                            style={{ aspectRatio: `${pin.file.width} / ${pin.file.height}` }}
-                        >
-                            <img
-                                src={`/huaban-img/${pin.file.key}_fw240webp`}
-                                srcSet={`/huaban-img/${pin.file.key}_fw240webp 1x, /huaban-img/${pin.file.key}_fw480webp 2x`}
-                                alt={pin.raw_text}
-                                className="w-full h-full object-cover"
-                                loading="lazy"
-                                onError={(e) => {
-                                    (e.target as HTMLImageElement).src = `https://gd-hbimg.huaban.com/${pin.file.key}_fw240webp`
-                                }}
-                            />
-                            {pin.raw_text && (
-                                <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/60 to-transparent text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                    <p className="truncate">{pin.raw_text}</p>
-                                </div>
-                            )}
-                        </div>
+                        <PinItem key={pin.pin_id} pin={pin} />
                     ))}
                 </div>
 
