@@ -1,11 +1,12 @@
 from pprint import pprint
 from typing import NotRequired
 
-from api.core.memory import memory_checkpointer
+from pydantic import Field, BaseModel, ConfigDict
 from langchain.agents import AgentState, create_agent
-from langchain_core.messages import HumanMessage
 from langgraph.graph.state import CompiledStateGraph
-from pydantic import BaseModel, ConfigDict, Field
+from langchain_core.messages import HumanMessage
+
+from api.core.memory import memory_checkpointer
 
 system_prompt = """
 角色（Role）
@@ -123,5 +124,6 @@ if __name__ == "__main__":
     resp = agent.invoke(
         input={"messages": HumanMessage("生成一幅牛肉面"), "aspect_ratio": "3:2"},
         config=dict(configurable=dict(thread_id="1")),
+
     )
     pprint(resp)

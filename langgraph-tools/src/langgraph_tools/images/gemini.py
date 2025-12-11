@@ -3,13 +3,15 @@ from io import BytesIO
 from typing import Literal, Optional
 
 import requests
-from google import genai
-from langchain_core.tools import tool
 from PIL import Image
-from pydantic import BaseModel, Field
+from google import genai
+from pydantic import Field, BaseModel
+from langgraph.prebuilt import ToolRuntime
+from langchain_core.tools import tool
 
 from lib import settings, upload_image
 from tools.images import image_create_with_gemini as image_create_with_gemini_tool
+from api.services.websocket import broadcast_session_update
 
 api_key = settings.providers.gemini.api_key
 http_options = genai.types.HttpOptions(
@@ -46,15 +48,29 @@ class GeminiArgs(BaseModel):
     description="Image Creation tool, generate or edit image With Google Gemini(aka Nano Banana) model using prompt and  image_urls. pass prompt with simple and specific instruction text, pass image with image_urls. Use this model for high-quality image modification.",
     args_schema=GeminiArgs,
 )
-def image_create_with_gemini(
+async def image_create_with_gemini(
+    runtime: ToolRuntime,
     prompt: str,
     image_urls: str | None = None,
     aspect_ratio: str | None = None,
     image_size: Literal["1K", "2K", "4K"] | None = "1K",
 ) -> str:
-    return image_create_with_gemini_tool(
+    image_tool_response = image_create_with_gemini_tool(
         prompt, image_urls=image_urls, aspect_ratio=aspect_ratio, image_size=image_size
     )
+    if image_tool_response.images:
+        for image in image_tool_response.images:
+            await broadcast_session_update(
+                runtime.context.session_id,
+                runtime.context.canvas_id,
+                {
+                    "type": "image_generated",
+                    "element": "",
+                    "file": "",
+                    "image_url": image.url,
+                },
+            )
+    return image_tool_response.content
 
 
 def magic_generate_with_gemini(*, prompt: str | None = None, image_url: str) -> list[dict]:

@@ -1,10 +1,10 @@
-from datetime import datetime
-from typing import Any
 from uuid import UUID
+from typing import Any
+from datetime import datetime
 
 import uuid_utils as uuid
 from openai import BaseModel
-from pydantic import ConfigDict, Field, Json, field_validator
+from pydantic import Json, Field, ConfigDict, field_validator
 
 from lib import get_current_date
 

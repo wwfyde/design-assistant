@@ -1,20 +1,22 @@
-from typing import NotRequired, Optional
+from typing import Optional, NotRequired
 
 import httpx
-from langchain.agents import AgentState, create_agent
-from langchain.agents.middleware import AgentMiddleware, ModelRequest, dynamic_prompt
-from langchain_core.messages import HumanMessage
-from langchain_openai import ChatOpenAI
-from langgraph.checkpoint.base import BaseCheckpointSaver
-from langgraph.graph.state import CompiledStateGraph
+from pydantic import Field, BaseModel, ConfigDict
 from langgraph_tools import get_langgraph_tools
-from pydantic import BaseModel, Field
+from langchain.agents import AgentState, create_agent
+from langchain_openai import ChatOpenAI
+from langgraph.graph.state import CompiledStateGraph
+from langchain_core.messages import HumanMessage
 
+# from langchain_core.callbacks import CallbackManagerForToolRun
+from langgraph.checkpoint.base import BaseCheckpointSaver
+from langchain.agents.middleware import ModelRequest, AgentMiddleware, dynamic_prompt, wrap_tool_call
+
+from lib import settings
 from agents.common import get_text_model
 from api.core.memory import memory_checkpointer
-from api.domain.model import ModelInfo
 from api.domain.tool import ToolInfo
-from lib import settings
+from api.domain.model import ModelInfo
 
 
 class CreativeAssistantState(AgentState):
@@ -34,12 +36,14 @@ class ResponseFormat(BaseModel):
     # )
 
 
-class RednoteContext(BaseModel):
-    user_id: str
-    conversation_id: str = Field(title="对话ID")
+class CreativeContext(BaseModel):
+    # user_id: str
+    # conversation_id: str = Field(title="对话ID")
     session_id: Optional[str] = Field(None, title="会话ID")
-    profile_id: Optional[str] = Field(None, title="用户资料ID")
+    # profile_id: Optional[str] = Field(None, title="用户资料ID")
     canvas_id: Optional[str] = None
+
+    model_config = ConfigDict(extra="allow")
 
 
 class CustomMiddleware(AgentMiddleware):
@@ -373,7 +377,7 @@ def build_creative_assistant(
         middleware=[],
         system_prompt=system_prompt,
         state_schema=CreativeAssistantState,  # noqa F401
-        # context_schema=RednoteContext,
+        context_schema=CreativeContext,
         checkpointer=checkpointer,
     )
     return agent

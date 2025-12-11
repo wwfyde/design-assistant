@@ -32,6 +32,8 @@ dependencies = [
     "rembg[cpu]>=2.0.67;sys_platform == 'darwin'",
     "uuid-utils>=0.11.1",
     "langchain-deepseek>=1.0.1",
+    "dashscope>=1.25.2",
+    "nacos-sdk-python>=2.0.9",
 ]
 
 [tool.uv.workspace]
@@ -67,9 +69,43 @@ langgraph-tools = { workspace = true }
 
 [tool.ruff]
 line-length = 120
+target-version = "py313"
+#output-format = "grouped" # openai-python
+preview = true
+
+[tool.ruff.format]
+docstring-code-format = true
+quote-style = "double"
+
+
+
+[tool.ruff.lint]
+
+# 启用规则
+# E: pycodestyle (错误)
+# F: Pyflakes (核心功能，包括检测未使用的导入 F401)
+# I: isort (导入排序)
+# W: pycodestyle (警告)
+# B: flake8-bugbear (发现潜在 Bug)
+# UP: pyupgrade (自动升级旧语法)
+select = ["E", "F",
+    # remove unused imports
+    "F401",
+    "I", "W", "B", "UP"]
+
+#ignore = []
+
+ignore = [
+    # mutable defaults
+    "B006",
+]
 
 [tool.ruff.lint.isort]
+# 将自家模块放入 first-party 块中 (可选)
 known-first-party = ["api", "lib", "tools", "langgraph-tools", "agents"]
+length-sort = true
+length-sort-straight = true
+combine-as-imports = true   # 将 from import 组合 (推荐)
 
 [tool.ty.environment]
 #root = ["api", "tools", "lib", "agents", "langgraph-tools"]
