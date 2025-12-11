@@ -96,6 +96,7 @@ export default defineConfig(({ mode }) => {
         target: `http://127.0.0.1:${PORT}`,
         changeOrigin: true,
         ws: true,
+        rewrite: (path) => path.replace(/^\/socket.io/, '/llmapi/socket.io'),
       },
       // Also proxy WebSocket connections
       '/ws': {

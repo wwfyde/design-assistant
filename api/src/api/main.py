@@ -159,7 +159,7 @@ def create_app(lifespan: Callable = lifespan):
 
 app = create_app()
 sleep(2)
-socket_app = socketio.ASGIApp(sio, other_asgi_app=app, socketio_path="/socket.io")
+socket_app = socketio.ASGIApp(sio, other_asgi_app=app, socketio_path=f"{root_path}/socket.io")
 
 
 # app.mount('/outer', api2.app)
