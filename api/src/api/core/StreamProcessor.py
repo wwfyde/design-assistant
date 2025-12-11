@@ -1,21 +1,21 @@
 # type: ignore[import]
 import json
 import traceback
-from typing import Any, Awaitable, Callable, Dict, List, Optional
+from typing import Any, Dict, List, Callable, Optional, Awaitable
 
+from sqlalchemy.orm import Session
+from langgraph.graph.state import CompiledStateGraph
 from langchain_core.messages import (
-    AIMessageChunk,
     ToolCall,
     ToolMessage,
+    AIMessageChunk,
     convert_to_openai_messages,
 )
-from langgraph.graph.state import CompiledStateGraph
-from sqlalchemy.orm import Session
 
-from api.core.db import async_session, engine
+from lib import settings
+from api.core.db import engine, async_session
 from api.core.memory import memory_store
 from api.services.chat import ChatService, InMemoryChatRepo, PostgresChatRepo
-from lib import settings
 
 
 class StreamProcessor:
@@ -47,7 +47,7 @@ class StreamProcessor:
         """
 
         # agent = supervisor.compile()
-        print(f"用户消息: {messages}")
+        # print(f"用户消息: {messages}")
         # print("测试")
 
         async for chunk in supervisor.astream(
