@@ -6,27 +6,28 @@ import { clsx } from 'clsx'
 import { useState } from 'react'
 import { ArrowLeft, Image as ImageIcon, Sparkles } from 'lucide-react'
 import { eventBus } from '@/lib/event'
+import customPrompts from '@/data/huaban_prompts.json'
 
 const PinItem = ({ pin }: { pin: HuabanPin }) => {
     const [isOpen, setIsOpen] = useState(false)
     const [copyState, setCopyState] = useState<string | null>(null)
 
-    const handleCopy = (text: string, pId: number) => {
-        console.log('pId', pId)
+    // Lookup custom prompt or fallback to raw_text
+    const validPrompt = (customPrompts as Record<string, string>)[String(pin.pin_id)] || pin.raw_text
+
+    const handleCopy = (text: string) => {
         navigator.clipboard.writeText(text)
         setCopyState('copied')
         setTimeout(() => setCopyState(null), 2000)
     }
 
-    const handleUsePrompt = (text: string, pId: number) => {
-        console.log('pId', pId)
+    const handleUsePrompt = (text: string) => {
         eventBus.emit('Chat::SetPrompt', { prompt: text })
         eventBus.emit('Chat::ScrollToTop')
         setIsOpen(false)
     }
 
-    const handleUseImage = (url: string, pId: number, text?: string) => {
-        console.log('pId', pId)
+    const handleUseImage = (url: string, text?: string) => {
         eventBus.emit('Chat::Clear')
         eventBus.emit('Chat::AddImageFromUrl', { url })
         if (text) {
@@ -47,7 +48,7 @@ const PinItem = ({ pin }: { pin: HuabanPin }) => {
                 <img
                     src={`/huaban-img/${pin.file.key}_fw240webp`}
                     srcSet={`/huaban-img/${pin.file.key}_fw240webp 1x, /huaban-img/${pin.file.key}_fw480webp 2x`}
-                    alt={pin.raw_text}
+                    alt={validPrompt}
                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                     loading="lazy"
                     onError={(e) => {
@@ -66,9 +67,9 @@ const PinItem = ({ pin }: { pin: HuabanPin }) => {
                     </DialogTrigger>
                 </div>
 
-                {pin.raw_text && (
+                {validPrompt && (
                     <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/60 to-transparent text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                        <p className="truncate">{pin.raw_text}</p>
+                        <p className="truncate">{validPrompt}</p>
                     </div>
                 )}
             </div>
@@ -81,14 +82,14 @@ const PinItem = ({ pin }: { pin: HuabanPin }) => {
                             onError={(e) => {
                                 (e.target as HTMLImageElement).src = imageUrl
                             }}
-                            alt={pin.raw_text}
+                            alt={validPrompt}
                             className='w-full h-full object-contain'
                         />
                     </div>
                     <div className='flex flex-col h-full overflow-hidden'>
                         <div className='p-8 md:p-10 flex-1 overflow-y-auto'>
                             <div className='mb-8'>
-                                <DialogTitle className='text-xl font-bold mb-6 leading-relaxed line-clamp-2'>{pin.raw_text || 'No Title'}</DialogTitle>
+                                <DialogTitle className='text-xl font-bold mb-6 leading-relaxed line-clamp-2'>{validPrompt || 'No Title'}</DialogTitle>
 
                                 <div className='flex flex-col gap-4'>
                                     <div className='flex items-center justify-between'>
@@ -100,7 +101,7 @@ const PinItem = ({ pin }: { pin: HuabanPin }) => {
                                                 variant='outline'
                                                 size='sm'
                                                 className='h-8 rounded-full text-xs px-3 gap-1.5 hover:bg-primary hover:text-primary-foreground transition-colors'
-                                                onClick={() => handleUsePrompt(pin.raw_text, pin.pin_id)}
+                                                onClick={() => handleUsePrompt(validPrompt!)}
                                             >
                                                 <Sparkles className='w-3.5 h-3.5' />
                                                 做同款
@@ -109,7 +110,7 @@ const PinItem = ({ pin }: { pin: HuabanPin }) => {
                                                 variant='outline'
                                                 size='sm'
                                                 className='h-8 rounded-full text-xs px-3 gap-1.5 hover:bg-primary hover:text-primary-foreground transition-colors'
-                                                onClick={() => handleUseImage(imageUrl, pin.pin_id, pin.raw_text)}
+                                                onClick={() => handleUseImage(imageUrl, validPrompt)}
                                             >
                                                 <ImageIcon className='w-3.5 h-3.5' />
                                                 参考作图
@@ -118,14 +119,19 @@ const PinItem = ({ pin }: { pin: HuabanPin }) => {
                                                 variant='outline'
                                                 size='sm'
                                                 className='h-8 rounded-full text-xs px-4'
-                                                onClick={() => handleCopy(pin.raw_text, pin.pin_id)}
+                                                onClick={() => handleCopy(validPrompt!)}
                                             >
                                                 {copyState === 'copied' ? 'Copied!' : 'Copy'}
                                             </Button>
                                         </div>
                                     </div>
                                     <div className='text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap bg-muted/50 p-4 rounded-lg border'>
-                                        {pin.raw_text || 'No description available'}
+                                        {validPrompt || 'No description available'}
+                                    </div>
+
+                                    {/* Debug ID display for the user to easily find ID for JSON editing */}
+                                    <div className="text-[10px] text-muted-foreground mt-4 pt-4 border-t border-dashed">
+                                        ID: {pin.pin_id}
                                     </div>
                                 </div>
                             </div>
