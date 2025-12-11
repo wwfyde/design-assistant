@@ -1,5 +1,4 @@
 import { createCanvas } from '@/api/canvas'
-import TopMenu from '@/components/TopMenu'
 import ChatTextarea from '@/components/chat/ChatTextarea'
 import CanvasList from '@/components/home/CanvasList'
 import { HuabanList } from '@/components/home/HuabanList'
@@ -11,7 +10,6 @@ import { useConfigs } from '@/contexts/configs'
 import { eventBus } from '@/lib/event'
 import { useMutation } from '@tanstack/react-query'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { motion } from 'motion/react'
 import { nanoid } from 'nanoid'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -61,28 +59,37 @@ function Home() {
 
   return (
     <div className='flex flex-col h-screen'>
-      <Tabs defaultValue="huaban" className="flex flex-col flex-1 overflow-hidden">
-        <div className="px-4 pt-2 shrink-0">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="huaban">花瓣库</TabsTrigger>
-            <TabsTrigger value="prompt">Prompt库</TabsTrigger>
-            <TabsTrigger value="history">历史记录</TabsTrigger>
+      <Tabs defaultValue='huaban' className='flex flex-col flex-1 overflow-hidden'>
+        <div className='px-4 pt-2 shrink-0'>
+          <TabsList className='grid w-full grid-cols-3'>
+            <TabsTrigger value='huaban'>外部图像库</TabsTrigger>
+            <TabsTrigger value='prompt'>Prompt库</TabsTrigger>
+            <TabsTrigger value='history'>历史记录</TabsTrigger>
           </TabsList>
         </div>
 
-        <TabsContent value="prompt" className="flex-1 overflow-hidden mt-2 border-none p-0 outline-none data-[state=inactive]:hidden">
+        <TabsContent
+          value='prompt'
+          className='flex-1 overflow-hidden mt-2 border-none p-0 outline-none data-[state=inactive]:hidden'
+        >
           <ScrollArea className='h-full'>
             <PromptList />
           </ScrollArea>
         </TabsContent>
 
-        <TabsContent value="huaban" className="flex-1 overflow-hidden mt-2 border-none p-0 outline-none data-[state=inactive]:hidden">
+        <TabsContent
+          value='huaban'
+          className='flex-1 overflow-hidden mt-2 border-none p-0 outline-none data-[state=inactive]:hidden'
+        >
           <ScrollArea className='h-full'>
             <HuabanList />
           </ScrollArea>
         </TabsContent>
 
-        <TabsContent value="history" className="flex-1 overflow-hidden mt-2 border-none p-0 outline-none data-[state=inactive]:hidden">
+        <TabsContent
+          value='history'
+          className='flex-1 overflow-hidden mt-2 border-none p-0 outline-none data-[state=inactive]:hidden'
+        >
           <ScrollArea className='h-full'>
             <CanvasList />
           </ScrollArea>
