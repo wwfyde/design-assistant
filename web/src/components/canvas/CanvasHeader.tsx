@@ -1,4 +1,6 @@
 import { Input } from '@/components/ui/input'
+import { useNavigate } from '@tanstack/react-router'
+import { ArrowLeft } from 'lucide-react'
 import TopMenu from '../TopMenu'
 import CanvasExport from './CanvasExport'
 
@@ -10,8 +12,21 @@ type CanvasHeaderProps = {
 }
 
 const CanvasHeader: React.FC<CanvasHeaderProps> = ({ canvasName, canvasId, onNameChange, onNameSave }) => {
+  const navigate = useNavigate()
+
+  const BackButton = (
+    <button
+      onClick={() => navigate({ to: '/' })}
+      className='p-1.5 -ml-1.5 hover:bg-secondary rounded-full transition-colors flex items-center justify-center'
+      title='Back to Home'
+    >
+      <ArrowLeft size={18} />
+    </button>
+  )
+
   return (
     <TopMenu
+      left={BackButton}
       middle={
         <Input
           className='text-sm text-muted-foreground text-center bg-transparent border-none shadow-none w-fit h-7 hover:bg-primary-foreground transition-all'

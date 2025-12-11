@@ -29,7 +29,7 @@ const PinItem = ({ pin }: { pin: HuabanPin }) => {
 
     const handleUseImage = (url: string, text?: string) => {
         eventBus.emit('Chat::Clear')
-        eventBus.emit('Chat::AddImageFromUrl', { url })
+        eventBus.emit('Chat::AddImageFromUrl', { url: window.location.origin + url })
         if (text) {
             eventBus.emit('Chat::SetPrompt', { prompt: text })
         }
