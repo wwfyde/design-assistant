@@ -6,7 +6,7 @@ import { clsx } from 'clsx'
 import { useState } from 'react'
 import { ArrowLeft, Image as ImageIcon, Sparkles } from 'lucide-react'
 import { eventBus } from '@/lib/event'
-import customPrompts from '@/data/huaban_prompts.json'
+import customPrompts from '@/json/huaban_prompts.json'
 
 const PinItem = ({ pin }: { pin: HuabanPin }) => {
     const [isOpen, setIsOpen] = useState(false)
@@ -37,7 +37,7 @@ const PinItem = ({ pin }: { pin: HuabanPin }) => {
         setIsOpen(false)
     }
 
-    const imageUrl = `https://gd-hbimg.huaban.com/${pin.file.key}_fw658`
+    const imageUrl = `/huaban-img/${pin.file.key}_fw658`
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -52,7 +52,7 @@ const PinItem = ({ pin }: { pin: HuabanPin }) => {
                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                     loading="lazy"
                     onError={(e) => {
-                        (e.target as HTMLImageElement).src = `https://gd-hbimg.huaban.com/${pin.file.key}_fw240webp`
+                        (e.target as HTMLImageElement).src = `/huaban-img/${pin.file.key}_fw240webp`
                     }}
                 />
 
@@ -302,7 +302,7 @@ export const HuabanList = () => {
                                                                     alt={board.title}
                                                                     className="w-full h-full object-cover"
                                                                     onError={(e) => {
-                                                                        (e.target as HTMLImageElement).src = `https://gd-hbimg.huaban.com/${board.cover.file.key}_sq235`
+                                                                        (e.target as HTMLImageElement).src = `/huaban-img/${board.cover.file.key}_sq235`
                                                                     }}
                                                                 />
                                                             ) : (
@@ -322,7 +322,7 @@ export const HuabanList = () => {
                                                                         alt=""
                                                                         className="w-full h-full object-cover"
                                                                         onError={(e) => {
-                                                                            (e.target as HTMLImageElement).src = `https://gd-hbimg.huaban.com/${board.pins![0].file.key}_sq235`
+                                                                            (e.target as HTMLImageElement).src = `/huaban-img/${board.pins![0].file.key}_sq235`
                                                                         }}
                                                                     />
                                                                 )}
@@ -335,7 +335,7 @@ export const HuabanList = () => {
                                                                         alt=""
                                                                         className="w-full h-full object-cover"
                                                                         onError={(e) => {
-                                                                            (e.target as HTMLImageElement).src = `https://gd-hbimg.huaban.com/${board.pins![1].file.key}_sq235`
+                                                                            (e.target as HTMLImageElement).src = `/huaban-img/${board.pins![1].file.key}_sq235`
                                                                         }}
                                                                     />
                                                                 )}
