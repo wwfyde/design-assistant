@@ -461,7 +461,7 @@ const ChatTextarea: React.FC<ChatTextareaProps> = ({
           {/* Text Model Selector */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant='outline' size='sm' className='flex items-center gap-1'>
+              <Button variant='outline' size='sm' className='flex items-center gap-1 hidden'>
                 {textModel && PROVIDER_NAME_MAPPING[textModel.provider]?.icon && (
                   <img
                     src={PROVIDER_NAME_MAPPING[textModel.provider].icon}
