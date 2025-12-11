@@ -169,7 +169,7 @@ const ChatTextarea: React.FC<ChatTextareaProps> = ({
 
     // Add aspect ratio and quantity information if not default values
     let additionalInfo = ''
-    if (selectedAspectRatio !== 'auto') {
+    if (selectedAspectRatio !== 'Auto') {
       additionalInfo += `<aspect_ratio>${selectedAspectRatio}</aspect_ratio>\n`
     }
     if (quantity !== 1) {
