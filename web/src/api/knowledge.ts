@@ -1,5 +1,5 @@
 import { BASE_API_URL } from '../constants'
-import { authenticatedFetch } from './auth'
+import { apiClient } from '@/lib/api-client'
 
 // 知识库基本信息接口
 export interface KnowledgeBase {
@@ -69,7 +69,7 @@ export async function getKnowledgeList(params: KnowledgeListParams = {}): Promis
   }
 
   try {
-    const response = await authenticatedFetch(`${BASE_API_URL}/api/knowledge/list?${queryParams.toString()}`)
+    const response = await apiClient.get(`${BASE_API_URL}/api/knowledge/list?${queryParams.toString()}`)
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
@@ -90,7 +90,7 @@ export async function getKnowledgeList(params: KnowledgeListParams = {}): Promis
  */
 export async function getKnowledgeById(id: string): Promise<KnowledgeBase> {
   try {
-    const response = await authenticatedFetch(`${BASE_API_URL}/api/knowledge/${id}`)
+    const response = await apiClient.get(`${BASE_API_URL}/api/knowledge/${id}`)
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
@@ -117,10 +117,7 @@ export async function createKnowledge(knowledgeData: {
   content?: string
 }): Promise<ApiResponse> {
   try {
-    const response = await authenticatedFetch(`${BASE_API_URL}/api/knowledge/create`, {
-      method: 'POST',
-      body: JSON.stringify(knowledgeData),
-    })
+    const response = await apiClient.post(`${BASE_API_URL}/api/knowledge/create`, knowledgeData)
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
@@ -150,10 +147,7 @@ export async function updateKnowledge(
   }>,
 ): Promise<ApiResponse> {
   try {
-    const response = await authenticatedFetch(`${BASE_API_URL}/api/knowledge/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(knowledgeData),
-    })
+    const response = await apiClient.put(`${BASE_API_URL}/api/knowledge/${id}`, knowledgeData)
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
@@ -173,9 +167,7 @@ export async function updateKnowledge(
  */
 export async function deleteKnowledge(id: string): Promise<ApiResponse> {
   try {
-    const response = await authenticatedFetch(`${BASE_API_URL}/api/knowledge/${id}`, {
-      method: 'DELETE',
-    })
+    const response = await apiClient.delete(`${BASE_API_URL}/api/knowledge/${id}`)
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
@@ -196,14 +188,8 @@ export async function deleteKnowledge(id: string): Promise<ApiResponse> {
 export async function saveEnabledKnowledgeDataToSettings(knowledgeData: KnowledgeBase[]): Promise<ApiResponse> {
   try {
     // 调用本地服务器API，不需要BASE_API_URL和认证
-    const response = await fetch('/api/settings', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        enabled_knowledge_data: knowledgeData,
-      }),
+    const response = await apiClient.post('/api/settings', {
+      enabled_knowledge_data: knowledgeData,
     })
 
     if (!response.ok) {

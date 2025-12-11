@@ -1,3 +1,4 @@
+import { apiClient } from '@/lib/api-client'
 import { Prompt } from '@/types/prompt'
 
 export async function listPrompts(offset: number = 0, limit: number = 20): Promise<Prompt[]> {
@@ -5,7 +6,7 @@ export async function listPrompts(offset: number = 0, limit: number = 20): Promi
     offset: offset.toString(),
     limit: limit.toString(),
   })
-  const response = await fetch(`/api/prompts?${params.toString()}`)
+  const response = await apiClient.get(`/api/prompts?${params.toString()}`)
   if (!response.ok) {
     throw new Error('Failed to fetch prompts')
   }

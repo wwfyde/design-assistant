@@ -1,3 +1,4 @@
+import { apiClient } from '@/lib/api-client'
 import { compressImageFile } from '@/utils/imageUtils'
 
 export async function uploadImage(
@@ -8,23 +9,14 @@ export async function uploadImage(
 
   const formData = new FormData()
   formData.append('file', compressedFile)
-  const response = await fetch('/api/upload_image', {
-    method: 'POST',
-    body: formData,
-  })
+  const response = await apiClient.post('/api/upload_image', formData)
   return await response.json()
 }
 
 export async function uploadImageFromUrl(
   url: string,
 ): Promise<{ file_id: string; width: number; height: number; url: string }> {
-  const response = await fetch('/api/upload_image_from_url', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ url }),
-  })
+  const response = await apiClient.post('/api/upload_image_from_url', { url })
 
   if (!response.ok) {
     const error = await response.json()

@@ -1,6 +1,8 @@
 import { BASE_API_URL } from '../constants'
 import i18n from '../i18n'
 import { clearJaazApiKey } from './config'
+import { apiClient } from '@/lib/api-client'
+import { LLMConfig } from '@/types/types'
 
 export interface AuthStatus {
   status: 'logged_out' | 'pending' | 'logged_in'
@@ -39,10 +41,7 @@ export interface ApiResponse {
 }
 
 export async function startDeviceAuth(): Promise<DeviceAuthResponse> {
-  const response = await fetch(`${BASE_API_URL}/api/device/auth`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-  })
+  const response = await apiClient.post(`${BASE_API_URL}/api/device/auth`)
 
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`)
@@ -76,7 +75,7 @@ export async function startDeviceAuth(): Promise<DeviceAuthResponse> {
 }
 
 export async function pollDeviceAuth(deviceCode: string): Promise<DeviceAuthPollResponse> {
-  const response = await fetch(`${BASE_API_URL}/api/device/poll?code=${deviceCode}`)
+  const response = await apiClient.get(`${BASE_API_URL}/api/device/poll?code=${deviceCode}`)
 
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`)
@@ -191,27 +190,38 @@ export function getAccessToken(): string | null {
 
 // Helper function to make authenticated API calls
 export async function authenticatedFetch(url: string, options: RequestInit = {}): Promise<Response> {
-  const token = getAccessToken()
+  // This function is now just a wrapper around apiClient.request, but keeping it for backward compatibility
+  // though apiClient already handles the token from cookie, not localStorage 'jaaz_access_token'.
+  // Wait, the user requirement is about 'ai_mark_token' from cookie.
+  // The existing code uses 'jaaz_access_token' from localStorage.
+  // I should respect the user requirement to use the new token logic.
+  // But 'authenticatedFetch' explicitly adds 'Authorization' with Bearer token from localStorage.
+  // If I replace fetch with apiClient.request, it will use the cookie token.
+  // The user said "add Authorization Header... value is token from this function".
+  // The function provided gets 'ai_mark_token' from cookie.
+  // So I should prioritize that.
 
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    ...((options.headers as Record<string, string>) || {}),
-  }
+  // However, authenticatedFetch adds Bearer token.
+  // apiClient adds the token directly (user code: return tokenCookie.split('=')[1].trim(); header: headers.set('Authorization', `${token}`))
+  // The user didn't say "Bearer ". Just "value as the token".
+  // But usually it is Bearer.
+  // Let's look at the user request again: "值为我这个函数获取的token" (Value is the token obtained by this function).
+  // It doesn't explicitly say "Bearer".
+  // But wait, the existing code has `headers['Authorization'] = Bearer ${token}`.
+  // If I change it to `apiClient.request`, it will use the cookie token without "Bearer" prefix if I strictly follow my `apiClient` implementation.
+  // My `apiClient` implementation: `headers.set('Authorization', ${token})`.
+  // If the backend expects "Bearer", this might break.
+  // But the user strictly asked to use the token from the function as the value.
+  // I will assume the user knows what they are doing or the token itself includes "Bearer" (unlikely for a cookie value usually, but possible).
+  // OR, the backend just expects the raw token.
+  // Given the explicit instruction, I will stick to what I implemented in apiClient.
 
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`
-  }
-
-  return fetch(url, {
-    ...options,
-    headers,
-  })
+  return apiClient.request(url, options)
 }
 
 // 刷新token
 export async function refreshToken(currentToken: string) {
-  const response = await fetch(`${BASE_API_URL}/api/device/refresh-token`, {
-    method: 'GET',
+  const response = await apiClient.get(`${BASE_API_URL}/api/device/refresh-token`, {
     headers: {
       Authorization: `Bearer ${currentToken}`,
     },
@@ -228,3 +238,4 @@ export async function refreshToken(currentToken: string) {
     throw new Error(`NETWORK_ERROR: ${response.status}`)
   }
 }
+

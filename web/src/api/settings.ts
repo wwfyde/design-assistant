@@ -1,3 +1,5 @@
+import { apiClient } from '@/lib/api-client'
+
 /**
  * Settings API - 设置相关的API接口
  *
@@ -20,7 +22,7 @@
  * }
  */
 export async function getSettingsFileExists(): Promise<{ exists: boolean }> {
-  const response = await fetch('/api/settings/exists')
+  const response = await apiClient.get('/api/settings/exists')
   return await response.json()
 }
 
@@ -36,7 +38,7 @@ export async function getSettingsFileExists(): Promise<{ exists: boolean }> {
  * const systemPrompt = settings.system_prompt;
  */
 export async function getSettings(): Promise<Record<string, unknown>> {
-  const response = await fetch('/api/settings')
+  const response = await apiClient.get('/api/settings')
   return await response.json()
 }
 
@@ -60,13 +62,7 @@ export async function updateSettings(settings: Record<string, unknown>): Promise
   status: string
   message: string
 }> {
-  const response = await fetch('/api/settings', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(settings),
-  })
+  const response = await apiClient.post('/api/settings', settings)
   return await response.json()
 }
 
@@ -84,7 +80,7 @@ export async function updateSettings(settings: Record<string, unknown>): Promise
  * // 'http://proxy.example.com:8080' - 使用指定代理
  */
 export async function getProxySettings(): Promise<Record<string, unknown>> {
-  const response = await fetch('/api/settings/proxy')
+  const response = await apiClient.get('/api/settings/proxy')
   return await response.json()
 }
 
@@ -114,19 +110,13 @@ export async function updateProxySettings(proxyConfig: Record<string, unknown>):
   status: string
   message: string
 }> {
-  const response = await fetch('/api/settings/proxy', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(proxyConfig),
-  })
+  const response = await apiClient.post('/api/settings/proxy', proxyConfig)
   return await response.json()
 }
 
 // 文件系统浏览相关的API
 export const browseFolderApi = async (path: string = '') => {
-  const response = await fetch(`/api/browse_filesystem?path=${encodeURIComponent(path)}`)
+  const response = await apiClient.get(`/api/browse_filesystem?path=${encodeURIComponent(path)}`)
   if (!response.ok) {
     throw new Error('Failed to browse folder')
   }
@@ -134,7 +124,7 @@ export const browseFolderApi = async (path: string = '') => {
 }
 
 export const getMediaFilesApi = async (path: string) => {
-  const response = await fetch(`/api/get_media_files?path=${encodeURIComponent(path)}`)
+  const response = await apiClient.get(`/api/get_media_files?path=${encodeURIComponent(path)}`)
   if (!response.ok) {
     throw new Error('Failed to get media files')
   }
@@ -142,13 +132,7 @@ export const getMediaFilesApi = async (path: string) => {
 }
 
 export const openFolderInExplorer = async (path: string) => {
-  const response = await fetch('/api/open_folder_in_explorer', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ path }),
-  })
+  const response = await apiClient.post('/api/open_folder_in_explorer', { path })
   if (!response.ok) {
     throw new Error('Failed to open folder in explorer')
   }
@@ -156,7 +140,7 @@ export const openFolderInExplorer = async (path: string) => {
 }
 
 export const getFileThumbnailApi = async (filePath: string) => {
-  const response = await fetch(`/api/get_file_thumbnail?file_path=${encodeURIComponent(filePath)}`)
+  const response = await apiClient.get(`/api/get_file_thumbnail?file_path=${encodeURIComponent(filePath)}`)
   if (!response.ok) {
     throw new Error('Failed to get file thumbnail')
   }
@@ -170,7 +154,7 @@ export const getFileServiceUrl = (filePath: string) => {
 
 // 获取文件详细信息
 export const getFileInfoApi = async (filePath: string) => {
-  const response = await fetch(`/api/get_file_info?file_path=${encodeURIComponent(filePath)}`)
+  const response = await apiClient.get(`/api/get_file_info?file_path=${encodeURIComponent(filePath)}`)
   if (!response.ok) {
     throw new Error('Failed to get file info')
   }
@@ -179,7 +163,7 @@ export const getFileInfoApi = async (filePath: string) => {
 
 // 获取用户的My Assets目录路径
 export const getMyAssetsDirPath = async () => {
-  const response = await fetch('/api/settings/my_assets_dir_path')
+  const response = await apiClient.get('/api/settings/my_assets_dir_path')
   const result = await response.json()
   return result
 }
