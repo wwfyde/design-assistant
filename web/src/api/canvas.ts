@@ -1,4 +1,4 @@
-import { apiClient } from '@/lib/api-client'
+import { apiClient, getToken } from '@/lib/api-client'
 import { ToolInfo } from '@/api/model'
 import { CanvasData, Message, Session } from '@/types/types'
 
@@ -11,6 +11,11 @@ export type ListCanvasesResponse = {
 }
 
 export async function listCanvases(): Promise<ListCanvasesResponse[]> {
+  const user_id = getToken()
+  if (user_id) {
+    const response = await apiClient.get(`/api/canvas/by/user_id/${user_id}`)
+    return await response.json()
+  }
   const response = await apiClient.get('/api/canvas/list')
   return await response.json()
 }
@@ -20,6 +25,7 @@ export async function createCanvas(data: {
   canvas_id: string
   messages: Message[]
   session_id: string
+  user_id: string | null
   text_model: {
     provider: string
     model: string

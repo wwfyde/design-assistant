@@ -28,6 +28,7 @@ import { DEFAULT_SYSTEM_PROMPT } from '@/constants'
 import { useConfigs } from '@/contexts/configs'
 import 'react-photo-view/dist/react-photo-view.css'
 // import { useAuth } from '@/contexts/AuthContext'
+import { apiClient } from '@/lib/api-client.ts'
 import { useQueryClient } from '@tanstack/react-query'
 import { MixedContentImages, MixedContentText } from './Message/MixedContent'
 
@@ -468,7 +469,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
     sessionIdRef.current = sessionId
 
-    const resp = await fetch('/api/chat_session/' + sessionId)
+    // const resp = await fetch('/api/chat_session/' + sessionId)
+    const resp = await apiClient.get('/api/chat_session/' + sessionId)
     const data = await resp.json()
     const msgs = data?.length ? data : []
 

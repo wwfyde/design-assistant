@@ -28,9 +28,10 @@ class CanvasRepo(ABC):
         pass
 
     @abstractmethod
-    async def get_canvases(self):
+    async def get_canvases(self, user_id: str | None = None):
         pass
 
+    @abstractmethod
     async def save_canvas_data(self, id: str | UUID, data: str, thumbnail: str):
         pass
 
@@ -52,6 +53,7 @@ class InMemoryCanvasRepo(CanvasRepo):
                 name=canvas.name,
                 canvas_id=canvas.canvas_id,
                 session_id=canvas.session_id,
+                user_id=canvas.user_id,
                 messages=canvas.messages,
             )
             return self.store.canvas[canvas.canvas_id]
@@ -121,6 +123,7 @@ class PostgresCanvasRepo(CanvasRepo):
             name=canvas.name,
             canvas_id=canvas.canvas_id,
             session_id=canvas.session_id,
+            user_id=canvas.user_id,
             messages=messages,
         )
         self.session.add(canvas_db)
@@ -154,8 +157,14 @@ class PostgresCanvasRepo(CanvasRepo):
             return data
         return None
 
-    async def get_canvases(self) -> list[Canvas] | None:
-        stmt = select(CanvasModel).order_by(CanvasModel.created_at.desc()).limit(20)
+    async def get_canvases(self, user_id: str | None = None) -> list[Canvas] | None:
+
+        stmt = select(CanvasModel)
+        if user_id:
+            stmt = stmt.where(CanvasModel.user_id == user_id)
+
+        stmt = stmt.order_by(CanvasModel.created_at.desc()).limit(20)
+
         result = self.session.execute(stmt)
         canvas_models = result.scalars().all()
         if not canvas_models:
@@ -213,8 +222,8 @@ class CanvasService:
     async def create_canvas(self, canvas: CanvasCreate):
         return await self.repo.create_canvas(canvas)
 
-    async def get_canvases(self):
-        return await self.repo.get_canvases()
+    async def get_canvases(self, user_id: str | None = None):
+        return await self.repo.get_canvases(user_id)
 
     async def get_canvas_by_id(self, id: str | UUID) -> Canvas | None:
         return await self.repo.get_canvas_by_id(id)

@@ -1,9 +1,9 @@
 import json
-from datetime import datetime
-from typing import Any
 from uuid import UUID
+from typing import Any
+from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, Json, field_validator
+from pydantic import Json, BaseModel, ConfigDict, field_validator
 
 from lib import get_current_date
 
@@ -13,6 +13,7 @@ class Canvas(BaseModel):
     name: str
     session_id: str | None = None
     canvas_id: str | None = None
+    user_id: str | None = None
     data: str | dict | None = None  # 画布数据
     messages: Json | list[dict] = None
     system_prompt: str | None = None

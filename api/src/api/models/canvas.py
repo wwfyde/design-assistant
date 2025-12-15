@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, String, func
+from sqlalchemy import Text, String, Boolean, DateTime, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from .base import Base
@@ -13,6 +13,7 @@ class Canvas(Base):
     name: Mapped[str] = mapped_column(String, comment="画布名")
     session_id: Mapped[str | None] = mapped_column(String, nullable=True)
     canvas_id: Mapped[str | None] = mapped_column(String, nullable=True)
+    user_id: Mapped[str | None] = mapped_column(Text, nullable=True)
     data: Mapped[str | None] = mapped_column(String, nullable=True, comment="画布数据")
     messages: Mapped[str | None] = mapped_column(String, nullable=True)
     system_prompt: Mapped[str | None] = mapped_column(String, nullable=True)

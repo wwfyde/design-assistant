@@ -21,6 +21,7 @@ import { useTranslation } from 'react-i18next'
 import { VideoElement } from './VideoElement'
 
 import '@/assets/style/canvas.css'
+import { apiClient } from '@/lib/api-client.ts'
 
 type LastImagePosition = {
   x: number
@@ -140,7 +141,7 @@ const CanvasExcali: React.FC<CanvasExcaliProps> = ({ canvasId, initialData }) =>
 
       try {
         // Fetch the image
-        const response = await fetch(imageUrl)
+        const response = await apiClient.get(imageUrl)
         const blob = await response.blob()
 
         // Convert to data URL

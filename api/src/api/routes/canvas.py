@@ -1,17 +1,19 @@
-import asyncio
 import json
+import asyncio
+from typing import Annotated
 
-from api.deps import (
-    get_canvas_service,
-    get_chat_service,
-    handle_chat,
-)
-from api.schemas.canvas import CanvasCreate
-from api.services.canvas import CanvasService
-from api.services.chat import ChatService
 from fastapi import APIRouter
 from fastapi.params import Depends
 from starlette.requests import Request
+
+from api.deps import (
+    handle_chat,
+    get_chat_service,
+    get_canvas_service,
+)
+from api.services.chat import ChatService
+from api.schemas.canvas import CanvasCreate
+from api.services.canvas import CanvasService
 
 router = APIRouter()
 
@@ -21,6 +23,14 @@ async def list_canvases(
     canvas_service: CanvasService = Depends(get_canvas_service),
 ):
     return await canvas_service.get_canvases()
+
+
+@router.get("/by/user_id/{user_id}")
+async def get_canvas_by_user_id(
+    user_id: str,
+    canvas_service: Annotated[CanvasService, Depends(get_canvas_service)],
+):
+    return await canvas_service.get_canvases(user_id)
 
 
 @router.post("/create")

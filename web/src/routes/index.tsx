@@ -14,6 +14,7 @@ import { nanoid } from 'nanoid'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
+import { getToken } from '@/lib/api-client.ts'
 
 export const Route = createFileRoute('/')({
   component: Home,
@@ -120,6 +121,7 @@ function Home() {
               canvas_id: nanoid(),
               messages: messages,
               session_id: nanoid(),
+              user_id: getToken(),
               text_model: configs.textModel,
               tool_list: configs.toolList,
               system_prompt: localStorage.getItem('system_prompt') || DEFAULT_SYSTEM_PROMPT,

@@ -21,6 +21,7 @@ import { v7 as uuidv7 } from 'uuid'
 // import { useBalance } from '@/hooks/use-balance'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { BASE_API_URL, PROVIDER_NAME_MAPPING } from '@/constants'
+import { apiClient } from '@/lib/api-client.ts'
 
 type ChatTextareaProps = {
   pending: boolean
@@ -190,7 +191,7 @@ const ChatTextarea: React.FC<ChatTextareaProps> = ({
 
     // Fetch images as base64
     const imagePromises = images.map(async (image) => {
-      const response = await fetch(`/api/file/${image.file_id}`)
+      const response = await apiClient.get(`/api/file/${image.file_id}`)
       const blob = await response.blob()
       return new Promise<string>((resolve) => {
         const reader = new FileReader()
@@ -299,7 +300,7 @@ const ChatTextarea: React.FC<ChatTextareaProps> = ({
         // Convert file path to blob and upload
         try {
           const fileUrl = `/api/serve_file?file_path=${encodeURIComponent(image.filePath)}`
-          const response = await fetch(fileUrl)
+          const response = await apiClient.get(fileUrl)
           const blob = await response.blob()
           const file = new File([blob], image.fileName, {
             type: `image/${image.fileType}`,
