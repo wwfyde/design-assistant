@@ -108,10 +108,9 @@ function App() {
       const { type, payload } = event.data
       if (type === 'SYNC_TOKEN' && payload) {
         console.log('Received token from parent iframe')
-        // Save to localStorage for existing auth flow
-        // localStorage.setItem('jaaz_access_token', token)
-        // Save to cookie for apiClient
-        document.cookie = `ai_mark_token=${payload}; path=/; max-age=${60 * 60 * 24 * 30}` // 30 days
+        console.log(`user-code=${payload} ||||`)
+        localStorage.setItem('ai_mark_token', payload)
+        document.cookie = `ai_mark_token=${encodeURIComponent(payload)}; path=/; max-age=${60 * 60 * 24 * 30}` // 30 days
       }
     }
 

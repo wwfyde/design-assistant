@@ -1,10 +1,13 @@
-import { toast } from 'sonner'
-
 export const getToken = () => {
   // 从 cookie 中获取 token
   const cookies = document.cookie.split(';')
   const tokenCookie = cookies.find((cookie) => cookie.trim().startsWith('ai_mark_token='))
 
+  // 从 localse
+  const tokenLocal = localStorage.getItem('ai_mark_token')
+  if (tokenLocal) {
+    return tokenLocal
+  }
   if (tokenCookie) {
     return tokenCookie.split('=')[1].trim()
   }
@@ -15,15 +18,18 @@ export const getToken = () => {
 export const apiClient = {
   request: async (url: string, options: RequestInit = {}) => {
     const token = getToken()
+
     const headers = new Headers(options.headers)
 
     if (token) {
+      console.log('获取Token成功')
       headers.set('Authorization', `${token}`)
-    } else {
-      toast.error('用户未登录, 请登录主账号后再使用该页面', {
-        duration: 500,
-      })
     }
+    // else {
+    //   toast.error('用户未登录, 请登录主账号后再使用该页面', {
+    //     duration: 500,
+    //   })
+    // }
 
     // Ensure Content-Type is set if body is present and not FormData
     if (options.body && typeof options.body === 'string' && !headers.has('Content-Type')) {
