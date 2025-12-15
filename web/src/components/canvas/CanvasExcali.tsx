@@ -141,7 +141,9 @@ const CanvasExcali: React.FC<CanvasExcaliProps> = ({ canvasId, initialData }) =>
 
       try {
         // Fetch the image
-        const response = await apiClient.get(imageUrl)
+        // Use native fetch to avoid adding Authorization headers from apiClient to external URLs
+        // which can cause CORS issues
+        const response = await fetch(imageUrl)
         const blob = await response.blob()
 
         // Convert to data URL
