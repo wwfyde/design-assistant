@@ -1,56 +1,62 @@
+import { toast } from 'sonner'
+
 export const getToken = () => {
-    // 从 cookie 中获取 token
-    const cookies = document.cookie.split(';')
-    const tokenCookie = cookies.find((cookie) => cookie.trim().startsWith('ai_mark_token='))
+  // 从 cookie 中获取 token
+  const cookies = document.cookie.split(';')
+  const tokenCookie = cookies.find((cookie) => cookie.trim().startsWith('ai_mark_token='))
 
-    if (tokenCookie) {
-        return tokenCookie.split('=')[1].trim()
-    }
+  if (tokenCookie) {
+    return tokenCookie.split('=')[1].trim()
+  }
 
-    return null
+  return null
 }
 
 export const apiClient = {
-    request: async (url: string, options: RequestInit = {}) => {
-        const token = getToken()
-        const headers = new Headers(options.headers)
+  request: async (url: string, options: RequestInit = {}) => {
+    const token = getToken()
+    const headers = new Headers(options.headers)
 
-        if (token) {
-            headers.set('Authorization', `${token}`)
-        }
+    if (token) {
+      headers.set('Authorization', `${token}`)
+    } else {
+      toast.error('用户未登录, 请登录主账号后再使用该页面', {
+        duration: 500,
+      })
+    }
 
-        // Ensure Content-Type is set if body is present and not FormData
-        if (options.body && typeof options.body === 'string' && !headers.has('Content-Type')) {
-            headers.set('Content-Type', 'application/json')
-        }
+    // Ensure Content-Type is set if body is present and not FormData
+    if (options.body && typeof options.body === 'string' && !headers.has('Content-Type')) {
+      headers.set('Content-Type', 'application/json')
+    }
 
-        const config: RequestInit = {
-            ...options,
-            headers,
-        }
+    const config: RequestInit = {
+      ...options,
+      headers,
+    }
 
-        return fetch(url, config)
-    },
-    get: (url: string, options: RequestInit = {}) => {
-        return apiClient.request(url, { ...options, method: 'GET' })
-    },
-    post: (url: string, body?: any, options: RequestInit = {}) => {
-        const isFormData = body instanceof FormData
-        return apiClient.request(url, {
-            ...options,
-            method: 'POST',
-            body: isFormData ? body : JSON.stringify(body),
-        })
-    },
-    put: (url: string, body?: any, options: RequestInit = {}) => {
-        const isFormData = body instanceof FormData
-        return apiClient.request(url, {
-            ...options,
-            method: 'PUT',
-            body: isFormData ? body : JSON.stringify(body),
-        })
-    },
-    delete: (url: string, options: RequestInit = {}) => {
-        return apiClient.request(url, { ...options, method: 'DELETE' })
-    },
+    return fetch(url, config)
+  },
+  get: (url: string, options: RequestInit = {}) => {
+    return apiClient.request(url, { ...options, method: 'GET' })
+  },
+  post: (url: string, body?: any, options: RequestInit = {}) => {
+    const isFormData = body instanceof FormData
+    return apiClient.request(url, {
+      ...options,
+      method: 'POST',
+      body: isFormData ? body : JSON.stringify(body),
+    })
+  },
+  put: (url: string, body?: any, options: RequestInit = {}) => {
+    const isFormData = body instanceof FormData
+    return apiClient.request(url, {
+      ...options,
+      method: 'PUT',
+      body: isFormData ? body : JSON.stringify(body),
+    })
+  },
+  delete: (url: string, options: RequestInit = {}) => {
+    return apiClient.request(url, { ...options, method: 'DELETE' })
+  },
 }

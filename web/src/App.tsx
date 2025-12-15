@@ -96,6 +96,31 @@ function App() {
     }
   }, [])
 
+  // Listen for token from parent iframe
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      const allowedOrigin = 'http://ai.fullspeed.cn'
+      if (event.origin !== allowedOrigin) {
+        console.warn('收到来自未知来源的消息:', event.origin)
+        return
+      }
+      // const token = event.data?.token
+      const { type, payload } = event.data
+      if (type === 'SYNC_TOKEN' && payload) {
+        console.log('Received token from parent iframe')
+        // Save to localStorage for existing auth flow
+        // localStorage.setItem('jaaz_access_token', token)
+        // Save to cookie for apiClient
+        document.cookie = `ai_mark_token=${payload}; path=/; max-age=${60 * 60 * 24 * 30}` // 30 days
+      }
+    }
+
+    window.addEventListener('message', handleMessage)
+    return () => {
+      window.removeEventListener('message', handleMessage)
+    }
+  }, [])
+
   return (
     <ThemeProvider defaultTheme={theme} storageKey='vite-ui-theme'>
       <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
