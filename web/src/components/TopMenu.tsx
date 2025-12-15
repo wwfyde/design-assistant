@@ -2,13 +2,23 @@ import ThemeButton from '@/components/theme/ThemeButton'
 import { Button } from '@/components/ui/button'
 import { useConfigs } from '@/contexts/configs'
 import { cn } from '@/lib/utils'
-import { useNavigate } from '@tanstack/react-router'
+import { NavigateOptions, useNavigate } from '@tanstack/react-router'
 import { ChevronLeft, ImageIcon, SettingsIcon } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useTranslation } from 'react-i18next'
 import LanguageSwitcher from './common/LanguageSwitcher'
 
-export default function TopMenu({ left, middle, right }: { left?: React.ReactNode; middle?: React.ReactNode; right?: React.ReactNode }) {
+export default function TopMenu({
+  left,
+  middle,
+  right,
+  returnHomeOptions,
+}: {
+  left?: React.ReactNode
+  middle?: React.ReactNode
+  right?: React.ReactNode
+  returnHomeOptions?: NavigateOptions
+}) {
   const { t } = useTranslation()
 
   const navigate = useNavigate()
@@ -25,7 +35,10 @@ export default function TopMenu({ left, middle, right }: { left?: React.ReactNod
         {left ? (
           left
         ) : (
-          <motion.div className='flex items-center gap-2 cursor-pointer group' onClick={() => navigate({ to: '/' })}>
+          <motion.div
+            className='flex items-center gap-2 cursor-pointer group'
+            onClick={() => navigate(returnHomeOptions ? returnHomeOptions : { to: '/' })}
+          >
             {window.location.pathname !== '/' && (
               <ChevronLeft className='size-5 group-hover:-translate-x-0.5 transition-transform duration-300' />
             )}

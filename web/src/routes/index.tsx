@@ -11,18 +11,31 @@ import { eventBus } from '@/lib/event'
 import { useMutation } from '@tanstack/react-query'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { nanoid } from 'nanoid'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
 export const Route = createFileRoute('/')({
   component: Home,
+  validateSearch: (search: Record<string, unknown>): { tab?: string } => {
+    return {
+      tab: search.tab as string | undefined,
+    }
+  },
 })
 
 function Home() {
   const navigate = useNavigate()
   const { t } = useTranslation()
   const { setInitCanvas } = useConfigs()
+  const search = Route.useSearch()
+  const [activeTab, setActiveTab] = useState(search.tab || 'huaban')
+
+  useEffect(() => {
+    if (search.tab) {
+      setActiveTab(search.tab)
+    }
+  }, [search.tab])
 
   const { mutate: createCanvasMutation, isPending } = useMutation({
     mutationFn: createCanvas,
@@ -59,7 +72,7 @@ function Home() {
 
   return (
     <div className='flex flex-col h-screen'>
-      <Tabs defaultValue='huaban' className='flex flex-col flex-1 overflow-hidden'>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className='flex flex-col flex-1 overflow-hidden'>
         <div className='px-4 pt-2 shrink-0'>
           <TabsList className='grid w-full grid-cols-3'>
             <TabsTrigger value='huaban'>外部图像库</TabsTrigger>
