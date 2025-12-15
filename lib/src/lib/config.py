@@ -78,6 +78,7 @@ class LLMConfig(BaseModel):
 
 class LLMProvider(BaseModel):
     dashscope: LLMConfig | None = None
+    qwen: LLMConfig | None = None
     ark: LLMConfig | None = None
     openai: LLMConfig | None = None
     gemini: LLMConfig | None = None
