@@ -46,6 +46,7 @@ function Home() {
         params: { id: data.id },
         search: {
           sessionId: variables.session_id,
+          returnTab: activeTab,
         },
       })
     },

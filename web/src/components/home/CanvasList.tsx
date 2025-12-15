@@ -20,7 +20,7 @@ const CanvasList: React.FC = () => {
 
   const navigate = useNavigate()
   const handleCanvasClick = (id: string) => {
-    navigate({ to: '/canvas/$id', params: { id } })
+    navigate({ to: '/canvas/$id', params: { id }, search: { returnTab: 'history' } })
   }
 
   return (

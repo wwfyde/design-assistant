@@ -11,12 +11,17 @@ type CanvasHeaderProps = {
   onNameSave: () => void
 }
 
-const CanvasHeader: React.FC<CanvasHeaderProps> = ({ canvasName, canvasId, onNameChange, onNameSave }) => {
+const CanvasHeader: React.FC<CanvasHeaderProps & { returnTab?: string }> = ({
+  canvasName,
+  canvasId,
+  onNameChange,
+  onNameSave,
+  returnTab,
+}) => {
   const navigate = useNavigate()
-
   const BackButton = (
     <button
-      onClick={() => navigate({ to: '/' })}
+      onClick={() => navigate({ to: '/', search: returnTab ? { tab: returnTab } : undefined })}
       className='p-1.5 -ml-1.5 hover:bg-secondary rounded-full transition-colors flex items-center justify-center'
       title='Back to Home'
     >

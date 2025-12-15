@@ -16,6 +16,12 @@ import { ImperativePanelHandle } from 'react-resizable-panels'
 
 export const Route = createFileRoute('/canvas/$id')({
   component: Canvas,
+  validateSearch: (search: Record<string, unknown>): { sessionId?: string; returnTab?: string } => {
+    return {
+      sessionId: search.sessionId as string | undefined,
+      returnTab: search.returnTab as string | undefined,
+    }
+  },
 })
 
 function Canvas() {
@@ -28,10 +34,9 @@ function Canvas() {
   const chatPanelRef = useRef<ImperativePanelHandle>(null)
   const [isChatOpen, setIsChatOpen] = useState(true)
   // initialVideos removed - using native Excalidraw embeddable elements instead
-  const search = useSearch({ from: '/canvas/$id' }) as {
-    sessionId: string
-  }
+  const search = useSearch({ from: '/canvas/$id' })
   const searchSessionId = search?.sessionId || ''
+  const returnTab = search?.returnTab
   useEffect(() => {
     let mounted = true
 
@@ -81,7 +86,13 @@ function Canvas() {
   return (
     <CanvasProvider>
       <div className='flex flex-col w-screen h-screen relative'>
-        <CanvasHeader canvasName={canvasName} canvasId={id} onNameChange={setCanvasName} onNameSave={handleNameSave} />
+        <CanvasHeader
+          canvasName={canvasName}
+          canvasId={id}
+          onNameChange={setCanvasName}
+          onNameSave={handleNameSave}
+          returnTab={returnTab}
+        />
         <ResizablePanelGroup direction='horizontal' className='w-screen h-screen' autoSaveId='jaaz-chat-panel'>
           <ResizablePanel className='relative' defaultSize={75}>
             <div className='w-full h-full'>
