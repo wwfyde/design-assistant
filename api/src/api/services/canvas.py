@@ -171,7 +171,7 @@ class PostgresCanvasRepo(CanvasRepo):
         if not canvas_models:
             return None
         canvases = [Canvas.model_validate(canvas) for canvas in canvas_models]
-        return canvases[:10]
+        return canvases
 
     async def delete_canvas(self, id: str | UUID) -> bool:
         stmt = delete(CanvasModel).where(CanvasModel.id == str(id))

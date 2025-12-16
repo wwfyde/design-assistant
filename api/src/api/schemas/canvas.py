@@ -1,6 +1,8 @@
 from uuid import UUID
+from typing import Any
+from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, field_validator
 
 from api.domain.tool import ToolInfo
 from api.domain.model import ModelInfo
@@ -19,7 +21,16 @@ class CanvasCreate(BaseModel):
 
 
 class CanvasResponse(BaseModel):
-    id: str | UUID
+    model_config = ConfigDict(from_attributes=True, extra="ignore")
+
+    id: str | None = None
+    name: str | None = None
+    user_id: str | None = None
+    thumbnail: str | None = None
+    canvas_id: str | None = None
+    session_id: str | None = None
+    created_at: datetime
+    updated_at: datetime
 
 
 class CanvasSave(BaseModel):

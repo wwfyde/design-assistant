@@ -9,20 +9,20 @@ from starlette.requests import Request
 from lib import settings
 from api.deps import handle_chat, get_chat_service, get_canvas_service
 from api.services.chat import ChatService
-from api.schemas.canvas import CanvasCreate
+from api.schemas.canvas import CanvasCreate, CanvasResponse
 from api.services.canvas import CanvasService
 
 router = APIRouter()
 
 
-@router.get("/list")
+@router.get("/list", response_model=list[CanvasResponse])
 async def list_canvases(
     canvas_service: CanvasService = Depends(get_canvas_service),
 ):
     return await canvas_service.get_canvases()
 
 
-@router.get("/by/user_id/{user_id}")
+@router.get("/by/user_id/{user_id}", response_model=list[CanvasResponse])
 async def get_canvas_by_user_id(
     user_id: str,
     page: int = 1,
