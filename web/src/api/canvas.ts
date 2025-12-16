@@ -12,11 +12,17 @@ export type ListCanvasesResponse = {
 
 export async function listCanvases(): Promise<ListCanvasesResponse[]> {
   const user_id = getToken()
+  let response
   if (user_id) {
-    const response = await apiClient.get(`/api/canvas/by/user_id/${user_id}`)
-    return await response.json()
+    response = await apiClient.get(`/api/canvas/by/user_id/${user_id}`)
+  } else {
+    response = await apiClient.get('/api/canvas/list')
   }
-  const response = await apiClient.get('/api/canvas/list')
+
+  if (!response.ok) {
+    console.error('Failed to fetch canvases:', response.statusText)
+    return []
+  }
   return await response.json()
 }
 
