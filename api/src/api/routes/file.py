@@ -107,37 +107,77 @@ async def upload_image(file: UploadFile = File(...), max_size_mb: float = 3.0):
 
 
 @router.post("/upload_image_from_url")
-async def upload_image_from_url(base64_image: str = Body(..., embed=True)):
-    print("🦄upload_image_from_url (base64) length:", len(base64_image))
+async def upload_image_from_url(
+    base64_image: str | None = Body(None, embed=True),
+    url: str | None = Body(None, embed=True)
+):
+    print(f"🦄upload_image_from_url base64_len={len(base64_image) if base64_image else 0}, url={url}")
+
+    if not base64_image and not url:
+        raise HTTPException(status_code=400, detail="Either base64_image or url must be provided")
 
     try:
-        # 1. Handle Data URL prefix (e.g., "data:image/png;base64,...")
-        if "," in base64_image:
-            header, base64_data = base64_image.split(",", 1)
-        else:
-            base64_data = base64_image
+        content = None
+        filename = "image.jpg"
 
-        # 2. Decode Base64 string
-        try:
-            image_data = base64.b64decode(base64_data)
-        except Exception as e:
-            raise HTTPException(status_code=400, detail=f"Invalid base64 string: {e}")
+        # 1. Try Base64
+        if base64_image:
+            # Handle Data URL prefix
+            if "," in base64_image:
+                header, base64_data = base64_image.split(",", 1)
+            else:
+                base64_data = base64_image
+
+            try:
+                content = base64.b64decode(base64_data)
+            except Exception as e:
+                print(f"Invalid base64 string: {e}")
+                # If url is also provided, we might failover? But usually frontend sends one or the other.
+                # If base64 fails invalid, it's a client error.
+                if not url:
+                     raise HTTPException(status_code=400, detail=f"Invalid base64 string: {e}")
+
+        # 2. Key Fallback: If no base64 (or maybe we want to support fallback inside logic, but frontend decides)
+        # Actually frontend logic: try fetch -> if ok, send base64. If fail, send url.
+        # So backend just handles what it gets.
+        if not content and url:
+             async with httpx.AsyncClient() as client:
+                print(f"Downloading from URL: {url}")
+                response = await client.get(url)
+                response.raise_for_status()
+                content = response.content
+
+                # Guess filename from URL
+                fname = url.split("/")[-1]
+                if "?" in fname:
+                    fname = fname.split("?")[0]
+                if fname:
+                    filename = fname
+
+
+        if not content:
+             raise HTTPException(status_code=400, detail="Failed to retrieve image content")
 
         file_id = generate_file_id()
 
-        # 3. Open image to get dimensions and validate
-        with Image.open(BytesIO(image_data)) as img:
+        # 3. Open image to process
+        with Image.open(BytesIO(content)) as img:
             width, height = img.size
 
-            # Determine extension from format or default to jpg
-            # If we had the header, we could guess from mime type, but PIL knows the format too.
-            original_format = img.format  # e.g., 'PNG', 'JPEG'
-            if original_format:
-                extension = original_format.lower()
+            # Determine extension
+            mime_type, _ = guess_type(filename)
+            if mime_type and mime_type.startswith("image/"):
+                extension = mime_type.split("/")[-1]
                 if extension == "jpeg":
                     extension = "jpg"
             else:
-                extension = "jpg"
+                # Try to detect from PIL
+                if img.format:
+                    extension = img.format.lower()
+                    if extension == "jpeg":
+                        extension = "jpg"
+                else:
+                    extension = "jpg"
 
             # Save image
             file_path = os.path.join(FILES_DIR, f"{file_id}.{extension}")
@@ -158,7 +198,7 @@ async def upload_image_from_url(base64_image: str = Body(..., embed=True)):
     except HTTPException as he:
         raise he
     except Exception as e:
-        print(f"Error processing base64 image: {e}")
+        print(f"Error processing image: {e}")
         raise HTTPException(status_code=400, detail=f"Failed to process image: {str(e)}")
 
 
