@@ -55,6 +55,7 @@ async def lifespan(app):
                 ip=settings.nacos.ip,
                 port=settings.nacos.port,
                 group_name=settings.nacos.group_name,
+                healthy=True,
                 metadata={"env": "prod"},
             )
         )
