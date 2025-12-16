@@ -21,7 +21,6 @@ import { useTranslation } from 'react-i18next'
 import { VideoElement } from './VideoElement'
 
 import '@/assets/style/canvas.css'
-import { apiClient } from '@/lib/api-client.ts'
 
 type LastImagePosition = {
   x: number

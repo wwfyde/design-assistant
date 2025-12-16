@@ -102,6 +102,7 @@ class Settings(BaseSettings):
     repo_type: Literal["in-memory", "postgres", "mongodb", "mysql", "redis"] = "in-memory"
     api_port: int = 8013
     api_key_header: str = "fastapi"
+    admin_users: list[str] = []
     httpx_timeout: int = 60
     wait_max_seconds: int = 60 * 2
     project_dir: Path = Path(__file__).parent.parent.parent.parent

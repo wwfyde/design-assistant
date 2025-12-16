@@ -28,7 +28,7 @@ class CanvasRepo(ABC):
         pass
 
     @abstractmethod
-    async def get_canvases(self, user_id: str | None = None):
+    async def get_canvases(self, user_id: str | None = None, page: int = 1, page_size: int = 20):
         pass
 
     @abstractmethod
@@ -77,7 +77,7 @@ class InMemoryCanvasRepo(CanvasRepo):
             return data
         return None
 
-    async def get_canvases(self) -> list[Canvas] | None:
+    async def get_canvases(self, user_id: str | None = None, page: int = 1, page_size: int = 20) -> list[Canvas] | None:
         if len(self.store.canvas.items()) == 0:
             return None
         canvases = sorted(
@@ -157,13 +157,14 @@ class PostgresCanvasRepo(CanvasRepo):
             return data
         return None
 
-    async def get_canvases(self, user_id: str | None = None) -> list[Canvas] | None:
+    async def get_canvases(self, user_id: str | None = None, page: int = 1, page_size: int = 20) -> list[Canvas] | None:
 
         stmt = select(CanvasModel)
         if user_id:
             stmt = stmt.where(CanvasModel.user_id == user_id)
 
-        stmt = stmt.order_by(CanvasModel.created_at.desc()).limit(20)
+        offset = (page - 1) * page_size
+        stmt = stmt.order_by(CanvasModel.created_at.desc()).offset(offset).limit(page_size)
 
         result = self.session.execute(stmt)
         canvas_models = result.scalars().all()
@@ -222,8 +223,8 @@ class CanvasService:
     async def create_canvas(self, canvas: CanvasCreate):
         return await self.repo.create_canvas(canvas)
 
-    async def get_canvases(self, user_id: str | None = None):
-        return await self.repo.get_canvases(user_id)
+    async def get_canvases(self, user_id: str | None = None, page: int = 1, page_size: int = 20):
+        return await self.repo.get_canvases(user_id=user_id, page=page, page_size=page_size)
 
     async def get_canvas_by_id(self, id: str | UUID) -> Canvas | None:
         return await self.repo.get_canvas_by_id(id)

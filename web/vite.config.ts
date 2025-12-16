@@ -87,6 +87,9 @@ export default defineConfig(({ mode }) => {
     config.server.proxy = {
       '/api': {
         target: `http://127.0.0.1:${PORT}`,
+        // headers: {
+        //   'User-Code': '2f4682a0d56c40477093014772652280',
+        // },
         changeOrigin: true,
         // Uncomment the following if you want to remove the /api prefix when forwarding to Flask
         rewrite: (path) => path.replace(/^\/api/, '/llmapi/api'),
