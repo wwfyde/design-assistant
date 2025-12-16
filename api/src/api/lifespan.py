@@ -44,16 +44,17 @@ async def lifespan(app):
     # app.state.listen_task.add_done_callback(lambda task : logging.info("listen_service task done"))
 
     # 如何访问全局state? api 中通过 request.app.state.xxx 访问
-
+    app.state.nacos_client = None
     # 真全局共享状态, 需要依赖redis等外部存储机制
     if settings.app_env != "dev":
-        nacos_client = await create_nacos_client()
+        app.state.nacos_client = await create_nacos_client()
         print("开始注册服务到nacos")
-        success = await nacos_client.register_instance(
+        success = await app.state.nacos_client.register_instance(
             request=RegisterInstanceParam(
                 service_name=settings.nacos.service_name,
                 ip=settings.nacos.ip,
                 port=settings.nacos.port,
+                group_name=settings.nacos.group_name,
                 metadata={"env": "prod"},
             )
         )
@@ -66,7 +67,7 @@ async def lifespan(app):
 
     # 注销nacos
     if settings.app_env != "dev":
-        await nacos_client.deregister_instance(
+        await app.state.nacos_client.deregister_instance(
             DeregisterInstanceParam(
                 service_name=settings.nacos.service_name,
                 group_name=settings.nacos.group_name,
