@@ -20,13 +20,19 @@ export async function listModels(): Promise<{
   tools: ToolInfo[]
 }> {
   const modelsResp = await apiClient.get('/api/list_models')
-    .then((res) => res.json())
+    .then((res) => {
+      if (!res.ok) throw new Error('Failed to fetch models')
+      return res.json()
+    })
     .catch((err) => {
       console.error(err)
       return []
     })
   const toolsResp = await apiClient.get('/api/list_tools')
-    .then((res) => res.json())
+    .then((res) => {
+      if (!res.ok) throw new Error('Failed to fetch tools')
+      return res.json()
+    })
     .catch((err) => {
       console.error(err)
       return []

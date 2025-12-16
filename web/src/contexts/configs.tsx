@@ -1,7 +1,8 @@
 import { listModels, ModelInfo, ToolInfo } from '@/api/model'
+import { getToken } from '@/lib/api-client'
 import useConfigsStore from '@/stores/configs'
 import { useQuery } from '@tanstack/react-query'
-import { createContext, useContext, useEffect, useRef } from 'react'
+import { createContext, useContext, useEffect, useRef, useState } from 'react'
 
 export const ConfigsContext = createContext<{
   configsStore: typeof useConfigsStore
@@ -15,6 +16,16 @@ export const ConfigsProvider = ({ children }: { children: React.ReactNode }) => 
   // 存储上一次的 allTools 值，用于检测新添加的工具，并自动选中
   const previousAllToolsRef = useRef<ModelInfo[]>([])
 
+  const [isTokenReady, setIsTokenReady] = useState(!!getToken())
+
+  useEffect(() => {
+    const handleTokenRefreshed = () => {
+      setIsTokenReady(true)
+    }
+    window.addEventListener('token-refreshed', handleTokenRefreshed)
+    return () => window.removeEventListener('token-refreshed', handleTokenRefreshed)
+  }, [])
+
   const { data: modelList, refetch: refreshModels } = useQuery({
     queryKey: ['list_models_2'],
     queryFn: () => listModels(),
@@ -23,20 +34,27 @@ export const ConfigsProvider = ({ children }: { children: React.ReactNode }) => 
     refetchOnWindowFocus: true, // 窗口获得焦点时重新获取
     refetchOnReconnect: true, // 网络重连时重新获取
     refetchOnMount: true, // 挂载时重新获取
+    enabled: isTokenReady,
   })
 
   useEffect(() => {
     if (!modelList) return
-    const { llm: llmModels = [], tools: toolList = [] } = modelList
+    const { llm, tools } = modelList
+    const llmModels = Array.isArray(llm) ? llm : []
+    const toolList = Array.isArray(tools) ? tools : []
 
-    setTextModels(llmModels || [])
-    setAllTools(toolList || [])
+    console.log(llmModels)
+    console.log(toolList)
+
+    setTextModels(llmModels)
+    setAllTools(toolList)
 
     // 设置选择的文本模型
     const textModel = localStorage.getItem('text_model')
     if (textModel && llmModels.find((m) => m.provider + ':' + m.model === textModel)) {
       setTextModel(llmModels.find((m) => m.provider + ':' + m.model === textModel))
     } else {
+      // 默认获取第一个
       setTextModel(llmModels.find((m) => m.type === 'text'))
     }
 

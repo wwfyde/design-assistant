@@ -46,17 +46,18 @@ async def lifespan(app):
     # 如何访问全局state? api 中通过 request.app.state.xxx 访问
 
     # 真全局共享状态, 需要依赖redis等外部存储机制
-    nacos_client = await create_nacos_client()
-    print("开始注册服务到nacos")
-    success = await nacos_client.register_instance(
-        request=RegisterInstanceParam(
-            service_name=settings.nacos.service_name,
-            ip=settings.nacos.ip,
-            port=settings.nacos.port,
-            metadata={"env": "prod"},
+    if settings.app_env != "dev":
+        nacos_client = await create_nacos_client()
+        print("开始注册服务到nacos")
+        success = await nacos_client.register_instance(
+            request=RegisterInstanceParam(
+                service_name=settings.nacos.service_name,
+                ip=settings.nacos.ip,
+                port=settings.nacos.port,
+                metadata={"env": "prod"},
+            )
         )
-    )
-    print(success)
+        print(success)
 
     yield
     # 优雅关闭
@@ -64,14 +65,15 @@ async def lifespan(app):
     logging.info("shutdown")
 
     # 注销nacos
-    await nacos_client.deregister_instance(
-        DeregisterInstanceParam(
-            service_name=settings.nacos.service_name,
-            group_name=settings.nacos.group_name,
-            ip=settings.nacos.ip,
-            port=settings.nacos.port,
+    if settings.app_env != "dev":
+        await nacos_client.deregister_instance(
+            DeregisterInstanceParam(
+                service_name=settings.nacos.service_name,
+                group_name=settings.nacos.group_name,
+                ip=settings.nacos.ip,
+                port=settings.nacos.port,
+            )
         )
-    )
 
     # app.state.listen_task.cancel()
     # 关闭全局资源

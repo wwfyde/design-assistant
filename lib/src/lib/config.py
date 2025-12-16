@@ -103,6 +103,7 @@ class Settings(BaseSettings):
     api_port: int = 8013
     api_key_header: str = "fastapi"
     admin_users: list[str] = []
+    app_env: Literal["dev", "prod", "local"] = "prod"
     httpx_timeout: int = 60
     wait_max_seconds: int = 60 * 2
     project_dir: Path = Path(__file__).parent.parent.parent.parent

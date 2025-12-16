@@ -111,6 +111,9 @@ function App() {
         console.log(`user-code=${payload} ||||`)
         localStorage.setItem('ai_mark_token', payload)
         document.cookie = `ai_mark_token=${encodeURIComponent(payload)}; path=/; max-age=${60 * 60 * 24 * 30}` // 30 days
+
+        // Dispatch event to notify that token is ready
+        window.dispatchEvent(new Event('token-refreshed'))
       }
     }
 
