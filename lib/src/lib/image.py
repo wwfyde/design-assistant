@@ -89,6 +89,16 @@ def parse_data_url(data_url: str) -> str:
     return url
 
 
+def calculate_image_width(original_width, original_height, max_width: int = 350) -> tuple[int, int]:
+    """
+    最大宽度, 一般设计为 350 , 240-320 400 等典型值
+
+    """
+    scale = min(max_width / original_width, max_width / original_height, 1.0)
+
+    return round(original_width * scale), round(original_height * scale)
+
+
 if __name__ == "__main__":
     # file = Path(__file__).parent.parent.joinpath("img.png")
     #
@@ -97,9 +107,11 @@ if __name__ == "__main__":
     # url = upload_image(id, image_bytes, prefix="test", rename=False, domain=None)
     # print(url)
 
-    url = parse_data_url(
-        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAsQAAAFgCAYAAAC8MG/mAAAQAElEQVR4AeydgbncKLZu67uJOI3pSDoNTyQzaXQknjQcyXtetnc3RwckpEISoHW/2S0ECDYLwf4L16n7f//P/5OABCQgAQlIQAISkMCDCfzfy/+TgAQk8AgCDlICEpCABCSQJ6AgznMxVwISkIAEJCABCYxJQK93E1AQ70bmAxKQgAQkIAEJSEACMxFQEM80m47lSQQcqwQkIAEJSEACjQgoiBuBtBkJSEACEpCABM4gYJsSOJ+Agvh8xvYgA"
-    )
-    print(url)
-
+    # url = parse_data_url(
+    #     "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAsQAAAFgCAYAAAC8MG/mAAAQAElEQVR4AeydgbncKLZu67uJOI3pSDoNTyQzaXQknjQcyXtetnc3RwckpEISoHW/2S0ECDYLwf4L16n7f//P/5OABCQgAQlIQAISkMCDCfzfy/+TgAQk8AgCDlICEpCABCSQJ6AgznMxVwISkIAEJCABCYxJQK93E1AQ70bmAxKQgAQkIAEJSEACMxFQEM80m47lSQQcqwQkIAEJSEACjQgoiBuBtBkJSEACEpCABM4gYJsSOJ+Agvh8xvYgA"
+    # )
+    # print(url)
+    print(calculate_image_width(1500, 2300))
+    print(calculate_image_width(1500, 1500))
+    print(calculate_image_width(4000, 1500))
     pass
