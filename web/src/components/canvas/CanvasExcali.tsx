@@ -178,7 +178,8 @@ const CanvasExcali: React.FC<CanvasExcaliProps> = ({ canvasId, initialData }) =>
             height = img.height
 
             // Scale down if too large (max 1000px)
-            const MAX_DIMENSION = 1000
+            // 默认将图像缩放到最大350
+            const MAX_DIMENSION = 350
             if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
               const ratio = Math.min(MAX_DIMENSION / width, MAX_DIMENSION / height)
               width *= ratio
