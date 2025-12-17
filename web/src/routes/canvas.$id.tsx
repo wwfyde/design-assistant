@@ -118,7 +118,7 @@ function Canvas() {
             ref={chatPanelRef}
             defaultSize={25}
             collapsible={true}
-            minSize={20}
+            minSize={25}
             onCollapse={() => setIsChatOpen(false)}
             onExpand={() => setIsChatOpen(true)}
           >
