@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Literal, Optional
 
 from pydantic import Field, BaseModel
 from langgraph.prebuilt import ToolRuntime
@@ -18,9 +18,12 @@ class SeedreamArgs(BaseModel):
     prompt: str = Field(
         description="Required. The prompt for image generation. If you want to edit an image, please describe what you want to edit in the prompt."
     )
-    aspect_ratio: Optional[str] = Field(
+    aspect_ratio: str | None = Field(
         None,
-        description="Required. Aspect ratio of the image, only these values are allowed: 1:1, 16:9, 4:3, 3:4, 9:16. Choose the best fitting aspect ratio according to the prompt. Best ratio for posters is 3:4",
+        description="Optional. Aspect ratio of the image, only these values are allowed: 1:1, 16:9, 4:3, 3:4, 2:3, 3:2 9:16, 21:9. 支持传入传入自定义比例, 比如 1:3, 1024×3072 ",
+    )
+    image_size: Literal["2K", "4K", "2k", "4k"] | None = Field(
+        "2K", description="Optional. 图像分辨率, 默认2K, 支持设置为4K"
     )
 
 
@@ -34,10 +37,14 @@ async def image_create_with_seedream4_5(
     prompt: str,
     image_urls: list[str] | str | None = None,
     aspect_ratio: str | None = None,
+    image_size: Literal["2K", "4K", "2k", "4k"] | None = "2K",
 ) -> str:
 
     image_tool_response = image_create_with_seedream_tool(
-        image_urls=image_urls, prompt=prompt, aspect_ratio=aspect_ratio
+        image_urls=image_urls,
+        prompt=prompt,
+        aspect_ratio=aspect_ratio,
+        image_size=image_size.upper() if image_size else None,
     )
     if image_tool_response.images:
         for image in image_tool_response.images:

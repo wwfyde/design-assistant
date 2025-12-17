@@ -87,7 +87,7 @@ def image_create_with_gemini(
             # print(f"Image format: {format}")
             id = str(uuid.uuid7())
             filename = f"{id}.{extension}"
-            image_url = upload_image(filename, image_bytes, rename=False)
+            image_url = upload_image(filename, image_bytes, prefix="creative/gemini", rename=False)
             pil_image = Image.open(io.BytesIO(image_bytes))
             width, height = pil_image.size
             images.append(

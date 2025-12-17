@@ -1,6 +1,7 @@
 import json
 import math
 from io import BytesIO
+from typing import Literal
 
 import httpx
 import uuid_utils as uuid
@@ -16,6 +17,7 @@ def image_create_with_seedream(
     prompt: str,
     image_urls: list[str] | str | None = None,
     aspect_ratio: str | None = None,
+    image_size: Literal["1K", "2K", "4K"] | None = "2K",
 ) -> ImageToolResponse:
     """
 
@@ -23,25 +25,25 @@ def image_create_with_seedream(
         image_urls: Search terms to look for
         prompt: Required. The prompt for image generation. If you want to edit an image, please describe what you want to edit in the prompt.
         aspect_ratio:
+        image_size:
     """
 
-    # aspect_ratio: str | None = tool_parameters.get("aspect_ratio", None)
-    # size: Literal["1K", "2K", "4K"] = tool_parameters.get("size", "2K")
-    # seed: int | None = tool_parameters.get("seed", -1)
     # TODO: 考虑使用字符串逗号隔开, 还是list
+
+    # 基于image_size确定缩放倍率
+    base = 2
+    match image_size:
+        case "1K":
+            base = 1
+        case "2K":
+            base = 2
+        case "4K":
+            base = 4
+        case _:
+            base = 2
+    size = "2K"
     if aspect_ratio:
-        width, height = [int(item) for item in aspect_ratio.replace(":", "×").split("×")]
-        size = "2K"
-        base = 2
-        match size:
-            case "1K":
-                base = 1
-            case "2K":
-                base = 2
-            case "4K":
-                base = 4
-            case _:
-                base = 2
+        width, height = [int(item) for item in aspect_ratio.replace(":", "×").replace("x", "×").split("×")]
 
         if int(width) == 1 and int(height) == 1:
             width, height = 1024 * base, 1024 * base
@@ -61,13 +63,21 @@ def image_create_with_seedream(
             width, height = 1512 * base, 648 * base
         elif int(width) > 128 and int(height) > 500:
             width, height = min(int(width), 4096), min(int(height), 4096)
-        elif width * height < 921600:
-            base = math.ceil(math.sqrt(921600 // (width * height)))
-            width, height = int(width) * base, int(height) * base
+
+        # 处理自定义分辨率逻辑
+        elif 1 / 16 <= width / height <= 16:
+            if width * height < 921600:
+                # 自定义缩放比例
+                base = math.ceil(math.sqrt(921600 // (width * height)))
+                width, height = int(width) * base, int(height) * base
+            else:
+                width, height = int(width), int(height)
+        # 图像分辨率不对 默认 1: 1
         else:
-            width, height = int(width), int(height)  # 默认值
+            width, height = 1024, 1024  # 默认值
+        size = f"{width}x{height}"
     else:
-        width, height = 864 * 2, 1125 * 2  # 默认值
+        size = "4K" if base == 4 else "2K" if base == 2 else "1K"
     # seed = random.randrange(-1, 2**31 -1)
     if isinstance(image_urls, str):
         image_list = [i.strip() for i in image_urls.split(",") if i.strip()]
@@ -111,7 +121,7 @@ def image_create_with_seedream(
         "sequential_image_generation_options": {"max_images": 5},
         "response_format": "url",
         # "size": "2K",
-        "size": f"{width}x{height}",
+        "size": size,
         "stream": use_stream,
         # 优化prompt
         "optimize_prompt_options": {"mode": "standard"},  # support standard and fast mode
@@ -120,8 +130,6 @@ def image_create_with_seedream(
     }
     if not image_list:
         data.pop("image")
-    if not aspect_ratio:
-        data["size"] = "2K"
 
     try:
         if use_stream:
@@ -149,6 +157,7 @@ def image_create_with_seedream(
                     filename = f"{id}.{img_format.replace('jpeg', 'jpg')}"
                     image_url = upload_image(filename, data=content, prefix="creative/seedream", rename=False)
                     # metadata = {"mime_type": f"image/{img_format}"}
+                    width, height = pil.size
 
                     uploaded_urls.append(
                         ImageInfo(

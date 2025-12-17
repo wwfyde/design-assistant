@@ -2,6 +2,7 @@ import { cancelChat } from '@/api/chat'
 import { cancelMagicGenerate } from '@/api/magic'
 import { ToolInfo } from '@/api/model'
 import { uploadImage, uploadImageFromUrl } from '@/api/upload'
+import ImageConfigSelector, { AspectRatio, ImageSize } from '@/components/chat/ImageConfigSelector'
 import { Button } from '@/components/ui/button'
 import { useConfigs } from '@/contexts/configs'
 import { eventBus, TCanvasAddImagesToChatEvent, TMaterialAddImagesToChatEvent } from '@/lib/event'
@@ -10,7 +11,7 @@ import { Message, MessageContent, Model } from '@/types/types'
 import { useMutation } from '@tanstack/react-query'
 import { useDrop } from 'ahooks'
 import { produce } from 'immer'
-import { ArrowUp, Check, ChevronDown, Loader2, PlusIcon, RectangleVertical, Square, XIcon } from 'lucide-react'
+import { ArrowUp, Check, ChevronDown, Loader2, PlusIcon, Square, XIcon } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import Textarea, { TextAreaRef } from 'rc-textarea'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -62,7 +63,12 @@ const ChatTextarea: React.FC<ChatTextareaProps> = ({
     }[]
   >([])
   const [isFocused, setIsFocused] = useState(false)
-  const [selectedAspectRatio, setSelectedAspectRatio] = useState<string>('Auto')
+  const [aspectRatio, setAspectRatio] = useState<AspectRatio>('Auto')
+  const [lockRatio, setLockRatio] = useState(true)
+
+  const [imageSize, setImageSize] = useState<ImageSize>('2K')
+  const [imgWidth, setImgWidth] = useState(2048)
+  const [imgHeight, setImgHeight] = useState(2048)
   const [quantity, setQuantity] = useState<number>(1)
 
   const imageInputRef = useRef<HTMLInputElement>(null)
@@ -170,8 +176,14 @@ const ChatTextarea: React.FC<ChatTextareaProps> = ({
 
     // Add aspect ratio and quantity information if not default values
     let additionalInfo = ''
-    if (selectedAspectRatio !== 'Auto') {
-      additionalInfo += `<aspect_ratio>${selectedAspectRatio}</aspect_ratio>\n`
+    if (aspectRatio != 'Auto' && lockRatio) {
+      additionalInfo += `<aspect_ratio>${aspectRatio}</aspect_ratio>\n`
+    }
+    if (imgWidth && imgHeight && !lockRatio) {
+      additionalInfo += `<aspect_ratio>${imgWidth}:${imgHeight}</aspect_ratio>\n`
+    }
+    if (imageSize) {
+      additionalInfo += `<image_size>${imageSize}</image_size>\n`
     }
     if (quantity !== 1) {
       additionalInfo += `<quantity>${quantity}</quantity>\n`
@@ -239,7 +251,10 @@ const ChatTextarea: React.FC<ChatTextareaProps> = ({
     images,
     messages,
     t,
-    selectedAspectRatio,
+    aspectRatio,
+    imageSize,
+    imgWidth,
+    imgHeight,
     quantity,
     // authStatus.is_logged_in,
     setShowLoginDialog,
@@ -571,28 +586,21 @@ const ChatTextarea: React.FC<ChatTextareaProps> = ({
           {/*旧版模型选择器*/}
           {/*<ModelSelectorV3 />*/}
 
-          {/* Aspect Ratio Selector */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant='outline' className='flex items-center gap-1' size={'sm'}>
-                <RectangleVertical className='size-4' />
-                <span className='text-sm'>{selectedAspectRatio}</span>
-                <ChevronDown className='size-3 opacity-50' />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align='start' className='w-32'>
-              {['Auto', '1:1', '3:4', '4:3', '9:16', '16:9', '2:3', '3:2', '21:9'].map((ratio) => (
-                <DropdownMenuItem
-                  key={ratio}
-                  onClick={() => setSelectedAspectRatio(ratio)}
-                  className='flex items-center justify-between'
-                >
-                  <span>{ratio}</span>
-                  {selectedAspectRatio === ratio && <div className='size-2 rounded-full bg-primary' />}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {/* Image Config Selector */}
+          <ImageConfigSelector
+            aspectRatio={aspectRatio}
+            imageSize={imageSize}
+            width={imgWidth}
+            height={imgHeight}
+            lock={lockRatio}
+            onChange={(config) => {
+              setAspectRatio(config.aspectRatio)
+              setImageSize(config.imageSize)
+              setImgWidth(config.width)
+              setImgHeight(config.height)
+              setLockRatio(config.lock)
+            }}
+          />
 
           {/* Quantity Selector */}
           {/*<QuantitySelector value={quantity} onChange={setQuantity}/>*/}

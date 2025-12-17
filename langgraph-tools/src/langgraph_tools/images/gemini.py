@@ -35,17 +35,17 @@ class GeminiArgs(BaseModel):
         description="""Optional. Aspect ratio of the generated images. Supported values are
       "1:1", "2:3", "3:2", "3:4", "4:3", "9:16", "16:9", and "21:9".""",
     )
-    image_size: Literal["1K", "2K", "4K"] = Field(
+    image_size: Literal["1K", "2K", "4K", "1k", "2k", "4k"] = Field(
         None,
         description="""Optional. Specifies the size of generated images. Supported
       values are `1K`, `2K`, `4K`. If not specified, the model will use default
-      value `1K`.""",
+      value `2K`.""",
     )
 
 
 @tool(
     "image_create_with_gemini",
-    description="Image Creation tool, generate or edit image With Google Gemini(aka Nano Banana) model using prompt and  image_urls. pass prompt with simple and specific instruction text, pass image with image_urls. Use this model for high-quality image modification.",
+    description="Image Creation tool, generate or edit image With Google Gemini(aka Nano Banana) model using prompt and  image_urls(Optional), aspect_raito(Optional) and image_size(Optional). pass prompt with simple and specific instruction text, pass image with image_urls. Use this model for high-quality image modification.",
     args_schema=GeminiArgs,
 )
 async def image_create_with_gemini(
@@ -53,10 +53,10 @@ async def image_create_with_gemini(
     prompt: str,
     image_urls: str | None = None,
     aspect_ratio: str | None = None,
-    image_size: Literal["1K", "2K", "4K"] | None = "1K",
+    image_size: Literal["1K", "2K", "4K", "1k", "2k", "4k"] | None = "2K",
 ) -> str:
     image_tool_response = image_create_with_gemini_tool(
-        prompt, image_urls=image_urls, aspect_ratio=aspect_ratio, image_size=image_size
+        prompt, image_urls=image_urls, aspect_ratio=aspect_ratio, image_size=image_size.upper() if image_size else None
     )
     if image_tool_response.images:
         for image in image_tool_response.images:
