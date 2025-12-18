@@ -73,6 +73,9 @@ const ChatTextarea: React.FC<ChatTextareaProps> = ({
   const [imgHeight, setImgHeight] = useState(2048)
   const [quantity, setQuantity] = useState<number>(1)
 
+  // 中文输入法
+  const [isComposing, setIsComposing] = useState(false)
+
   const imageInputRef = useRef<HTMLInputElement>(null)
 
   // 充值按钮组件
@@ -278,6 +281,7 @@ const ChatTextarea: React.FC<ChatTextareaProps> = ({
     onFiles: handleFilesDrop,
   })
 
+  // 修复添加图片到Chat异常
   useEffect(() => {
     const handleAddImagesToChat = (data: TCanvasAddImagesToChatEvent) => {
       data.forEach(async (image) => {
@@ -453,7 +457,12 @@ const ChatTextarea: React.FC<ChatTextareaProps> = ({
         onChange={(e) => setPrompt(e.target.value)}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
+        onCompositionStart={() => setIsComposing(true)}
+        onCompositionEnd={() => setIsComposing(false)}
         onKeyDown={(e) => {
+          // 如果中文输入法中, 不会触发Enter发送消息事件
+          if (isComposing) return
+          // 如果是 Shift + Enter，允许换行
           if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault()
             handleSendPrompt()
@@ -471,6 +480,7 @@ const ChatTextarea: React.FC<ChatTextareaProps> = ({
           {/* Text Model Selector */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
+              {/* 隐藏或显式 hidden */}
               <Button variant='outline' size='sm' className='flex items-center gap-1 hidden'>
                 {textModel && PROVIDER_NAME_MAPPING[textModel.provider]?.icon && (
                   <img
