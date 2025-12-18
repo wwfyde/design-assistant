@@ -1,11 +1,14 @@
 import json
+import uuid
 from abc import ABC, abstractmethod
 from uuid import UUID
 
+import uuid_utils
 from sqlalchemy import delete, select, update
 from sqlalchemy.orm import Session
 
-from lib import get_current_date
+from lib import upload_image, get_current_date
+from lib.image import parse_data_url, parse_data_url_to_bytes
 from api.models import ChatSession as ChatSessionModel
 from api.core.memory import AppStore
 from api.domain.chat import ChatSession
@@ -183,11 +186,24 @@ class PostgresCanvasRepo(CanvasRepo):
         stmt = select(CanvasModel).where(CanvasModel.id == str(id))
         result = self.session.execute(stmt)
         canvas_db = result.scalar_one_or_none()
+        thumbnail_url = None
+        if thumbnail.startswith("https://cdn.fullspeed.cn/"):
+            thumbnail_url = thumbnail
+        elif thumbnail.startswith("http"):
+            raise ValueError("未知的图像来源! 待实现")
+            pass
+        else:
+            thumbnail_url = parse_data_url(thumbnail, prefix="thumbnail")
+
         if canvas_db:
             stmt = (
                 update(CanvasModel)
                 .where(CanvasModel.id == str(id))
-                .values(data=data, thumbnail=thumbnail, updated_at=get_current_date())
+                .values(
+                    data=data,
+                    thumbnail=thumbnail_url + "?x-oss-process=image/resize,h_320",
+                    updated_at=get_current_date(),
+                )
             )
             self.session.execute(stmt)
             self.session.commit()

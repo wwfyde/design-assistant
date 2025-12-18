@@ -1,17 +1,23 @@
 import os
+import re
+import base64
+import hashlib
 from io import BytesIO
+from typing import Annotated
 from mimetypes import guess_type
 
-from fastapi import APIRouter, File, HTTPException, UploadFile, Body
-from fastapi.concurrency import run_in_threadpool
-from fastapi.responses import FileResponse
-from lib.utils import generate_file_id
-import base64
-import re
-from PIL import Image
 import httpx
+import uuid_utils
+from PIL import Image
+from fastapi import Body, File, APIRouter, UploadFile, HTTPException
+from fastapi.responses import FileResponse
+from fastapi.concurrency import run_in_threadpool
+from aiohttp.web_fileresponse import extension
 
-from lib import settings
+from lib import settings, upload_image
+from lib.image import parse_data_url_to_bytes
+from lib.utils import generate_file_id
+from tools.types import ImageInfo
 
 router = APIRouter()
 files_dir = settings.data_dir / "files"
@@ -19,9 +25,94 @@ FILES_DIR = str(files_dir)
 os.makedirs(FILES_DIR, exist_ok=True)
 
 
+@router.post("/upload_image", response_model=ImageInfo)
+async def upload_image_(file: Annotated[UploadFile, File(..., description="待上传文件对象")]):
+
+    try:
+        content = await file.read()
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=f"Error reading file: {exc}") from exc
+
+    original_filename = file.filename
+    id = str(uuid_utils.uuid7())
+    image_pil = Image.open(BytesIO(content))
+    width, height = image_pil.size
+    mime_type = Image.MIME.get(image_pil.format)
+    extension = (image_pil.format or "png").lower().replace("jpeg", "jpg")
+    filename = f"{id}.{extension}"
+    sha256 = hashlib.sha256(content).hexdigest()
+    image_url = upload_image(filename, content, prefix="creative/uploaded", rename=False)
+
+    file_size = file.size
+    return ImageInfo(
+        id=id,
+        url=image_url,
+        mime_type=mime_type,  # noqa
+        filename=filename,
+        original_filename=original_filename,
+        file_size=file_size,
+        width=width,
+        height=height,
+        image_format=extension,
+        sha256=sha256,
+    )
+    pass
+
+
+@router.post("/upload_image_from_url", response_model=ImageInfo)
+async def upload_image_from_url(url: str | None = Body(None, embed=True)):
+    if url is None:
+        return
+    content = None
+    if url.startswith("data:image/"):
+        content = parse_data_url_to_bytes(url)
+    # 默认不重新上传https://cdn.fullspeed.cn上的图片
+    elif url.startswith("https://cdn.fullspeed.cn"):
+        filename = url.split("/")[-1]
+        id, extension = filename.split(".")
+
+        return ImageInfo(
+            url=url,
+            id=id,
+            filename=filename,
+            mime_type=f"image/{extension.replace('jpg', 'jpeg')}",
+        )
+    else:
+        async with httpx.AsyncClient(timeout=60, proxy=settings.proxy_url) as client:
+            print(f"Downloading from URL: {url}")
+            response = await client.get(url)
+            response.raise_for_status()
+            content = response.content
+
+    original_filename = None
+    id = str(uuid_utils.uuid7())
+    image_pil = Image.open(BytesIO(content))
+    width, height = image_pil.size
+    mime_type = Image.MIME.get(image_pil.format)
+    extension = (image_pil.format or "png").lower().replace("jpeg", "jpg")
+    filename = f"{id}.{extension}"
+    sha256 = hashlib.sha256(content).hexdigest()
+    image_url = upload_image(filename, content, prefix="creative/uploaded", rename=False)
+
+    file_size = len(content)
+    return ImageInfo(
+        id=id,
+        url=image_url,
+        mime_type=mime_type,  # noqa
+        filename=filename,
+        original_filename=original_filename,
+        file_size=file_size,
+        width=width,
+        height=height,
+        image_format=extension,
+        sha256=sha256,
+    )
+    pass
+
+
 # 上传图片接口，支持表单提交
-@router.post("/upload_image")
-async def upload_image(file: UploadFile = File(...), max_size_mb: float = 3.0):
+@router.post("/upload_image_to_local")
+async def upload_image_to_local(file: UploadFile = File(...), max_size_mb: float = 3.0):
     print("🦄upload_image file", file.filename)
     # 生成文件 ID 和文件名
     file_id = generate_file_id()
@@ -106,10 +197,9 @@ async def upload_image(file: UploadFile = File(...), max_size_mb: float = 3.0):
     }
 
 
-@router.post("/upload_image_from_url")
-async def upload_image_from_url(
-    base64_image: str | None = Body(None, embed=True),
-    url: str | None = Body(None, embed=True)
+@router.post("/upload_image_from_url_to_local")
+async def upload_image_from_url_to_local(
+    base64_image: str | None = Body(None, embed=True), url: str | None = Body(None, embed=True)
 ):
     print(f"🦄upload_image_from_url base64_len={len(base64_image) if base64_image else 0}, url={url}")
 
@@ -135,13 +225,13 @@ async def upload_image_from_url(
                 # If url is also provided, we might failover? But usually frontend sends one or the other.
                 # If base64 fails invalid, it's a client error.
                 if not url:
-                     raise HTTPException(status_code=400, detail=f"Invalid base64 string: {e}")
+                    raise HTTPException(status_code=400, detail=f"Invalid base64 string: {e}")
 
         # 2. Key Fallback: If no base64 (or maybe we want to support fallback inside logic, but frontend decides)
         # Actually frontend logic: try fetch -> if ok, send base64. If fail, send url.
         # So backend just handles what it gets.
         if not content and url:
-             async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient() as client:
                 print(f"Downloading from URL: {url}")
                 response = await client.get(url)
                 response.raise_for_status()
@@ -154,9 +244,8 @@ async def upload_image_from_url(
                 if fname:
                     filename = fname
 
-
         if not content:
-             raise HTTPException(status_code=400, detail="Failed to retrieve image content")
+            raise HTTPException(status_code=400, detail="Failed to retrieve image content")
 
         file_id = generate_file_id()
 

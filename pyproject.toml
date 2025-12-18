@@ -35,6 +35,7 @@ dependencies = [
     "dashscope>=1.25.2",
     "nacos-sdk-python>=3.0.0",
     "langchain-google-genai>=4",
+    "python-multipart>=0.0.21",
 ]
 
 [tool.uv.workspace]

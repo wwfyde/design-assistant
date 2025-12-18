@@ -67,7 +67,7 @@ def parse_data_url_to_bytes(data_url: str) -> bytes:
     return data_bytes
 
 
-def parse_data_url(data_url: str) -> str:
+def parse_data_url(data_url: str, *, prefix: str = "design") -> str:
     # pattern = r"^data:(.*?);(base64),(.*)$"
     # match = re.match(pattern, data_url, re.DOTALL)
     if not data_url.startswith("data:"):
@@ -82,9 +82,9 @@ def parse_data_url(data_url: str) -> str:
 
     data_bytes = base64.b64decode(data) if is_base64 else data
 
-    filename = str(uuid.uuid4()) + "." + mime_type.split("/")[-1]
+    filename = str(uuid.uuid7()) + "." + mime_type.split("/")[-1]
 
-    url = upload_image(filename, data_bytes, prefix="design", rename=False)
+    url = upload_image(filename, data_bytes, prefix=prefix, rename=False)
 
     return url
 

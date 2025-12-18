@@ -6,6 +6,7 @@ export type TCanvasAddImagesToChatEvent = {
   base64?: string
   width: number
   height: number
+  url?: string
 }[]
 
 export type TCanvasMagicGenerateEvent = {

@@ -15,6 +15,8 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { getToken } from '@/lib/api-client.ts'
+import { PhotoProvider } from 'react-photo-view'
+import 'react-photo-view/dist/react-photo-view.css'
 
 export const Route = createFileRoute('/')({
   component: Home,
@@ -73,63 +75,65 @@ function Home() {
   }, [])
 
   return (
-    <div className='flex flex-col h-screen'>
-      <Tabs value={activeTab} onValueChange={setActiveTab} className='flex flex-col flex-1 overflow-hidden'>
-        <div className='px-4 pt-2 shrink-0'>
-          <TabsList className='grid w-full grid-cols-3'>
-            <TabsTrigger value='huaban'>外部图像库</TabsTrigger>
-            <TabsTrigger value='prompt'>Prompt库</TabsTrigger>
-            <TabsTrigger value='history'>历史记录</TabsTrigger>
-          </TabsList>
+    <PhotoProvider>
+      <div className='flex flex-col h-screen'>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className='flex flex-col flex-1 overflow-hidden'>
+          <div className='px-4 pt-2 shrink-0'>
+            <TabsList className='grid w-full grid-cols-3'>
+              <TabsTrigger value='huaban'>外部图像库</TabsTrigger>
+              <TabsTrigger value='prompt'>Prompt库</TabsTrigger>
+              <TabsTrigger value='history'>历史记录</TabsTrigger>
+            </TabsList>
+          </div>
+
+          <TabsContent
+            value='prompt'
+            className='flex-1 overflow-hidden mt-2 border-none p-0 outline-none data-[state=inactive]:hidden'
+          >
+            <ScrollArea className='h-full'>
+              <PromptList />
+            </ScrollArea>
+          </TabsContent>
+
+          <TabsContent
+            value='huaban'
+            className='flex-1 overflow-hidden mt-2 border-none p-0 outline-none data-[state=inactive]:hidden'
+          >
+            <ScrollArea className='h-full'>
+              <HuabanList />
+            </ScrollArea>
+          </TabsContent>
+
+          <TabsContent
+            value='history'
+            className='flex-1 overflow-hidden mt-2 border-none p-0 outline-none data-[state=inactive]:hidden'
+          >
+            <ScrollArea className='h-full'>
+              <CanvasList />
+            </ScrollArea>
+          </TabsContent>
+        </Tabs>
+
+        <div className='w-full flex flex-col items-center justify-center p-4 bg-background sticky bottom-0 z-50 mt-auto'>
+          <ChatTextarea
+            className='w-full max-w-4xl max-h-60'
+            messages={[]}
+            onSendMessages={(messages, configs) => {
+              createCanvasMutation({
+                name: t('home:newCanvas'),
+                canvas_id: nanoid(),
+                messages: messages,
+                session_id: nanoid(),
+                user_id: getToken(),
+                text_model: configs.textModel,
+                tool_list: configs.toolList,
+                system_prompt: localStorage.getItem('system_prompt') || DEFAULT_SYSTEM_PROMPT,
+              })
+            }}
+            pending={isPending}
+          />
         </div>
-
-        <TabsContent
-          value='prompt'
-          className='flex-1 overflow-hidden mt-2 border-none p-0 outline-none data-[state=inactive]:hidden'
-        >
-          <ScrollArea className='h-full'>
-            <PromptList />
-          </ScrollArea>
-        </TabsContent>
-
-        <TabsContent
-          value='huaban'
-          className='flex-1 overflow-hidden mt-2 border-none p-0 outline-none data-[state=inactive]:hidden'
-        >
-          <ScrollArea className='h-full'>
-            <HuabanList />
-          </ScrollArea>
-        </TabsContent>
-
-        <TabsContent
-          value='history'
-          className='flex-1 overflow-hidden mt-2 border-none p-0 outline-none data-[state=inactive]:hidden'
-        >
-          <ScrollArea className='h-full'>
-            <CanvasList />
-          </ScrollArea>
-        </TabsContent>
-      </Tabs>
-
-      <div className='w-full flex flex-col items-center justify-center p-4 bg-background sticky bottom-0 z-50 mt-auto'>
-        <ChatTextarea
-          className='w-full max-w-4xl max-h-60'
-          messages={[]}
-          onSendMessages={(messages, configs) => {
-            createCanvasMutation({
-              name: t('home:newCanvas'),
-              canvas_id: nanoid(),
-              messages: messages,
-              session_id: nanoid(),
-              user_id: getToken(),
-              text_model: configs.textModel,
-              tool_list: configs.toolList,
-              system_prompt: localStorage.getItem('system_prompt') || DEFAULT_SYSTEM_PROMPT,
-            })
-          }}
-          pending={isPending}
-        />
-      </div>
-    </div>
+      </div >
+    </PhotoProvider >
   )
 }

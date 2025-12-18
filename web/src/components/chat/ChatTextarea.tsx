@@ -14,6 +14,7 @@ import { produce } from 'immer'
 import { ArrowUp, Check, ChevronDown, Loader2, PlusIcon, Square, XIcon } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import Textarea, { TextAreaRef } from 'rc-textarea'
+import { PhotoView } from 'react-photo-view'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
@@ -57,9 +58,10 @@ const ChatTextarea: React.FC<ChatTextareaProps> = ({
   const textareaRef = useRef<TextAreaRef>(null)
   const [images, setImages] = useState<
     {
-      file_id: string
+      id: string
       width: number
       height: number
+      url: string
     }[]
   >([])
   const [isFocused, setIsFocused] = useState(false)
@@ -105,9 +107,10 @@ const ChatTextarea: React.FC<ChatTextareaProps> = ({
       setImages((prev) => [
         ...prev,
         {
-          file_id: data.file_id,
+          id: data.id,
           width: data.width,
           height: data.height,
+          url: data.url,
         },
       ])
     },
@@ -196,33 +199,20 @@ const ChatTextarea: React.FC<ChatTextareaProps> = ({
     if (images.length > 0) {
       text_content += `\n\n<input_images count="${images.length}">`
       images.forEach((image, index) => {
-        text_content += `\n<image index="${index + 1}" file_id="${image.file_id}" width="${image.width}" height="${image.height}" />`
+        text_content += `\n<image index="${index + 1}" file_id="${image.id}" width="${image.width}" height="${image.height}" />`
       })
       text_content += `\n</input_images>`
     }
-
-    // Fetch images as base64
-    const imagePromises = images.map(async (image) => {
-      const response = await apiClient.get(`/api/file/${image.file_id}`)
-      const blob = await response.blob()
-      return new Promise<string>((resolve) => {
-        const reader = new FileReader()
-        reader.onloadend = () => resolve(reader.result as string)
-        reader.readAsDataURL(blob)
-      })
-    })
-
-    const base64Images = await Promise.all(imagePromises)
 
     const final_content = [
       {
         type: 'text',
         text: text_content as string,
       },
-      ...images.map((image, index) => ({
+      ...images.map((image) => ({
         type: 'image_url',
         image_url: {
-          url: base64Images[index],
+          url: image.url,
         },
       })),
     ] as MessageContent[]
@@ -298,9 +288,10 @@ const ChatTextarea: React.FC<ChatTextareaProps> = ({
           setImages(
             produce((prev) => {
               prev.push({
-                file_id: image.fileId,
+                id: image.fileId,
                 width: image.width,
                 height: image.height,
+                url: image.url || `/api/file/${image.fileId}`, // Use provided URL or fallback to local file API
               })
             }),
           )
@@ -359,9 +350,10 @@ const ChatTextarea: React.FC<ChatTextareaProps> = ({
         setImages((prev) => [
           ...prev,
           {
-            file_id: result.file_id,
+            id: result.id,
             width: result.width,
             height: result.height,
+            url: result.url,
           },
         ])
         textareaRef.current?.focus()
@@ -422,25 +414,27 @@ const ChatTextarea: React.FC<ChatTextareaProps> = ({
           >
             {images.map((image) => (
               <motion.div
-                key={image.file_id}
+                key={image.id}
                 className='relative size-10'
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.2, ease: 'easeInOut' }}
               >
-                <img
-                  key={image.file_id}
-                  src={`/api/file/${image.file_id}`}
-                  alt='Uploaded image'
-                  className='w-full h-full object-cover rounded-md'
-                  draggable={false}
-                />
+                <PhotoView src={image.url}>
+                  <img
+                    key={image.id}
+                    src={image.url}
+                    alt='Uploaded image'
+                    className='w-full h-full object-cover rounded-md'
+                    draggable={false}
+                  />
+                </PhotoView>
                 <Button
                   variant='secondary'
                   size='icon'
                   className='absolute -top-1 -right-1 size-4'
-                  onClick={() => setImages((prev) => prev.filter((i) => i.file_id !== image.file_id))}
+                  onClick={() => setImages((prev) => prev.filter((i) => i.id !== image.id))}
                 >
                   <XIcon className='size-3' />
                 </Button>

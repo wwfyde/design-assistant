@@ -1,4 +1,5 @@
 import { saveCanvas } from '@/api/canvas'
+import { uploadImageFromUrl } from '@/api/upload'
 import { useCanvas } from '@/contexts/canvas'
 import useDebounce from '@/hooks/use-debounce'
 import { useTheme } from '@/hooks/use-theme'
@@ -139,100 +140,83 @@ const CanvasExcali: React.FC<CanvasExcaliProps> = ({ canvasId, initialData }) =>
       if (!excalidrawAPI) return
 
       try {
-        // Fetch the image
-        // Use native fetch to avoid adding Authorization headers from apiClient to external URLs
-        // which can cause CORS issues
-        const response = await fetch(imageUrl)
-        const blob = await response.blob()
+        // Upload image via API to get permanent URL and metadata
+        const uploadedImage = await uploadImageFromUrl(imageUrl)
 
-        // Convert to data URL
-        const reader = new FileReader()
-        reader.readAsDataURL(blob)
-        reader.onloadend = async () => {
-          const base64data = reader.result as string
+        // Create file object using API response
+        const fileId = (imageElement.fileId as string) || (uploadedImage.id as string)
 
-          // Create file object
-          // Use existing fileId from element if available, otherwise generate new one
-          const fileId = (imageElement.fileId as string) || (nanoid() as string)
-
-          const file: BinaryFileData = {
-            id: fileId as any, // Cast to any to avoid FileId type error
-            dataURL: base64data as any,
-            mimeType: blob.type as any,
-            created: Date.now(),
-            lastRetrieved: Date.now(),
-          }
-
-          // Get image dimensions if not provided or 0
-          let width = imageElement.width
-          let height = imageElement.height
-
-          if (!width || !height) {
-            const img = new Image()
-            img.src = base64data
-            await new Promise((resolve) => {
-              img.onload = resolve
-            })
-            width = img.width
-            height = img.height
-
-            // Scale down if too large (max 1000px)
-            // 默认将图像缩放到最大350
-            const MAX_DIMENSION = 350
-            if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
-              const ratio = Math.min(MAX_DIMENSION / width, MAX_DIMENSION / height)
-              width *= ratio
-              height *= ratio
-            }
-          }
-
-          // Calculate position based on last image
-          let x = imageElement.x
-          let y = imageElement.y
-
-          if (lastImagePosition.current) {
-            const GAP = 20
-            x = lastImagePosition.current.x + lastImagePosition.current.width + GAP
-            y = lastImagePosition.current.y
-          }
-
-          // Ensure image is not locked and can be manipulated
-          const unlockedImageElement = {
-            ...imageElement,
-            fileId: fileId as any,
-            x,
-            y,
-            width,
-            height,
-            locked: false,
-            groupIds: [],
-            isDeleted: false,
-          }
-
-          // Get current elements
-          const currentElements = excalidrawAPI.getSceneElements()
-
-          // Add file to Excalidraw
-          excalidrawAPI.addFiles([file])
-
-          console.log('👇 Adding new image element to canvas:', unlockedImageElement.id)
-
-          // Place new image at the beginning (bottom) of the stack to avoid obscuring existing elements
-          excalidrawAPI.updateScene({
-            elements: [...(currentElements || []), unlockedImageElement],
-          })
-
-          // Update last image position
-          lastImagePosition.current = {
-            x,
-            y,
-            width,
-            height,
-            col: 0, // Not strictly used here but required by type
-          }
-
-          localStorage.setItem('excalidraw-last-image-position', JSON.stringify(lastImagePosition.current))
+        const file: BinaryFileData = {
+          id: fileId as any,
+          dataURL: uploadedImage.url as any,
+          mimeType: 'image/jpeg' as any, // Default to jpeg as API normalizes images
+          created: Date.now(),
+          lastRetrieved: Date.now(),
         }
+
+        // Use dimensions from API response if element dimensions not set
+        let width = imageElement.width
+        let height = imageElement.height
+
+        if (!width || !height) {
+          width = uploadedImage.width
+          height = uploadedImage.height
+
+          // Scale down if too large (max 350px)
+          const MAX_DIMENSION = 350
+          if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
+            const ratio = Math.min(MAX_DIMENSION / width, MAX_DIMENSION / height)
+            width *= ratio
+            height *= ratio
+          }
+        }
+
+        // Calculate position based on last image
+        let x = imageElement.x
+        let y = imageElement.y
+
+        if (lastImagePosition.current) {
+          const GAP = 20
+          x = lastImagePosition.current.x + lastImagePosition.current.width + GAP
+          y = lastImagePosition.current.y
+        }
+
+        // Ensure image is not locked and can be manipulated
+        const unlockedImageElement = {
+          ...imageElement,
+          fileId: fileId as any,
+          x,
+          y,
+          width,
+          height,
+          locked: false,
+          groupIds: [],
+          isDeleted: false,
+        }
+
+        // Get current elements
+        const currentElements = excalidrawAPI.getSceneElements()
+
+        // Add file to Excalidraw
+        excalidrawAPI.addFiles([file])
+
+        console.log('👇 Adding new image element to canvas:', unlockedImageElement.id)
+
+        // Place new image at the beginning (bottom) of the stack
+        excalidrawAPI.updateScene({
+          elements: [...(currentElements || []), unlockedImageElement],
+        })
+
+        // Update last image position
+        lastImagePosition.current = {
+          x,
+          y,
+          width,
+          height,
+          col: 0,
+        }
+
+        localStorage.setItem('excalidraw-last-image-position', JSON.stringify(lastImagePosition.current))
       } catch (error) {
         console.error('Failed to add image to canvas:', error)
       }

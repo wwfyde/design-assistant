@@ -13,10 +13,15 @@ class ImageInfo(BaseModel):
     url: str
     id: uuid.UUID | str
     filename: str
+    original_filename: str | None = None
+    file_size: int | None = None
     mime_type: Literal["image/png", "image/jpeg", "image/webp"]
+    image_format: Literal["png", "jpg", "webp"] | None = None
     width: int | None = None
     height: int | None = None
     content: str | None = None
+    storage_key: str | None = None
+    sha256: str | None = None
 
     @property
     def size(self) -> tuple[int, int]:

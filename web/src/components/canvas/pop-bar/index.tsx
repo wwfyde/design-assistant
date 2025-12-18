@@ -48,12 +48,15 @@ const CanvasPopbarWrapper = () => {
       .map((image) => {
         const file = files[image.fileId!]
         const isBase64 = file.dataURL.startsWith('data:')
-        const id = isBase64 ? file.id : file.dataURL.split('/').at(-1)!
+        // If not base64, use the fileId directly as we now have robust IDs from backend
+        // Fallback to URL parsing only if absolutely necessary, but file.id is safer
+        const id = file.id
         return {
           fileId: id,
           base64: isBase64 ? file.dataURL : undefined,
           width: image.width,
           height: image.height,
+          url: isBase64 ? undefined : file.dataURL,
         }
       })
 

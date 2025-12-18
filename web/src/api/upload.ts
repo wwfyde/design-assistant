@@ -1,9 +1,15 @@
 import { apiClient } from '@/lib/api-client'
 import { compressImageFile } from '@/utils/imageUtils'
 
-export async function uploadImage(
-  file: File,
-): Promise<{ file_id: string; width: number; height: number; url: string }> {
+export interface ImageInfo {
+  id: string
+  width: number
+  height: number
+  url: string
+  [key: string]: any
+}
+
+export async function uploadImage(file: File): Promise<ImageInfo> {
   // Compress image before upload
   const compressedFile = await compressImageFile(file)
 
@@ -15,11 +21,16 @@ export async function uploadImage(
 
 export async function uploadImageFromUrl(
   url: string,
-): Promise<{ file_id: string; width: number; height: number; url: string }> {
+): Promise<{ id: string; width: number; height: number; url: string }> {
   try {
     // 1. Try to fetch the image from client side to avoid backend network issues
     // Use simple fetch to avoid auth headers being sent to external URLs (CORS)
-    const res = await fetch(url)
+    // 强制不走缓存
+    const res = await fetch(url, {
+      mode: 'cors',
+      credentials: 'omit',
+      cache: 'no-store',
+    })
 
     if (!res.ok) {
       throw new Error(`Failed to fetch image: ${res.statusText}`)
@@ -36,7 +47,7 @@ export async function uploadImageFromUrl(
     })
 
     // Send base64 to backend
-    const response = await apiClient.post('/api/upload_image_from_url', { base64_image })
+    const response = await apiClient.post('/api/upload_image_from_url', { url: base64_image })
 
     if (!response.ok) {
       const error = await response.json()
