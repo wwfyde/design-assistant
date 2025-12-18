@@ -14,9 +14,9 @@ import { produce } from 'immer'
 import { ArrowUp, Check, ChevronDown, Loader2, PlusIcon, Square, XIcon } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import Textarea, { TextAreaRef } from 'rc-textarea'
-import { PhotoView } from 'react-photo-view'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { PhotoView } from 'react-photo-view'
 import { toast } from 'sonner'
 import { v7 as uuidv7 } from 'uuid'
 // import { useAuth } from '@/contexts/AuthContext'
@@ -199,7 +199,7 @@ const ChatTextarea: React.FC<ChatTextareaProps> = ({
     if (images.length > 0) {
       text_content += `\n\n<input_images count="${images.length}">`
       images.forEach((image, index) => {
-        text_content += `\n<image index="${index + 1}" file_id="${image.id}" width="${image.width}" height="${image.height}" />`
+        text_content += `\n<image index="${index + 1}" id="${image.id}" url="${image.url}" width="${image.width}" height="${image.height}" />`
       })
       text_content += `\n</input_images>`
     }
