@@ -98,11 +98,11 @@ def image_create_with_gemini(
                     filename=filename,
                     width=width,
                     height=height,
-                )
+                ).model_dump(exclude_unset=True, exclude_none=True)
             )
 
         return ImageToolResponse(
-            content="\n".join([f"![image]({image.url})" for image in images]),
+            content=f"图像生成完成, 共生成{len(images)}张图像, 图像信息:{images}",
             success=True,
             images=images,
         )

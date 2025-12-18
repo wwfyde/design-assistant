@@ -166,7 +166,7 @@ def image_create_with_seedream4_5(
                             id=id,
                             filename=filename,
                             mime_type=f"image/{img_format}",  # noqa
-                            content=f"![images]({image_url})",
+                            content=f"{image_url}",
                         ).model_dump(exclude_none=True, exclude_unset=True)
                     )
                 # markdown_str = "\n".join(
