@@ -16,6 +16,8 @@ type MixedContentTextProps = {
   contents: MessageContent[]
 }
 
+import { filterMessageContent } from '@/lib/utils'
+
 // 图片组件 - 独立显示在聊天框外
 export const MixedContentImages: React.FC<MixedContentImagesProps> = ({ contents }) => {
   const images = contents.filter((content) => content.type === 'image_url')
@@ -48,13 +50,14 @@ export const MixedContentText: React.FC<MixedContentTextProps> = ({ message, con
   const textContents = contents.filter((content) => content.type === 'text')
 
   // 过滤掉文本中的图片引用，只保留纯文本
-  const combinedText = textContents
-    .map((content) => content.text)
-    .join('\n')
-    .replace(/!\[.*?\]\(.*?\)/g, '') // 移除markdown图片语法
-    .replace(/!\[.*?\]\[.*?\]/g, '') // 移除引用式图片语法
-    .replace(/^\s*$/gm, '') // 移除空行
-    .trim()
+  const combinedText = filterMessageContent(
+    textContents
+      .map((content) => content.text)
+      .join('\n')
+      .replace(/!\[.*?\]\(.*?\)/g, '') // 移除markdown图片语法
+      .replace(/!\[.*?\]\[.*?\]/g, '') // 移除引用式图片语法
+      .replace(/^\s*$/gm, ''), // 移除空行
+  )
 
   if (!combinedText) return null
 
