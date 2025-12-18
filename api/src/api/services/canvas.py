@@ -192,6 +192,8 @@ class PostgresCanvasRepo(CanvasRepo):
         elif thumbnail.startswith("http"):
             raise ValueError("未知的图像来源! 待实现")
             pass
+        elif not thumbnail:
+            thumbnail_url = None
         else:
             thumbnail_url = parse_data_url(thumbnail, prefix="thumbnail")
 
@@ -201,7 +203,7 @@ class PostgresCanvasRepo(CanvasRepo):
                 .where(CanvasModel.id == str(id))
                 .values(
                     data=data,
-                    thumbnail=thumbnail_url + "?x-oss-process=image/resize,h_320",
+                    thumbnail=thumbnail_url + "?x-oss-process=image/resize,h_320" if thumbnail_url else None,
                     updated_at=get_current_date(),
                 )
             )
