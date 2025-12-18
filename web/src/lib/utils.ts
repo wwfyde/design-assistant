@@ -16,3 +16,12 @@ export function dataURLToFile(dataURL: string, filename: string) {
   }
   return new File([u8arr], filename, { type: mime })
 }
+
+export function filterMessageContent(content: string) {
+  return content
+    .replace(/<aspect_ratio>.*?<\/aspect_ratio>/g, '')
+    .replace(/<image_size>.*?<\/image_size>/g, '')
+    .replace(/<quantity>.*?<\/quantity>/g, '')
+    .replace(/<input_images[\s\S]*?<\/input_images>/g, '')
+    .trim()
+}

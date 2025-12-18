@@ -199,7 +199,7 @@ const ChatTextarea: React.FC<ChatTextareaProps> = ({
     if (images.length > 0) {
       text_content += `\n\n<input_images count="${images.length}">`
       images.forEach((image, index) => {
-        text_content += `\n<image index="${index + 1}" id="${image.id}" url="${image.url}" width="${image.width}" height="${image.height}" />`
+        text_content += `\n<image index="${index + 1}" id="${image.id}" image_url="${image.url}" width="${image.width}" height="${image.height}" />`
       })
       text_content += `\n</input_images>`
     }

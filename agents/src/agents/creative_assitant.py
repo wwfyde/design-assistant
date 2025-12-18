@@ -136,7 +136,6 @@ creative_system_prompt = """
 - 拆分图层(素材拆分)时, 使用多步完成, 先对原图进行构图和设计分层分析,  识别其中可分离的层, 基于层数, 多次使用传入原图url, 对对象进行剥离和提取, 大小和位置不变, 用纯白色抹除其他地方, 
 - 用户有传入参考图(1-6张)时, 使用图片编辑工具并携带图像url, 用逗号隔开
 - image_create_with_gemini和image_create_with_seedream工具支持传入多张图片, 调用工具时使用使用英文逗号隔开比如: "http://example.com/a.png,https://example.com/b.png"
-- 为 [此处插入图片] 占位的地方, 根据占位的上文文案生成图片
 - 当我有参考图片需求时, 通过image_urls字段将图片url 传入工具
 
 # Guide
@@ -229,6 +228,7 @@ Seedream 基于领先架构的SOTA级多模态图像创作模型。其打破传�
 > 基于用户输入的文字和图片，生成一组内容关联的图像
 - 参考这个LOGO，做一套户外运动品牌视觉设计，品牌名称为“GREEN"，包括包装袋、帽子、纸盒、卡片、手环、挂绳等。绿色视觉主色调，趣味、简约现代风格
 - 参考图1，生成四图片，分别为春夏秋冬四个场景的图片
+
 ### 拆分图层
 
 step-by-step, 识别图像中的独立元素, 设计素材, 反向拆解,根据要拆分的对象,  调用seedream  对图像进行仅多次拆分图层, 识别其中的可分离元素, 仅保,  抹除其他元素
@@ -315,23 +315,18 @@ RGB/CMYK： RGB（红绿蓝）是屏幕显示的加色模式；CMYK（青、品�
 
 # 约束
 
-- 回答格式为Markdown, 含有image url 时, 务必将image_url输出: ![image](image_url)
+- 回答格式为Markdown, 使用图像工具生成图像后, 务必将生成的图像用markdown风格输出: ![image](image_url_here)
 - seedream Prompt支持中英文, 除非用户传入英文Prompt, 默认使用中文Prompt 
 - image_create_with_seedream工具 image_urls参数支持传入多张图片, 传入格式为多个url用使用英文逗号隔开, 例如: "http://example.com/a.png, https://example.com/b.png"; 如果是本地文件则直接传入文件名, 比如'img_1344.png' 
 - gemini工具传入prompt或指令时使用英文, 双引号内的文字不翻译
 - 使用图像工具时, 优先使用Seedream(image_create_with_seedream), 优先使用中文prompt
 - 不清楚内容细节时, 考虑使用web_search扩充上下文
-- 编辑图片时使用image_create_with_seedream, 能提供更好的一致性
-- 参考图模式生图时, 传入参考图url, 
-- 涉及日期判断时, 使用web_search查询. 比如今天日期, 星期几, 本月有什么等. 
-- 新媒体日历,电商日历, 营销日历, 活动日历, 热点日历类型: 节气,公历,农历,国际节日,纪念日,颁奖典礼,影视上映,重要事件,展会活动,品日
+- 编辑图片, 从聊天上下文关联相应的图片, 一定要将被编辑的图片通过image_urls参数传递给图像工具
+- 参考图模式生图时, 传入参考图url,
 - 涉及到使用aimark的logo图时 使用https://wwfyde.oss-cn-hangzhou.aliyuncs.com/images/20250918162432519.png图像链接, 将其用于图像工具
 - 编辑图像时, 除非显式约束aspect_ratio, 则不要传入该参数
-- 获取营销/热点日历时尝试获取所有类型的日历
- - 图像类型分为本地图像和网络图像, 本地图像格式为 img_2b2de312310745118d54672b80e218f1.png 类似的格式, 仅存有文件名, 工具会自行拼接. 传入工具时使用本地图像或网络图像url
-- 获取近期营销日历时 使用web_search, 不要使用LLM记忆的时间, 
 
-"""
+"""  # noqa: E501
 
 
 def build_system_prompt(raw: str, *args):
