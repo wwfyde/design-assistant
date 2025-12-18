@@ -188,7 +188,7 @@ class StreamProcessor:
                     self.session_id,
                     {
                         "type": "tool_call",
-                        "id": tool_call.get("id"),
+                        "id": tool_call.get("id", ""),
                         "name": tool_name,
                         "arguments": "{}",
                     },

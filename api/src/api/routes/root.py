@@ -18,10 +18,10 @@ router = APIRouter()
 @router.get("/list_models")
 async def get_models() -> list[ModelInfo]:
     return [
+        ModelInfo(provider="ark", model="seed-1.8", url="https://api.openai.com/v1", type="text", display_name="豆包"),
         ModelInfo(
             provider="openai", model="gpt-4.1-mini", url="https://api.openai.com/v1", type="text", display_name="GPT"
         ),
-        ModelInfo(provider="ark", model="seed-1.6", url="https://api.openai.com/v1", type="text", display_name="豆包"),
         # ModelInfo(
         #     provider="deepseek",
         #     model="deepseek-v3.2",
@@ -29,13 +29,13 @@ async def get_models() -> list[ModelInfo]:
         #     type="text",
         #     display_name="DeepSeek",
         # ),
-        # ModelInfo(
-        #     provider="gemini",
-        #     model="gemini-3-pro-preview",
-        #     url="https://api.openai.com/v1",
-        #     type="text",
-        #     display_name="Gemini",
-        # ),
+        ModelInfo(
+            provider="gemini",
+            model="gemini-3-pro-preview",
+            url="https://api.openai.com/v1",
+            type="text",
+            display_name="Gemini",
+        ),
         ModelInfo(
             provider="dashscope",
             model="qwen-plus",
