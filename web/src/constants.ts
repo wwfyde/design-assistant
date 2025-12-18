@@ -36,16 +36,16 @@ export const PROVIDER_NAME_MAPPING: {
   },
   volces: {
     name: 'Volces',
-    icon: '/models/volc.png',
+    icon: '/models/seed.png',
   },
   ark: {
     name: 'Seed',
-    icon: 'https://portal.volccdn.com/obj/volcfe/misc/favicon.png',
+    icon: '/models/seed.png',
   },
   seedream: {
     name: 'Seedream',
     // icon: 'https://portal.volccdn.com/obj/volcfe/misc/favicon.png',
-    icon: '/models/volc.png',
+    icon: '/models/seed.png',
   },
   comfyui: {
     name: 'ComfyUI',
