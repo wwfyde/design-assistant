@@ -61,15 +61,13 @@ def image_create_with_seedream4_5(
             width, height = 832 * base, 1248 * base
         elif int(width) == 21 and int(height) == 9:
             width, height = 1512 * base, 648 * base
-        elif int(width) > 128 and int(height) > 500:
-            width, height = min(int(width), 4096), min(int(height), 4096)
 
         # 处理自定义分辨率逻辑
         elif 1 / 16 <= width / height <= 16:
             if width * height < 3686400:
                 # 自定义缩放比例
                 scale = math.ceil(math.sqrt(3686400 // (width * height)))
-                width, height = int(width) * scale * base / 2, int(height) * scale * base / 2
+                width, height = int(width) * scale * base // 2, int(height) * scale * base // 2
             else:
                 width, height = int(width), int(height)
         # 图像分辨率不对 默认 1: 1
